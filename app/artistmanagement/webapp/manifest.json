@@ -17,7 +17,7 @@
     },
     "dataSources": {
       "mainService": {
-        "uri": "/odata/v4/FestivalService/",
+        "uri": "/odata/v4/festival/",
         "type": "OData",
         "settings": {
           "annotations": [],

@@ -1,6 +1,26 @@
 <mvc:View controllerName="artistmanagement.controller.ArtistManagement"
     xmlns:mvc="sap.ui.core.mvc"
+    xmlns:core="sap.ui.core"
     xmlns="sap.m">
     <Page id="page" title="{i18n>title}">
+        <content>
+            <Table id="artistTable"
+                items="{
+                    path: '/Artists'
+                }">
+                <columns>
+                    <Column>
+                        <Text text="Name"/>
+                    </Column>
+                </columns>
+                <items>
+                    <ColumnListItem>
+                        <cells>
+                            <ObjectIdentifier title="{name}"/>
+                        </cells>
+                    </ColumnListItem>
+                </items>
+            </Table>
+        </content>
     </Page>
 </mvc:View>
