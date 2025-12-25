@@ -1,26 +1,49 @@
 <mvc:View controllerName="artistmanagement.controller.ArtistManagement"
     xmlns:mvc="sap.ui.core.mvc"
-    xmlns:core="sap.ui.core"
-    xmlns="sap.m">
-    <Page id="page" title="{i18n>title}">
-        <content>
-            <Table id="artistTable"
-                items="{
-                    path: '/Artists'
-                }">
-                <columns>
-                    <Column>
-                        <Text text="Name"/>
-                    </Column>
-                </columns>
-                <items>
-                    <ColumnListItem>
-                        <cells>
-                            <ObjectIdentifier title="{name}"/>
-                        </cells>
-                    </ColumnListItem>
-                </items>
-            </Table>
-        </content>
-    </Page>
+    xmlns="sap.m"
+    xmlns:f="sap.f">
+    <f:FlexibleColumnLayout id="fcl" layout="OneColumn">
+        <f:beginColumnPages>
+            <Page id="masterPage" title="Artists">
+                <Table id="artistTable"
+                    mode="SingleSelectMaster"
+                    items="{
+                        path: '/ArtistOverview'
+                    }"
+                    selectionChange=".onSelectArtist">
+                    <columns>
+                        <Column>
+                            <Text text="Name"/>
+                        </Column>
+                        <Column>
+                            <Text text="Genre"/>
+                        </Column>
+                        <Column>
+                            <Text text="Country"/>
+                        </Column>
+                        <Column>
+                            <Text text="Popularity"/>
+                        </Column>
+                    </columns>
+                    <items>
+                        <ColumnListItem>
+                            <cells>
+                                <ObjectIdentifier title="{name}"/>
+                                <Text text="{genre}"/>
+                                <Text text="{country}"/>
+                                <ObjectNumber number="{ path: 'popularityScore', type: 'sap.ui.model.type.Float', formatOptions: { minFractionDigits: 1, maxFractionDigits: 1 } }"/>
+                            </cells>
+                        </ColumnListItem>
+                    </items>
+                </Table>
+            </Page>
+        </f:beginColumnPages>
+        <f:midColumnPages>
+            <Page id="detailPage" title="Artist Detail" showNavButton="true" navButtonPress=".onCloseDetail">
+                <VBox class="sapUiSmallMargin">
+                    <ObjectIdentifier title="{detail>/name}" text="{detail>/id}"/>
+                </VBox>
+            </Page>
+        </f:midColumnPages>
+    </f:FlexibleColumnLayout>
 </mvc:View>
