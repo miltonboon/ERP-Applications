@@ -21,7 +21,7 @@ service FestivalService {
     a.name,
     a.genre,
     a.country.name as country,
-    cast(avg(r.rating) as Decimal(5,2)) as popularityScore
+    cast(round(avg(r.rating), 0) as Decimal(5,0)) as popularityScore
   } group by a.ID, a.name, a.genre, a.country.name;
 
   @readonly
