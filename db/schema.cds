@@ -53,9 +53,14 @@ entity Artists : cuid, managed {
   performances    : Composition of many Performances on performances.artist = $self;
 }
 
+entity Stages : cuid {
+  name : String(120) @mandatory;
+}
+
 entity Performances : cuid, managed {
-  date     : Date @mandatory;
-  location : String(160) @mandatory;
+  startAt : DateTime @mandatory;
+  endAt   : DateTime @mandatory;
+  stage   : Association to Stages @mandatory;
 
   artist   : Association to Artists @mandatory;
   reviews  : Composition of many Reviews on reviews.performance = $self;

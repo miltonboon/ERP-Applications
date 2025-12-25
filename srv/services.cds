@@ -11,6 +11,7 @@ service FestivalService {
   @cds.redirection.target entity Items        as projection on db.Items;
   @cds.redirection.target entity Orders       as projection on db.Orders;
   @cds.redirection.target entity OrderItems   as projection on db.OrderItems;
+  @cds.redirection.target entity Stages       as projection on db.Stages;
 
   @readonly
   entity ArtistOverview as select from db.Artists as a
