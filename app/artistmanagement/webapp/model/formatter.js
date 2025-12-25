@@ -82,6 +82,17 @@ sap.ui.define([
                 }
                 return startAt;
             }
+        },
+
+        formatPerformanceLabel(stageName, startAt, endAt) {
+            const slot = this.formatPerformanceSlot(startAt, endAt);
+            if (stageName && slot) {
+                return `${stageName} (${slot})`;
+            }
+            if (stageName) {
+                return stageName;
+            }
+            return slot;
         }
     };
 });

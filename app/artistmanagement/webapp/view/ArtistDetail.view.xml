@@ -82,6 +82,9 @@
                     <ObjectPageSubSection>
                         <blocks>
                             <m:VBox class="sapUiSmallMargin">
+                                <m:HBox justifyContent="End" class="sapUiTinyMarginBottom">
+                                    <m:Button text="New review" type="Emphasized" icon="sap-icon://add" press=".onOpenAddReview"/>
+                                </m:HBox>
                                 <m:Text text="Geen reviews beschikbaar" visible="{= ${detail>/reviews}.length === 0 }" class="sapUiTinyMarginBottom"/>
                                 <m:List id="reviewsList" items="{detail>/reviews}" noDataText="Geen reviews beschikbaar" inset="true">
                                     <m:CustomListItem class="sapUiSmallMarginBottom">
