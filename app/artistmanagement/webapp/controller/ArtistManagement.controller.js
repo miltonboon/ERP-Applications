@@ -11,8 +11,10 @@ sap.ui.define([
     "sap/ui/core/Item",
     "sap/m/SegmentedButton",
     "sap/m/SegmentedButtonItem",
-    "sap/m/Button"
-], (Controller, JSONModel, fLibrary, Filter, FilterOperator, Sorter, Popover, VBox, Select, Item, SegmentedButton, SegmentedButtonItem, Button) => {
+    "sap/m/Button",
+    "sap/m/MultiComboBox",
+    "sap/m/Text"
+], (Controller, JSONModel, fLibrary, Filter, FilterOperator, Sorter, Popover, VBox, Select, Item, SegmentedButton, SegmentedButtonItem, Button, MultiComboBox, Text) => {
     "use strict";
 
     const LayoutType = fLibrary.LayoutType;
@@ -29,6 +31,10 @@ sap.ui.define([
             this._table = this.byId("artistTable");
             this._sortPopover = null;
             this._sortState = { key: "", descending: false };
+            this._filterPopover = null;
+            this._filterGenres = [];
+            this._filterCountries = [];
+            this._searchQuery = "";
         },
 
         onSelectArtist(event) {
@@ -48,24 +54,8 @@ sap.ui.define([
         },
 
         onSearch(event) {
-            const query = event.getParameter("query") || "";
-            const binding = this._table.getBinding("items");
-            if (!binding) {
-                return;
-            }
-            if (!query) {
-                binding.filter([]);
-                return;
-            }
-            const filters = [
-                new Filter({
-                    path: "name",
-                    operator: FilterOperator.Contains,
-                    value1: query,
-                    caseSensitive: false
-                })
-            ];
-            binding.filter(filters);
+            this._searchQuery = event.getParameter("query") || "";
+            this._applyFilters();
         },
 
         onOpenSortPopover(event) {
@@ -126,6 +116,111 @@ sap.ui.define([
             }
             this._sortState = { key, descending };
             binding.sort(new Sorter(key, descending));
+        },
+
+        onOpenFilterPopover(event) {
+            if (!this._filterPopover) {
+                this._filterPopover = this._createFilterPopover();
+            }
+            this._refreshCountryOptions();
+            this._filterPopover.openBy(event.getSource());
+        },
+
+        _createFilterPopover() {
+            this._filterGenre = new MultiComboBox({
+                width: "100%",
+                selectionChange: this._onFilterSelectionChange.bind(this),
+                placeholder: "Select genres"
+            });
+            const genres = ["POP", "ROCK", "HIPHOP", "EDM", "TECHNO", "HOUSE", "JAZZ", "CLASSICAL", "RNB", "INDIE", "METAL", "LATIN", "AFROBEATS"];
+            genres.forEach((g) => {
+                this._filterGenre.addItem(new Item({ key: g, text: this.formatGenre(g) }));
+            });
+
+            this._filterCountry = new MultiComboBox({
+                width: "100%",
+                placeholder: "Select countries",
+                selectionChange: this._onFilterSelectionChange.bind(this)
+            });
+
+            const clearButton = new Button({
+                text: "Clear Filters",
+                press: () => {
+                    this._filterGenre.removeAllSelectedItems();
+                    this._filterCountry.removeAllSelectedItems();
+                    this._filterGenres = [];
+                    this._filterCountries = [];
+                    this._applyFilters();
+                }
+            });
+
+            const content = new VBox({
+                width: "16rem",
+                items: [
+                    new Text({ text: "Genres" }),
+                    this._filterGenre,
+                    new Text({ text: "Countries" }),
+                    this._filterCountry,
+                    clearButton
+                ]
+            }).addStyleClass("sapUiSmallMargin");
+
+            const pop = new Popover({
+                placement: "Bottom",
+                showHeader: true,
+                title: "Filter",
+                content: [content]
+            });
+            this.getView().addDependent(pop);
+            return pop;
+        },
+
+        _onFilterSelectionChange() {
+            this._filterGenres = this._filterGenre.getSelectedKeys();
+            this._filterCountries = this._filterCountry.getSelectedKeys();
+            this._applyFilters();
+        },
+
+        _applyFilters() {
+            const binding = this._table.getBinding("items");
+            if (!binding) {
+                return;
+            }
+            const filters = [];
+
+            if (this._searchQuery) {
+                filters.push(new Filter({
+                    path: "name",
+                    operator: FilterOperator.Contains,
+                    value1: this._searchQuery,
+                    caseSensitive: false
+                }));
+            }
+
+            if (this._filterGenres.length > 0) {
+                const genreFilters = this._filterGenres.map((g) => new Filter("genre", FilterOperator.EQ, g));
+                filters.push(new Filter({ filters: genreFilters, and: false }));
+            }
+
+            if (this._filterCountries.length > 0) {
+                const countryFilters = this._filterCountries.map((c) => new Filter("country", FilterOperator.EQ, c));
+                filters.push(new Filter({ filters: countryFilters, and: false }));
+            }
+
+            binding.filter(filters);
+        },
+
+        _refreshCountryOptions() {
+            this._filterCountry.removeAllItems();
+            const binding = this._table.getBinding("items");
+            if (!binding) {
+                return;
+            }
+            const contexts = binding.getContexts();
+            const names = new Set(contexts.map((ctx) => ctx.getProperty("country")).filter(Boolean));
+            names.forEach((name) => {
+                this._filterCountry.addItem(new Item({ key: name, text: name }));
+            });
         },
 
         formatGenre(value) {

@@ -18,6 +18,7 @@
                             <ToolbarSpacer/>
                             <SearchField width="17.5rem" placeholder="Search by name" search=".onSearch"/>
                             <Button type="Transparent" icon="sap-icon://sort" press=".onOpenSortPopover"/>
+                            <Button type="Transparent" icon="sap-icon://filter" press=".onOpenFilterPopover"/>
                         </OverflowToolbar>
                     </headerToolbar>
                     <columns>
