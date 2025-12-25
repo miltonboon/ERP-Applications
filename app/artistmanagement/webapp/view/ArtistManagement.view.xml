@@ -41,7 +41,7 @@
                                 <ObjectIdentifier title="{name}"/>
                                 <Text text="{path: 'genre', formatter: '.formatGenre'}"/>
                                 <Text text="{country}"/>
-                                <ObjectNumber number="{ path: 'popularityScore', type: 'sap.ui.model.type.Float', formatOptions: { minFractionDigits: 0, maxFractionDigits: 0 } }"/>
+                                <RatingIndicator maxValue="5" value="{ path: 'popularityScore', type: 'sap.ui.model.type.Float' }" enabled="false" displayOnly="true" iconSize="1.1rem"/>
                             </cells>
                         </ColumnListItem>
                     </items>
