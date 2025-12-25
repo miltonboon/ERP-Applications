@@ -12,6 +12,12 @@
                         parameters: { $select: 'ID,name,genre,country,popularityScore,spotifyUrl,instagramHandle' }
                     }"
                     selectionChange=".onSelectArtist">
+                    <headerToolbar>
+                        <OverflowToolbar>
+                            <ToolbarSpacer/>
+                            <SearchField width="17.5rem" placeholder="Search by name" search=".onSearch"/>
+                        </OverflowToolbar>
+                    </headerToolbar>
                     <columns>
                         <Column>
                             <Text text="Name"/>
