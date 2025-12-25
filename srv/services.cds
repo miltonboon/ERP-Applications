@@ -13,13 +13,15 @@ service FestivalService {
   @cds.redirection.target entity OrderItems   as projection on db.OrderItems;
 
   @readonly
-  entity ArtistOverview as select from db.Artists {
-    key ID,
-    name,
-    genre,
-    country.name as country,
-    cast((select avg(r.rating) from db.Reviews as r where r.performance.artist.ID = ID) as Decimal(5,2)) as popularityScore
-  };
+  entity ArtistOverview as select from db.Artists as a
+    left join db.Performances as p on p.artist.ID = a.ID
+    left join db.Reviews as r on r.performance.ID = p.ID {
+    key a.ID,
+    a.name,
+    a.genre,
+    a.country.name as country,
+    cast(avg(r.rating) as Decimal(5,2)) as popularityScore
+  } group by a.ID, a.name, a.genre, a.country.name;
 
   @readonly
   entity OrdersOverview as select from db.Orders {
