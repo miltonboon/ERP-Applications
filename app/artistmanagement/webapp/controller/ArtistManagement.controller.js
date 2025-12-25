@@ -4,8 +4,15 @@ sap.ui.define([
     "sap/f/library",
     "sap/ui/model/Filter",
     "sap/ui/model/FilterOperator",
-    "sap/ui/model/Sorter"
-], (Controller, JSONModel, fLibrary, Filter, FilterOperator, Sorter) => {
+    "sap/ui/model/Sorter",
+    "sap/m/Popover",
+    "sap/m/VBox",
+    "sap/m/Select",
+    "sap/ui/core/Item",
+    "sap/m/SegmentedButton",
+    "sap/m/SegmentedButtonItem",
+    "sap/m/Button"
+], (Controller, JSONModel, fLibrary, Filter, FilterOperator, Sorter, Popover, VBox, Select, Item, SegmentedButton, SegmentedButtonItem, Button) => {
     "use strict";
 
     const LayoutType = fLibrary.LayoutType;
@@ -20,9 +27,8 @@ sap.ui.define([
             }
             this._fcl = this.byId("fcl");
             this._table = this.byId("artistTable");
-            this._sortSelect = this.byId("sortSelect");
-            this._sortDirection = this.byId("sortDirection");
-            this._sortDirection.setSelectedKey("asc");
+            this._sortPopover = null;
+            this._sortState = { key: "", descending: false };
         },
 
         onSelectArtist(event) {
@@ -62,19 +68,59 @@ sap.ui.define([
             binding.filter(filters);
         },
 
-        onSortChange() {
+        onOpenSortPopover(event) {
+            if (!this._sortPopover) {
+                this._sortPopover = this._createSortPopover();
+            }
+            this._sortPopover.openBy(event.getSource());
+        },
+
+        _createSortPopover() {
+            this._sortSelect = new Select({
+                width: "100%",
+                change: this._applySort.bind(this)
+            });
+            this._sortSelect.addItem(new Item({ key: "", text: "No Sorting" }));
+            this._sortSelect.addItem(new Item({ key: "genre", text: "Genre" }));
+            this._sortSelect.addItem(new Item({ key: "country", text: "Country" }));
+            this._sortSelect.addItem(new Item({ key: "popularityScore", text: "Popularity" }));
+
+            this._sortDirection = new SegmentedButton({
+                selectionChange: this._applySort.bind(this),
+                items: [
+                    new SegmentedButtonItem({ key: "asc", text: "Asc" }),
+                    new SegmentedButtonItem({ key: "desc", text: "Desc" })
+                ]
+            });
+            this._sortDirection.setSelectedKey("asc");
+
+            const content = new VBox({
+                width: "16rem",
+                items: [this._sortSelect, this._sortDirection]
+            }).addStyleClass("sapUiSmallMargin");
+
+            return new Popover({
+                placement: "Bottom",
+                showHeader: true,
+                title: "Sort",
+                content: [content]
+            });
+        },
+
+        _applySort() {
             const binding = this._table.getBinding("items");
             if (!binding) {
                 return;
             }
-            const property = this._sortSelect.getSelectedKey();
-            const directionKey = this._sortDirection.getSelectedKey();
-            const descending = directionKey === "desc";
-            if (!property) {
+            const key = this._sortSelect.getSelectedKey();
+            const descending = this._sortDirection.getSelectedKey() === "desc";
+            if (!key) {
                 binding.sort([]);
+                this._sortState = { key: "", descending: false };
                 return;
             }
-            binding.sort(new Sorter(property, descending));
+            this._sortState = { key, descending };
+            binding.sort(new Sorter(key, descending));
         },
 
         formatGenre(value) {
