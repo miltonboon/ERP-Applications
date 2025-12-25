@@ -4,7 +4,7 @@
     <Page id="detailPage" title="Artist Detail" showNavButton="true" navButtonPress=".onCloseDetail">
         <VBox class="sapUiSmallMargin">
             <HBox justifyContent="SpaceBetween" alignItems="Center">
-                <ObjectStatus text="{detail>/id}" state="None"/>
+                <Label text="{= 'ID: ' + ${detail>/id}}"/>
                 <HBox alignItems="Center" renderType="Bare" class="sapUiTinyMarginTop">
                     <Link text="Spotify" href="{path: 'detail>/spotifyUrl', formatter: '.formatSpotifyHref'}" target="_blank" class="sapUiTinyMarginEnd"/>
                     <Link text="Instagram" href="{path: 'detail>/instagramHandle', formatter: '.formatInstagramHref'}" target="_blank"/>

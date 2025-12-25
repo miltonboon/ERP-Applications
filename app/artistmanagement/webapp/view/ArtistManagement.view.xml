@@ -10,7 +10,7 @@
                     mode="SingleSelectMaster"
                     items="{
                         path: '/ArtistOverview',
-                        parameters: { $select: 'ID,name,genre,country,popularityScore,spotifyUrl,instagramHandle' }
+                        parameters: { $select: 'ID,name,genre,country,popularityScore' }
                     }"
                     selectionChange=".onSelectArtist">
                     <headerToolbar>

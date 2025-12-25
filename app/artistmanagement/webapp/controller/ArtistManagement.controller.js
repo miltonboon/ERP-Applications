@@ -43,12 +43,39 @@ sap.ui.define([
                 return;
             }
             const data = context.getObject();
+            const artistId = data.ID || data.id;
+            if (!artistId) {
+                return;
+            }
             const detailModel = this.getView().getModel("detail");
             detailModel.setData({
-                name: data.name,
-                id: data.ID || data.id || "",
-                spotifyUrl: data.spotifyUrl || "",
-                instagramHandle: data.instagramHandle || ""
+                name: "Loading...",
+                id: artistId,
+                spotifyUrl: "",
+                instagramHandle: ""
+            });
+
+            const oDataModel = this.getView().getModel();
+            const artistBinding = oDataModel.bindContext(`/Artists('${artistId}')`, undefined, {
+                $select: "ID,name,spotifyUrl,instagramHandle"
+            });
+            artistBinding.requestObject().then((artist) => {
+                if (!artist) {
+                    return;
+                }
+                detailModel.setData({
+                    name: artist.name || "",
+                    id: artist.ID || artist.id || artistId,
+                    spotifyUrl: artist.spotifyUrl || "",
+                    instagramHandle: artist.instagramHandle || ""
+                });
+            }).catch(() => {
+                detailModel.setData({
+                    name: "Unavailable",
+                    id: artistId,
+                    spotifyUrl: "",
+                    instagramHandle: ""
+                });
             });
             this._fcl.setLayout(LayoutType.TwoColumnsMidExpanded);
         },
