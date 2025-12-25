@@ -1,1 +1,1 @@
-using apmorrowland.Service as service from '../../srv/services';
+using apmorrowland.FestivalService as service from '../../srv/services';

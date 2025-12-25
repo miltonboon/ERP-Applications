@@ -2,7 +2,7 @@ namespace apmorrowland;
 
 using { apmorrowland as db } from '../db/schema';
 
-service Service {
+service FestivalService {
   @cds.redirection.target entity Countries    as projection on db.Countries;
   @cds.redirection.target entity Artists      as projection on db.Artists;
   entity Performances as projection on db.Performances;
