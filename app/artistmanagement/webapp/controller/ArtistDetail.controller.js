@@ -41,6 +41,14 @@ sap.ui.define([
 
         formatDate(value) {
             return formatter.formatDate(value);
+        },
+
+        formatDateTime(value) {
+            return formatter.formatDateTime(value);
+        },
+
+        formatPerformanceSlot(startAt, endAt) {
+            return formatter.formatPerformanceSlot(startAt, endAt);
         }
     });
 });

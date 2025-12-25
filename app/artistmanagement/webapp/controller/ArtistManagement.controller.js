@@ -32,7 +32,8 @@ sap.ui.define([
                 biography: "",
                 genre: "",
                 country: "",
-                reviews: []
+                reviews: [],
+                performances: []
             });
             this.getView().setModel(detailModel, "detail");
             const detailView = this.byId("detailView");
@@ -69,7 +70,8 @@ sap.ui.define([
                 biography: "",
                 genre: "",
                 country: "",
-                reviews: []
+                reviews: [],
+                performances: []
             });
 
             const oDataModel = this.getView().getModel();
@@ -92,9 +94,11 @@ sap.ui.define([
                     biography: artist.biography || "",
                     genre: artist.genre || "",
                     country: (artist.country && artist.country.name) || "",
-                    reviews: []
+                    reviews: [],
+                    performances: []
                 });
                 this._loadReviews(artistId);
+                this._loadPerformances(artistId);
             }).catch(() => {
                 detailModel.setData({
                     name: "Unavailable",
@@ -104,7 +108,8 @@ sap.ui.define([
                     biography: "",
                     genre: "",
                     country: "",
-                    reviews: []
+                    reviews: [],
+                    performances: []
                 });
             });
             this._fcl.setLayout(LayoutType.TwoColumnsMidExpanded);
@@ -319,6 +324,45 @@ sap.ui.define([
             }).catch(() => {
                 if (this._currentArtistId === artistId) {
                     detailModel.setProperty("/reviews", []);
+                }
+            });
+        },
+
+        _loadPerformances(artistId) {
+            const detailModel = this.getView().getModel("detail");
+            detailModel.setProperty("/performances", []);
+            if (!artistId) {
+                return;
+            }
+            const oDataModel = this.getView().getModel();
+            const performancesBinding = oDataModel.bindList("/Performances", undefined, undefined, [
+                new Filter("artist/ID", FilterOperator.EQ, artistId)
+            ], {
+                $select: "ID,startAt,endAt",
+                $expand: "stage($select=name)"
+            });
+            performancesBinding.requestContexts(0, 200).then((contexts) => {
+                if (this._currentArtistId !== artistId) {
+                    return;
+                }
+                const performances = contexts.map((ctx) => {
+                    const perf = ctx.getObject();
+                    return {
+                        id: perf.ID || perf.id || "",
+                        startAt: perf.startAt,
+                        endAt: perf.endAt,
+                        stageName: (perf.stage && perf.stage.name) || ""
+                    };
+                });
+                performances.sort((a, b) => {
+                    const aDate = a.startAt ? new Date(a.startAt).getTime() : 0;
+                    const bDate = b.startAt ? new Date(b.startAt).getTime() : 0;
+                    return aDate - bDate;
+                });
+                detailModel.setProperty("/performances", performances);
+            }).catch(() => {
+                if (this._currentArtistId === artistId) {
+                    detailModel.setProperty("/performances", []);
                 }
             });
         }

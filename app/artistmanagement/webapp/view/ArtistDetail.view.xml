@@ -56,15 +56,36 @@
                     </ObjectPageSubSection>
                 </subSections>
             </ObjectPageSection>
+            <ObjectPageSection title="Performances">
+                <subSections>
+                    <ObjectPageSubSection>
+                        <blocks>
+                            <m:VBox class="sapUiSmallMargin">
+                                <m:Text text="Geen performances beschikbaar" visible="{= ${detail>/performances}.length === 0 }" class="sapUiTinyMarginBottom"/>
+                                <m:List id="performancesList" items="{detail>/performances}" noDataText="Geen performances beschikbaar" inset="true">
+                                    <m:CustomListItem class="sapUiSmallMarginBottom">
+                                        <m:VBox width="100%" class="sapUiSmallMarginBottom">
+                                            <m:HBox justifyContent="SpaceBetween" alignItems="Center">
+                                                <m:Text text="{detail>stageName}"/>
+                                                <m:Text text="{parts: [{path: 'detail>startAt'}, {path: 'detail>endAt'}], formatter: '.formatPerformanceSlot'}"/>
+                                            </m:HBox>
+                                        </m:VBox>
+                                    </m:CustomListItem>
+                                </m:List>
+                            </m:VBox>
+                        </blocks>
+                    </ObjectPageSubSection>
+                </subSections>
+            </ObjectPageSection>
             <ObjectPageSection title="Reviews">
                 <subSections>
                     <ObjectPageSubSection>
                         <blocks>
                             <m:VBox class="sapUiSmallMargin">
                                 <m:Text text="Geen reviews beschikbaar" visible="{= ${detail>/reviews}.length === 0 }" class="sapUiTinyMarginBottom"/>
-                                <m:List id="reviewsList" items="{detail>/reviews}" noDataText="Geen reviews beschikbaar">
-                                    <m:CustomListItem>
-                                        <m:VBox width="100%" class="sapUiTinyMarginY">
+                                <m:List id="reviewsList" items="{detail>/reviews}" noDataText="Geen reviews beschikbaar" inset="true">
+                                    <m:CustomListItem class="sapUiSmallMarginBottom">
+                                        <m:VBox width="100%" class="sapUiSmallMarginBottom">
                                             <m:HBox justifyContent="SpaceBetween" alignItems="Center">
                                                 <m:Text text="{detail>customerName}"/>
                                                 <m:RatingIndicator maxValue="5" value="{detail>rating}" enabled="false" displayOnly="true" iconSize="1.1rem"/>

@@ -24,6 +24,14 @@ sap.ui.define([
     };
 
     const dateFormatter = DateFormat.getDateInstance({ style: "medium" });
+    const dateTimeFormatter = DateFormat.getDateTimeInstance({
+        pattern: "MMM d, yyyy, HH:mm",
+        UTC: true
+    });
+    const timeFormatter = DateFormat.getTimeInstance({
+        pattern: "HH:mm",
+        UTC: true
+    });
 
     return {
         formatGenre(value) {
@@ -42,6 +50,37 @@ sap.ui.define([
                 return dateFormatter.format(parsed);
             } catch (e) {
                 return value;
+            }
+        },
+
+        formatDateTime(value) {
+            if (!value) {
+                return "";
+            }
+            try {
+                const parsed = new Date(value);
+                return dateTimeFormatter.format(parsed);
+            } catch (e) {
+                return value;
+            }
+        },
+
+        formatPerformanceSlot(startAt, endAt) {
+            if (!startAt) {
+                return "";
+            }
+            try {
+                const start = new Date(startAt);
+                const end = endAt ? new Date(endAt) : null;
+                if (end) {
+                    return `${dateTimeFormatter.format(start)} - ${timeFormatter.format(end)}`;
+                }
+                return dateTimeFormatter.format(start);
+            } catch (e) {
+                if (endAt) {
+                    return `${startAt} - ${endAt}`;
+                }
+                return startAt;
             }
         }
     };
