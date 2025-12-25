@@ -32,6 +32,7 @@ sap.ui.define([
                 biography: "",
                 genre: "",
                 country: "",
+                popularityScore: 0,
                 reviews: [],
                 performances: []
             });
@@ -70,6 +71,7 @@ sap.ui.define([
                 biography: "",
                 genre: "",
                 country: "",
+                popularityScore: data.popularityScore || 0,
                 reviews: [],
                 performances: []
             });
@@ -94,6 +96,7 @@ sap.ui.define([
                     biography: artist.biography || "",
                     genre: artist.genre || "",
                     country: (artist.country && artist.country.name) || "",
+                    popularityScore: detailModel.getProperty("/popularityScore") || 0,
                     reviews: [],
                     performances: []
                 });
@@ -108,6 +111,7 @@ sap.ui.define([
                     biography: "",
                     genre: "",
                     country: "",
+                    popularityScore: 0,
                     reviews: [],
                     performances: []
                 });

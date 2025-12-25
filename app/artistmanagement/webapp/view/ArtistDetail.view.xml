@@ -26,6 +26,10 @@
         <headerContent>
             <m:FlexBox wrap="Wrap" fitContainer="true" alignItems="Center">
                 <m:VBox class="sapUiSmallMarginEnd">
+                    <m:Label text="Popularity"/>
+                    <m:RatingIndicator maxValue="5" value="{detail>/popularityScore}" enabled="false" displayOnly="true" iconSize="1.2rem"/>
+                </m:VBox>
+                <m:VBox class="sapUiSmallMarginEnd">
                     <m:Label text="Spotify"/>
                     <m:Link text="{detail>/name}" href="{path: 'detail>/spotifyUrl', formatter: '.formatSpotifyHref'}" target="_blank"/>
                 </m:VBox>
