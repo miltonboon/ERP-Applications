@@ -93,6 +93,8 @@ sap.ui.define([
                 ]
             });
             this._sortDirection.setSelectedKey("asc");
+            this._sortDirection.setVisible(false);
+            this._sortDirection.setEnabled(false);
 
             const content = new VBox({
                 width: "16rem",
@@ -114,6 +116,9 @@ sap.ui.define([
             }
             const key = this._sortSelect.getSelectedKey();
             const descending = this._sortDirection.getSelectedKey() === "desc";
+            const showDirection = !!key;
+            this._sortDirection.setVisible(showDirection);
+            this._sortDirection.setEnabled(showDirection);
             if (!key) {
                 binding.sort([]);
                 this._sortState = { key: "", descending: false };
