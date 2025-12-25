@@ -20,8 +20,10 @@ service FestivalService {
     a.name,
     a.genre,
     a.country.name as country,
+    a.spotifyUrl,
+    a.instagramHandle,
     cast(avg(r.rating) as Decimal(5,2)) as popularityScore
-  } group by a.ID, a.name, a.genre, a.country.name;
+  } group by a.ID, a.name, a.genre, a.country.name, a.spotifyUrl, a.instagramHandle;
 
   @readonly
   entity OrdersOverview as select from db.Orders {

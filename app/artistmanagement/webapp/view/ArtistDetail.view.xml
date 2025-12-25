@@ -3,7 +3,14 @@
     xmlns="sap.m">
     <Page id="detailPage" title="Artist Detail" showNavButton="true" navButtonPress=".onCloseDetail">
         <VBox class="sapUiSmallMargin">
-            <ObjectIdentifier title="{detail>/name}" text="{detail>/id}"/>
+            <HBox justifyContent="SpaceBetween" alignItems="Center">
+                <ObjectStatus text="{detail>/id}" state="None"/>
+                <HBox alignItems="Center" renderType="Bare" class="sapUiTinyMarginTop">
+                    <Link text="Spotify" href="{path: 'detail>/spotifyUrl', formatter: '.formatSpotifyHref'}" target="_blank" class="sapUiTinyMarginEnd"/>
+                    <Link text="Instagram" href="{path: 'detail>/instagramHandle', formatter: '.formatInstagramHref'}" target="_blank"/>
+                </HBox>
+            </HBox>
+            <ObjectIdentifier title="{detail>/name}"/>
         </VBox>
     </Page>
 </mvc:View>

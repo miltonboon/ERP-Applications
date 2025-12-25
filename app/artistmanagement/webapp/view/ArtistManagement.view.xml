@@ -8,7 +8,8 @@
                 <Table id="artistTable"
                     mode="SingleSelectMaster"
                     items="{
-                        path: '/ArtistOverview'
+                        path: '/ArtistOverview',
+                        parameters: { $select: 'ID,name,genre,country,popularityScore,spotifyUrl,instagramHandle' }
                     }"
                     selectionChange=".onSelectArtist">
                     <columns>
@@ -29,7 +30,7 @@
                         <ColumnListItem>
                             <cells>
                                 <ObjectIdentifier title="{name}"/>
-                                <Text text="{genre}"/>
+                                <Text text="{path: 'genre', formatter: '.formatGenre'}"/>
                                 <Text text="{country}"/>
                                 <ObjectNumber number="{ path: 'popularityScore', type: 'sap.ui.model.type.Float', formatOptions: { minFractionDigits: 1, maxFractionDigits: 1 } }"/>
                             </cells>

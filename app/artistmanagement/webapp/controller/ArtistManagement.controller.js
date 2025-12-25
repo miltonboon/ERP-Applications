@@ -1,13 +1,15 @@
 sap.ui.define([
     "sap/ui/core/mvc/Controller",
     "sap/ui/model/json/JSONModel",
-    "sap/f/LayoutType"
-], (Controller, JSONModel, LayoutType) => {
+    "sap/f/library"
+], (Controller, JSONModel, fLibrary) => {
     "use strict";
+
+    const LayoutType = fLibrary.LayoutType;
 
     return Controller.extend("artistmanagement.controller.ArtistManagement", {
         onInit() {
-            const detailModel = new JSONModel({ name: "Select an artist", id: "" });
+            const detailModel = new JSONModel({ name: "Select an artist", id: "", spotifyUrl: "", instagramHandle: "" });
             this.getView().setModel(detailModel, "detail");
             const detailView = this.byId("detailView");
             if (detailView) {
@@ -25,9 +27,37 @@ sap.ui.define([
             const detailModel = this.getView().getModel("detail");
             detailModel.setData({
                 name: data.name,
-                id: data.ID || data.id || ""
+                id: data.ID || data.id || "",
+                spotifyUrl: data.spotifyUrl || "",
+                instagramHandle: data.instagramHandle || ""
             });
             this._fcl.setLayout(LayoutType.TwoColumnsMidExpanded);
+        },
+
+        formatGenre(value) {
+            if (!value) {
+                return "";
+            }
+            const map = {
+                HIPHOP: "Hip Hop",
+                RNB: "R&B",
+                EDM: "EDM",
+                POP: "Pop",
+                ROCK: "Rock",
+                TECHNO: "Techno",
+                HOUSE: "House",
+                JAZZ: "Jazz",
+                CLASSICAL: "Classical",
+                INDIE: "Indie",
+                METAL: "Metal",
+                LATIN: "Latin",
+                AFROBEATS: "Afrobeats",
+                FOLK: "Folk",
+                BLUES: "Blues",
+                FUNK: "Funk",
+                COUNTRY: "Country"
+            };
+            return map[value] || value;
         }
     });
 });
