@@ -39,11 +39,7 @@
             </Page>
         </f:beginColumnPages>
         <f:midColumnPages>
-            <Page id="detailPage" title="Artist Detail" showNavButton="true" navButtonPress=".onCloseDetail">
-                <VBox class="sapUiSmallMargin">
-                    <ObjectIdentifier title="{detail>/name}" text="{detail>/id}"/>
-                </VBox>
-            </Page>
+            <mvc:XMLView viewName="artistmanagement.view.ArtistDetail" id="detailView"/>
         </f:midColumnPages>
     </f:FlexibleColumnLayout>
 </mvc:View>

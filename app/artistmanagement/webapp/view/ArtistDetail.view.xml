@@ -1,0 +1,9 @@
+<mvc:View controllerName="artistmanagement.controller.ArtistDetail"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m">
+    <Page id="detailPage" title="Artist Detail" showNavButton="true" navButtonPress=".onCloseDetail">
+        <VBox class="sapUiSmallMargin">
+            <ObjectIdentifier title="{detail>/name}" text="{detail>/id}"/>
+        </VBox>
+    </Page>
+</mvc:View>

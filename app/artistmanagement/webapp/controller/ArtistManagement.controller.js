@@ -9,6 +9,10 @@ sap.ui.define([
         onInit() {
             const detailModel = new JSONModel({ name: "Select an artist", id: "" });
             this.getView().setModel(detailModel, "detail");
+            const detailView = this.byId("detailView");
+            if (detailView) {
+                detailView.setModel(detailModel, "detail");
+            }
             this._fcl = this.byId("fcl");
         },
 
@@ -18,15 +22,12 @@ sap.ui.define([
                 return;
             }
             const data = context.getObject();
-            this.getView().getModel("detail").setData({
+            const detailModel = this.getView().getModel("detail");
+            detailModel.setData({
                 name: data.name,
                 id: data.ID || data.id || ""
             });
             this._fcl.setLayout(LayoutType.TwoColumnsMidExpanded);
-        },
-
-        onCloseDetail() {
-            this._fcl.setLayout(LayoutType.OneColumn);
         }
     });
 });
