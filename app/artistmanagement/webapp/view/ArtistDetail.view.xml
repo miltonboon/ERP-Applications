@@ -1,16 +1,86 @@
 <mvc:View controllerName="artistmanagement.controller.ArtistDetail"
     xmlns:mvc="sap.ui.core.mvc"
-    xmlns="sap.m">
-    <Page id="detailPage" title="Artist Detail" showNavButton="true" navButtonPress=".onCloseDetail">
-        <VBox class="sapUiSmallMargin">
-            <HBox justifyContent="SpaceBetween" alignItems="Center">
-                <Label text="{= 'ID: ' + ${detail>/id}}"/>
-                <HBox alignItems="Center" renderType="Bare" class="sapUiTinyMarginTop">
-                    <Link text="Spotify" href="{path: 'detail>/spotifyUrl', formatter: '.formatSpotifyHref'}" target="_blank" class="sapUiTinyMarginEnd"/>
-                    <Link text="Instagram" href="{path: 'detail>/instagramHandle', formatter: '.formatInstagramHref'}" target="_blank"/>
-                </HBox>
-            </HBox>
-            <ObjectIdentifier title="{detail>/name}"/>
-        </VBox>
-    </Page>
+    xmlns="sap.uxap"
+    xmlns:m="sap.m">
+    <ObjectPageLayout id="detailPage"
+        showTitleInHeaderContent="true"
+        upperCaseAnchorBar="false"
+        headerContentPinnable="true"
+        height="100%">
+        <headerTitle>
+            <ObjectPageDynamicHeaderTitle>
+                <expandedHeading>
+                    <m:HBox alignItems="Center" renderType="Bare">
+                        <m:Button type="Transparent" icon="sap-icon://nav-back" press=".onCloseDetail" tooltip="Terug" class="sapUiTinyMarginEnd"/>
+                        <m:Title text="{detail>/name}" wrapping="true"/>
+                    </m:HBox>
+                </expandedHeading>
+                <snappedHeading>
+                    <m:HBox alignItems="Center" renderType="Bare">
+                        <m:Button type="Transparent" icon="sap-icon://nav-back" press=".onCloseDetail" tooltip="Terug" class="sapUiTinyMarginEnd"/>
+                        <m:Title text="{detail>/name}" wrapping="true"/>
+                    </m:HBox>
+                </snappedHeading>
+            </ObjectPageDynamicHeaderTitle>
+        </headerTitle>
+        <headerContent>
+            <m:FlexBox wrap="Wrap" fitContainer="true" alignItems="Center">
+                <m:VBox class="sapUiSmallMarginEnd">
+                    <m:Label text="Spotify"/>
+                    <m:Link text="{detail>/name}" href="{path: 'detail>/spotifyUrl', formatter: '.formatSpotifyHref'}" target="_blank"/>
+                </m:VBox>
+                <m:VBox class="sapUiSmallMarginEnd">
+                    <m:Label text="Instagram"/>
+                    <m:Link text="{detail>/instagramHandle}" href="{path: 'detail>/instagramHandle', formatter: '.formatInstagramHref'}" target="_blank"/>
+                </m:VBox>
+            </m:FlexBox>
+        </headerContent>
+        <sections>
+            <ObjectPageSection title="Artist Info">
+                <subSections>
+                    <ObjectPageSubSection>
+                        <blocks>
+                            <m:VBox class="sapUiSmallMargin">
+                                <m:HBox alignItems="Center" class="sapUiTinyMarginBottom">
+                                    <m:Label text="Genre" width="6rem"/>
+                                    <m:Text text="{path: 'detail>/genre', formatter: '.formatGenre'}"/>
+                                </m:HBox>
+                                <m:HBox alignItems="Center" class="sapUiTinyMarginBottom">
+                                    <m:Label text="Country" width="6rem"/>
+                                    <m:Text text="{detail>/country}"/>
+                                </m:HBox>
+                                <m:Label text="Biography" class="sapUiTinyMarginBottom"/>
+                                <m:Text text="{detail>/biography}" wrapping="true"/>
+                            </m:VBox>
+                        </blocks>
+                    </ObjectPageSubSection>
+                </subSections>
+            </ObjectPageSection>
+            <ObjectPageSection title="Reviews">
+                <subSections>
+                    <ObjectPageSubSection>
+                        <blocks>
+                            <m:VBox class="sapUiSmallMargin">
+                                <m:Text text="Geen reviews beschikbaar" visible="{= ${detail>/reviews}.length === 0 }" class="sapUiTinyMarginBottom"/>
+                                <m:List id="reviewsList" items="{detail>/reviews}" noDataText="Geen reviews beschikbaar">
+                                    <m:CustomListItem>
+                                        <m:VBox width="100%" class="sapUiTinyMarginY">
+                                            <m:HBox justifyContent="SpaceBetween" alignItems="Center">
+                                                <m:Text text="{detail>customerName}"/>
+                                                <m:RatingIndicator maxValue="5" value="{detail>rating}" enabled="false" displayOnly="true" iconSize="1.1rem"/>
+                                            </m:HBox>
+                                            <m:Text text="{detail>comment}" wrapping="true" class="sapUiTinyMarginTop"/>
+                                            <m:HBox justifyContent="End" class="sapUiTinyMarginTop">
+                                                <m:Text text="{path: 'detail>date', formatter: '.formatDate'}"/>
+                                            </m:HBox>
+                                        </m:VBox>
+                                    </m:CustomListItem>
+                                </m:List>
+                            </m:VBox>
+                        </blocks>
+                    </ObjectPageSubSection>
+                </subSections>
+            </ObjectPageSection>
+        </sections>
+    </ObjectPageLayout>
 </mvc:View>

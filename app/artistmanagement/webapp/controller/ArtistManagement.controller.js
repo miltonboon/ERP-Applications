@@ -13,15 +13,27 @@ sap.ui.define([
     "sap/m/SegmentedButtonItem",
     "sap/m/Button",
     "sap/m/MultiComboBox",
-    "sap/m/Text"
-], (Controller, JSONModel, fLibrary, Filter, FilterOperator, Sorter, Popover, VBox, Select, Item, SegmentedButton, SegmentedButtonItem, Button, MultiComboBox, Text) => {
+    "sap/m/Text",
+    "artistmanagement/model/formatter"
+], (Controller, JSONModel, fLibrary, Filter, FilterOperator, Sorter, Popover, VBox, Select, Item, SegmentedButton, SegmentedButtonItem, Button, MultiComboBox, Text, formatter) => {
     "use strict";
 
     const LayoutType = fLibrary.LayoutType;
 
     return Controller.extend("artistmanagement.controller.ArtistManagement", {
+        formatter,
+
         onInit() {
-            const detailModel = new JSONModel({ name: "Select an artist", id: "", spotifyUrl: "", instagramHandle: "" });
+            const detailModel = new JSONModel({
+                name: "Select an artist",
+                id: "",
+                spotifyUrl: "",
+                instagramHandle: "",
+                biography: "",
+                genre: "",
+                country: "",
+                reviews: []
+            });
             this.getView().setModel(detailModel, "detail");
             const detailView = this.byId("detailView");
             if (detailView) {
@@ -47,34 +59,52 @@ sap.ui.define([
             if (!artistId) {
                 return;
             }
+            this._currentArtistId = artistId;
             const detailModel = this.getView().getModel("detail");
             detailModel.setData({
                 name: "Loading...",
                 id: artistId,
                 spotifyUrl: "",
-                instagramHandle: ""
+                instagramHandle: "",
+                biography: "",
+                genre: "",
+                country: "",
+                reviews: []
             });
 
             const oDataModel = this.getView().getModel();
             const artistBinding = oDataModel.bindContext(`/Artists('${artistId}')`, undefined, {
-                $select: "ID,name,spotifyUrl,instagramHandle"
+                $select: "ID,name,spotifyUrl,instagramHandle,biography,genre",
+                $expand: "country($select=name)"
             });
             artistBinding.requestObject().then((artist) => {
                 if (!artist) {
+                    return;
+                }
+                if (this._currentArtistId !== artistId) {
                     return;
                 }
                 detailModel.setData({
                     name: artist.name || "",
                     id: artist.ID || artist.id || artistId,
                     spotifyUrl: artist.spotifyUrl || "",
-                    instagramHandle: artist.instagramHandle || ""
+                    instagramHandle: artist.instagramHandle || "",
+                    biography: artist.biography || "",
+                    genre: artist.genre || "",
+                    country: (artist.country && artist.country.name) || "",
+                    reviews: []
                 });
+                this._loadReviews(artistId);
             }).catch(() => {
                 detailModel.setData({
                     name: "Unavailable",
                     id: artistId,
                     spotifyUrl: "",
-                    instagramHandle: ""
+                    instagramHandle: "",
+                    biography: "",
+                    genre: "",
+                    country: "",
+                    reviews: []
                 });
             });
             this._fcl.setLayout(LayoutType.TwoColumnsMidExpanded);
@@ -251,29 +281,46 @@ sap.ui.define([
         },
 
         formatGenre(value) {
-            if (!value) {
-                return "";
+            return formatter.formatGenre(value);
+        },
+
+        _loadReviews(artistId) {
+            const detailModel = this.getView().getModel("detail");
+            detailModel.setProperty("/reviews", []);
+            if (!artistId) {
+                return;
             }
-            const map = {
-                HIPHOP: "Hip Hop",
-                RNB: "R&B",
-                EDM: "EDM",
-                POP: "Pop",
-                ROCK: "Rock",
-                TECHNO: "Techno",
-                HOUSE: "House",
-                JAZZ: "Jazz",
-                CLASSICAL: "Classical",
-                INDIE: "Indie",
-                METAL: "Metal",
-                LATIN: "Latin",
-                AFROBEATS: "Afrobeats",
-                FOLK: "Folk",
-                BLUES: "Blues",
-                FUNK: "Funk",
-                COUNTRY: "Country"
-            };
-            return map[value] || value;
+            const oDataModel = this.getView().getModel();
+            const reviewsBinding = oDataModel.bindList("/Reviews", undefined, undefined, [
+                new Filter("performance/artist/ID", FilterOperator.EQ, artistId)
+            ], {
+                $select: "ID,rating,date,comment,customerName"
+            });
+            reviewsBinding.requestContexts(0, 200).then((contexts) => {
+                if (this._currentArtistId !== artistId) {
+                    return;
+                }
+                const reviews = contexts.map((ctx) => {
+                    const review = ctx.getObject();
+                    return {
+                        id: review.ID || review.id || "",
+                        rating: review.rating,
+                        comment: review.comment,
+                        date: review.date,
+                        customerName: review.customerName
+                    };
+                });
+                reviews.sort((a, b) => {
+                    const aDate = a.date ? new Date(a.date).getTime() : 0;
+                    const bDate = b.date ? new Date(b.date).getTime() : 0;
+                    return bDate - aDate;
+                });
+                detailModel.setProperty("/reviews", reviews);
+            }).catch(() => {
+                if (this._currentArtistId === artistId) {
+                    detailModel.setProperty("/reviews", []);
+                }
+            });
         }
     });
 });
