@@ -1,7 +1,8 @@
 <mvc:View controllerName="artistmanagement.controller.ArtistManagement"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
-    xmlns:f="sap.f">
+    xmlns:f="sap.f"
+    xmlns:core="sap.ui.core">
     <f:FlexibleColumnLayout id="fcl" layout="OneColumn">
         <f:beginColumnPages>
             <Page id="masterPage" title="Artists">
@@ -16,6 +17,18 @@
                         <OverflowToolbar>
                             <ToolbarSpacer/>
                             <SearchField width="17.5rem" placeholder="Search by name" search=".onSearch"/>
+                            <Select id="sortSelect" width="12rem" change=".onSortChange">
+                                <core:Item key="" text="No Sorting"/>
+                                <core:Item key="genre" text="Sort by Genre"/>
+                                <core:Item key="country" text="Sort by Country"/>
+                                <core:Item key="popularityScore" text="Sort by Popularity"/>
+                            </Select>
+                            <SegmentedButton id="sortDirection" selectionChange=".onSortChange">
+                                <items>
+                                    <SegmentedButtonItem key="asc" text="Asc"/>
+                                    <SegmentedButtonItem key="desc" text="Desc"/>
+                                </items>
+                            </SegmentedButton>
                         </OverflowToolbar>
                     </headerToolbar>
                     <columns>

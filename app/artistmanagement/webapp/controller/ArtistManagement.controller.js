@@ -3,8 +3,9 @@ sap.ui.define([
     "sap/ui/model/json/JSONModel",
     "sap/f/library",
     "sap/ui/model/Filter",
-    "sap/ui/model/FilterOperator"
-], (Controller, JSONModel, fLibrary, Filter, FilterOperator) => {
+    "sap/ui/model/FilterOperator",
+    "sap/ui/model/Sorter"
+], (Controller, JSONModel, fLibrary, Filter, FilterOperator, Sorter) => {
     "use strict";
 
     const LayoutType = fLibrary.LayoutType;
@@ -19,6 +20,9 @@ sap.ui.define([
             }
             this._fcl = this.byId("fcl");
             this._table = this.byId("artistTable");
+            this._sortSelect = this.byId("sortSelect");
+            this._sortDirection = this.byId("sortDirection");
+            this._sortDirection.setSelectedKey("asc");
         },
 
         onSelectArtist(event) {
@@ -56,6 +60,21 @@ sap.ui.define([
                 })
             ];
             binding.filter(filters);
+        },
+
+        onSortChange() {
+            const binding = this._table.getBinding("items");
+            if (!binding) {
+                return;
+            }
+            const property = this._sortSelect.getSelectedKey();
+            const directionKey = this._sortDirection.getSelectedKey();
+            const descending = directionKey === "desc";
+            if (!property) {
+                binding.sort([]);
+                return;
+            }
+            binding.sort(new Sorter(property, descending));
         },
 
         formatGenre(value) {
