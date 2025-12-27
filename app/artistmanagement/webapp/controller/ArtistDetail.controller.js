@@ -145,6 +145,7 @@ sap.ui.define([
                 return bDate - aDate;
             });
             detailModel.setProperty("/reviews", reviews);
+            this._updatePopularityFromReviews(reviews);
         },
 
         _refreshData() {
@@ -181,6 +182,19 @@ sap.ui.define([
                 });
             }
             return this._reviewDialogPromise;
+        },
+
+        _updatePopularityFromReviews(reviews) {
+            if (!Array.isArray(reviews) || reviews.length === 0) {
+                this.getView().getModel("detail").setProperty("/popularityScore", 0);
+                return;
+            }
+            const validRatings = reviews.map((r) => Number(r.rating)).filter((r) => !Number.isNaN(r));
+            if (validRatings.length === 0) {
+                return;
+            }
+            const avg = validRatings.reduce((sum, r) => sum + r, 0) / validRatings.length;
+            this.getView().getModel("detail").setProperty("/popularityScore", Number(avg.toFixed(1)));
         }
     });
 });
