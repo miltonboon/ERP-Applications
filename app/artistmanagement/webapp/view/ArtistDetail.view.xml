@@ -53,8 +53,8 @@
                                     <m:Label text="Country" width="6rem"/>
                                     <m:Text text="{detail>/country}"/>
                                 </m:HBox>
-                                <m:Label text="Biography" class="sapUiTinyMarginBottom"/>
-                                <m:Text text="{detail>/biography}" wrapping="true"/>
+                                <m:Label text="Biography" class="sapUiTinyMarginBottom" visible="{= !!${detail>/biography} }"/>
+                                <m:Text text="{detail>/biography}" wrapping="true" visible="{= !!${detail>/biography} }"/>
                             </m:VBox>
                         </blocks>
                     </ObjectPageSubSection>
