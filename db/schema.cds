@@ -49,6 +49,8 @@ entity Artists : cuid, managed {
   biography       : LargeString;
   instagramHandle : String(60);
   spotifyUrl      : String(500);
+  avatar          : LargeBinary @Core.MediaType : avatarMimeType;
+  avatarMimeType  : String(80);
 
   performances    : Composition of many Performances on performances.artist = $self;
 }

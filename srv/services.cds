@@ -21,8 +21,10 @@ service FestivalService {
     a.name,
     a.genre,
     a.country.name as country,
+    a.avatar,
+    a.avatarMimeType,
     cast(round(avg(r.rating) * 2, 0) / 2 as Decimal(5,1)) as popularityScore
-  } group by a.ID, a.name, a.genre, a.country.name;
+  } group by a.ID, a.name, a.genre, a.country.name, a.avatar, a.avatarMimeType;
 
   @readonly
   entity OrdersOverview as select from db.Orders {
