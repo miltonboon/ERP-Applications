@@ -139,7 +139,7 @@ sap.ui.define([
             if (!this._sortPopover) {
                 this._sortPopover = this._createSortPopover();
             }
-            this._sortPopover.openBy(event.getSource());
+            this._deferredOpen(this._sortPopover, event.getSource());
         },
 
         _createSortPopover() {
@@ -200,7 +200,7 @@ sap.ui.define([
                 this._filterPopover = this._createFilterPopover();
             }
             this._refreshCountryOptions();
-            this._filterPopover.openBy(event.getSource());
+            this._deferredOpen(this._filterPopover, event.getSource());
         },
 
         _createFilterPopover() {
@@ -851,6 +851,19 @@ sap.ui.define([
             if (step && step.setValidated) {
                 step.setValidated(!!isValid);
             }
+        },
+
+        _deferredOpen(popover, opener) {
+            if (!popover || !opener) {
+                return;
+            }
+            // Delay to let the OverflowToolbar close its own popover before opening ours :P
+            setTimeout(() => {
+                if (popover.isOpen && popover.isOpen()) {
+                    popover.close();
+                }
+                popover.openBy(opener);
+            }, 0);
         }
     });
 });
