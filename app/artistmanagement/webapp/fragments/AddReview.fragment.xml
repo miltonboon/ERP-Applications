@@ -1,5 +1,5 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
-    <Dialog title="New review" stretchOnPhone="true" contentWidth="26rem">
+    <Dialog title="New review" contentWidth="26rem">
         <VBox class="sapUiMediumMargin" renderType="Bare">
             <Text text="Performance"/>
             <Select selectedKey="{reviewForm>/performanceId}" items="{detail>/performances}" width="100%">

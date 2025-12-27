@@ -1,0 +1,101 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+    <Dialog id="createArtistDialog" title="Create Artist" contentWidth="960px" class="sapUiResponsivePadding--Header sapUiResponsivePadding--Content sapUiResponsivePadding--Footer">
+        <VBox width="100%" renderType="Bare">
+            <Wizard id="createArtistWizard" stepActivate=".onWizardStepChange" class="createArtistWizard">
+                <WizardStep id="basicInfoStep" title="Basic Info" validated="true">
+                    <VBox class="sapUiSmallMarginTop" renderType="Bare" width="100%">
+                        <Label text="Artist name"/>
+                        <Input value="{createModel>/form/name}" placeholder="Enter the artist name" width="100%"
+                            valueState="{= ${createModel>/errors/name} ? 'Error' : 'None'}"
+                            valueStateText="{createModel>/errors/name}" required="true" liveChange=".onBasicFieldChange"/>
+                        <Label text="Genre" class="sapUiSmallMarginTop"/>
+                        <ComboBox selectedKey="{createModel>/form/genre}" width="100%" placeholder="Select a genre"
+                            required="true"
+                            items="{createModel>/options/genres}"
+                            valueState="{= ${createModel>/errors/genre} ? 'Error' : 'None'}"
+                            valueStateText="{createModel>/errors/genre}" showClearIcon="true" selectionChange=".onBasicFieldChange" change=".onBasicFieldChange">
+                            <core:Item key="{createModel>key}" text="{createModel>text}"/>
+                        </ComboBox>
+                        <Label text="Country / Nationality" class="sapUiSmallMarginTop"/>
+                        <ComboBox selectedKey="{createModel>/form/countryId}" width="100%" placeholder="Select a country"
+                            required="true"
+                            items="{createModel>/options/countries}"
+                            valueState="{= ${createModel>/errors/countryId} ? 'Error' : 'None'}"
+                            valueStateText="{createModel>/errors/countryId}" showClearIcon="true" selectionChange=".onBasicFieldChange" change=".onBasicFieldChange">
+                            <core:Item key="{createModel>key}" text="{createModel>text}"/>
+                        </ComboBox>
+                    </VBox>
+                </WizardStep>
+                <WizardStep id="biographyStep" title="Biography" validated="true">
+                    <VBox class="sapUiSmallMarginTop" renderType="Bare" width="100%">
+                        <Label text="Short biography"/>
+                        <TextArea value="{createModel>/form/biography}" rows="6" width="100%" growing="true"
+                            placeholder="Write a concise biography that highlights the artist's story and sound."/>
+                    </VBox>
+                </WizardStep>
+                <WizardStep id="socialStep" title="Social Media" validated="true">
+                    <VBox class="sapUiSmallMarginTop" renderType="Bare" width="100%">
+                        <Label text="Spotify URL"/>
+                        <Input value="{createModel>/form/spotifyUrl}" placeholder="https://open.spotify.com/artist/..." width="100%" change=".onBasicFieldChange"/>
+                        <Label text="Instagram handle" class="sapUiSmallMarginTop"/>
+                        <HBox alignItems="Center" renderType="Bare">
+                            <Text text="@" class="sapUiTinyMarginEnd"/>
+                            <Input value="{createModel>/form/instagramHandle}" placeholder="artistname" width="100%" change=".onBasicFieldChange"/>
+                        </HBox>
+                    </VBox>
+                </WizardStep>
+                <WizardStep id="performancesStep" title="Performances" validated="true">
+                    <VBox class="sapUiSmallMarginTop" renderType="Bare" width="100%">
+                        <Text text="Add at least one performance with stage, day, start, and end time." class="sapUiTinyMarginBottom"/>
+                        <List id="performanceList" items="{createModel>/form/performances}" noDataText="No performances added yet">
+                            <CustomListItem>
+                                <VBox width="100%" class="sapUiSmallMarginBottom">
+                                    <HBox alignItems="Center" class="sapUiTinyMarginBottom">
+                                        <Label text="Stage" width="4rem"/>
+                                        <ComboBox width="16rem" selectedKey="{createModel>stageId}" placeholder="Select a stage"
+                                            required="true"
+                                            items="{createModel>/options/stages}"
+                                            valueState="{= ${createModel>errors/stageId} ? 'Error' : 'None'}"
+                                            valueStateText="{createModel>errors/stageId}" showClearIcon="true" selectionChange=".onPerformanceFieldChange" change=".onPerformanceFieldChange">
+                                            <core:Item key="{createModel>key}" text="{createModel>text}"/>
+                                        </ComboBox>
+                                        <Button icon="sap-icon://less" type="Transparent" tooltip="Remove performance" press=".onRemovePerformanceRow" class="sapUiTinyMarginBegin"/>
+                                    </HBox>
+                                    <HBox alignItems="Center" class="sapUiTinyMarginBottom" renderType="Bare">
+                                        <Label text="Day" width="4rem"/>
+                                        <DatePicker value="{createModel>day}" valueFormat="yyyy-MM-dd" displayFormat="long" width="11rem"
+                                            valueState="{= ${createModel>errors/day} ? 'Error' : 'None'}"
+                                            valueStateText="{createModel>errors/day}" change=".onPerformanceFieldChange"/>
+                                        <Label text="Start" width="3.5rem" textAlign="Center" class="sapUiTinyMarginBegin"/>
+                                        <TimePicker value="{createModel>startTime}" valueFormat="HH:mm" displayFormat="HH:mm" width="7rem"
+                                            valueState="{= ${createModel>errors/startTime} || ${createModel>errors/timeRange} ? 'Error' : 'None'}"
+                                            valueStateText="{= ${createModel>errors/startTime} ? ${createModel>errors/startTime} : ${createModel>errors/timeRange}}" change=".onPerformanceFieldChange"/>
+                                        <Label text="End" width="3rem" textAlign="Center" class="sapUiTinyMarginBegin"/>
+                                        <TimePicker value="{createModel>endTime}" valueFormat="HH:mm" displayFormat="HH:mm" width="7rem"
+                                            valueState="{= ${createModel>errors/endTime} || ${createModel>errors/timeRange} ? 'Error' : 'None'}"
+                                            valueStateText="{= ${createModel>errors/endTime} ? ${createModel>errors/endTime} : ${createModel>errors/timeRange}}" change=".onPerformanceFieldChange"/>
+                                    </HBox>
+                                    <Text text="{createModel>errors/timeRange}" visible="{= !!${createModel>errors/timeRange} }" class="sapUiTinyMarginTop sapThemeColorCritical"/>
+                                </VBox>
+                            </CustomListItem>
+                        </List>
+                        <Button text="Add performance" type="Transparent" icon="sap-icon://add" press=".onAddPerformanceRow" class="sapUiSmallMarginTop"/>
+                    </VBox>
+                </WizardStep>
+                <WizardStep id="avatarStep" title="Avatar" validated="true">
+                    <VBox class="sapUiSmallMarginTop" renderType="Bare" width="100%" alignItems="Center">
+                        <Avatar displayShape="Circle" initials="NA" tooltip="Avatar placeholder"/>
+                        <Text text="Avatar upload placeholder; wiring comes next so we can plug in upload later." class="sapUiTinyMarginTop"/>
+                    </VBox>
+                </WizardStep>
+            </Wizard>
+        </VBox>
+        <beginButton>
+            <Button id="wizardCreateButton" text="Create Artist" type="Emphasized"
+                visible="true" press=".onCreateArtist"/>
+        </beginButton>
+        <endButton>
+            <Button text="Cancel" press=".onCancelCreateArtist"/>
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>
