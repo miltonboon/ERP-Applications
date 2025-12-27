@@ -8,14 +8,14 @@
                         <Input value="{createModel>/form/name}" placeholder="Enter the artist name" width="100%"
                             valueState="{= ${createModel>/errors/name} ? 'Error' : 'None'}"
                             valueStateText="{createModel>/errors/name}" required="true" liveChange=".onBasicFieldChange"/>
-                        <Label text="Genre" class="sapUiSmallMarginTop"/>
-                        <ComboBox selectedKey="{createModel>/form/genre}" width="100%" placeholder="Select a genre"
+                        <Label text="Genres" class="sapUiSmallMarginTop"/>
+                        <MultiComboBox selectedKeys="{createModel>/form/genres}" width="100%" placeholder="Select genres"
                             required="true"
                             items="{createModel>/options/genres}"
-                            valueState="{= ${createModel>/errors/genre} ? 'Error' : 'None'}"
-                            valueStateText="{createModel>/errors/genre}" showClearIcon="true" selectionChange=".onBasicFieldChange" change=".onBasicFieldChange">
+                            valueState="{= ${createModel>/errors/genres} ? 'Error' : 'None'}"
+                            valueStateText="{createModel>/errors/genres}" showClearIcon="true" selectionChange=".onBasicFieldChange">
                             <core:Item key="{createModel>key}" text="{createModel>text}"/>
-                        </ComboBox>
+                        </MultiComboBox>
                         <Label text="Country / Nationality" class="sapUiSmallMarginTop"/>
                         <ComboBox selectedKey="{createModel>/form/countryId}" width="100%" placeholder="Select a country"
                             required="true"

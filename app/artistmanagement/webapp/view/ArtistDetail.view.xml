@@ -46,8 +46,8 @@
                         <blocks>
                             <m:VBox class="sapUiSmallMargin">
                                 <m:HBox alignItems="Center" class="sapUiTinyMarginBottom">
-                                    <m:Label text="Genre" width="6rem"/>
-                                    <m:Text text="{path: 'detail>/genre', formatter: '.formatGenre'}"/>
+                                    <m:Label text="Genres" width="6rem"/>
+                                    <m:Text text="{path: 'detail>/genres', formatter: '.formatGenre', targetType: 'any'}"/>
                                 </m:HBox>
                                 <m:HBox alignItems="Center" class="sapUiTinyMarginBottom">
                                     <m:Label text="Country" width="6rem"/>

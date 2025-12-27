@@ -23,6 +23,8 @@ sap.ui.define([
         COUNTRY: "Country"
     };
 
+    const renderGenre = (v) => genreMap[v] || v || "";
+
     const dateFormatter = DateFormat.getDateInstance({ style: "medium" });
     const dateTimeFormatter = DateFormat.getDateTimeInstance({
         pattern: "MMM d, yyyy, HH:mm",
@@ -38,7 +40,10 @@ sap.ui.define([
             if (!value) {
                 return "";
             }
-            return genreMap[value] || value;
+            if (Array.isArray(value)) {
+                return value.map(renderGenre).filter(Boolean).join(", ");
+            }
+            return renderGenre(value);
         },
 
         formatDate(value) {
@@ -96,7 +101,7 @@ sap.ui.define([
         },
 
         toAvatarSrc(data, mimeType) {
-            if (!data || !mimeType) {
+            if (!data) {
                 return "";
             }
             if (typeof data === "string") {

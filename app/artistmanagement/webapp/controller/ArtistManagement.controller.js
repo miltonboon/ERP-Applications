@@ -17,8 +17,9 @@ sap.ui.define([
     "artistmanagement/model/formatter",
     "sap/ui/core/Fragment",
     "sap/m/MessageToast",
-    "sap/m/MessageBox"
-], (Controller, JSONModel, fLibrary, Filter, FilterOperator, Sorter, Popover, VBox, Select, Item, SegmentedButton, SegmentedButtonItem, Button, MultiComboBox, Text, formatter, Fragment, MessageToast, MessageBox) => {
+    "sap/m/MessageBox",
+    "sap/m/Token"
+], (Controller, JSONModel, fLibrary, Filter, FilterOperator, Sorter, Popover, VBox, Select, Item, SegmentedButton, SegmentedButtonItem, Button, MultiComboBox, Text, formatter, Fragment, MessageToast, MessageBox, Token) => {
     "use strict";
 
     const LayoutType = fLibrary.LayoutType;
@@ -33,7 +34,7 @@ sap.ui.define([
                 spotifyUrl: "",
                 instagramHandle: "",
                 biography: "",
-                genre: "",
+                genres: [],
                 country: "",
                 avatar: null,
                 avatarMimeType: "",
@@ -74,7 +75,7 @@ sap.ui.define([
                 spotifyUrl: "",
                 instagramHandle: "",
                 biography: "",
-                genre: "",
+                genres: [],
                 country: "",
                 avatar: data.avatar || null,
                 avatarMimeType: data.avatarMimeType || "",
@@ -85,7 +86,7 @@ sap.ui.define([
 
             const oDataModel = this.getView().getModel();
             const artistBinding = oDataModel.bindContext(`/Artists('${artistId}')`, undefined, {
-                $select: "ID,name,spotifyUrl,instagramHandle,biography,genre,avatar,avatarMimeType",
+                $select: "ID,name,spotifyUrl,instagramHandle,biography,genres,avatar,avatarMimeType",
                 $expand: "country($select=name)"
             });
             artistBinding.requestObject().then((artist) => {
@@ -101,7 +102,7 @@ sap.ui.define([
                     spotifyUrl: artist.spotifyUrl || "",
                     instagramHandle: artist.instagramHandle || "",
                     biography: artist.biography || "",
-                    genre: artist.genre || "",
+                    genres: artist.genres || [],
                     country: (artist.country && artist.country.name) || "",
                     avatar: artist.avatar || null,
                     avatarMimeType: artist.avatarMimeType || "",
@@ -115,14 +116,14 @@ sap.ui.define([
                 detailModel.setData({
                     name: "Unavailable",
                     id: artistId,
-                    spotifyUrl: "",
-                    instagramHandle: "",
-                    biography: "",
-                    genre: "",
-                    country: "",
-                    avatar: null,
-                    avatarMimeType: "",
-                    popularityScore: 0,
+                spotifyUrl: "",
+                instagramHandle: "",
+                biography: "",
+                genres: [],
+                country: "",
+                avatar: null,
+                avatarMimeType: "",
+                popularityScore: 0,
                     reviews: [],
                     performances: []
                 });
@@ -148,7 +149,7 @@ sap.ui.define([
                 change: this._applySort.bind(this)
             });
             this._sortSelect.addItem(new Item({ key: "", text: "No Sorting" }));
-            this._sortSelect.addItem(new Item({ key: "genre", text: "Genre" }));
+            this._sortSelect.addItem(new Item({ key: "genres", text: "Genre" }));
             this._sortSelect.addItem(new Item({ key: "country", text: "Country" }));
             this._sortSelect.addItem(new Item({ key: "popularityScore", text: "Popularity" }));
 
@@ -209,9 +210,8 @@ sap.ui.define([
                 selectionChange: this._onFilterSelectionChange.bind(this),
                 placeholder: "Select genres"
             });
-            const genres = ["POP", "ROCK", "HIPHOP", "EDM", "TECHNO", "HOUSE", "JAZZ", "CLASSICAL", "RNB", "INDIE", "METAL", "LATIN", "AFROBEATS"];
-            genres.forEach((g) => {
-                this._filterGenre.addItem(new Item({ key: g, text: this.formatGenre(g) }));
+            this._getGenreOptions().forEach((g) => {
+                this._filterGenre.addItem(new Item({ key: g.key, text: g.text }));
             });
 
             this._filterCountry = new MultiComboBox({
@@ -275,7 +275,7 @@ sap.ui.define([
             }
 
             if (this._filterGenres.length > 0) {
-                const genreFilters = this._filterGenres.map((g) => new Filter("genre", FilterOperator.EQ, g));
+                const genreFilters = this._filterGenres.map((g) => new Filter("genres", FilterOperator.Contains, g));
                 filters.push(new Filter({ filters: genreFilters, and: false }));
             }
 
@@ -302,6 +302,28 @@ sap.ui.define([
 
         formatGenre(value) {
             return formatter.formatGenre(value);
+        },
+
+        onListUpdateFinished(event) {
+            const items = event.getSource().getItems() || [];
+            items.forEach((item) => {
+                const genresBox = this._findGenresContainer(item);
+                const ctx = item.getBindingContext();
+                if (!genresBox || !ctx) {
+                    return;
+                }
+                genresBox.removeAllItems();
+                const data = ctx.getObject && ctx.getObject();
+                const genres = (data && data.genres) || [];
+                genres.forEach((g) => {
+                    const text = this.formatGenre(g);
+                    if (text) {
+                        const token = new Token({ text, editable: false });
+                        token.addStyleClass("sapUiTinyMarginEnd sapUiMicroMarginBottom");
+                        genresBox.addItem(token);
+                    }
+                });
+            });
         },
 
         _loadReviews(artistId) {
@@ -551,7 +573,7 @@ sap.ui.define([
             return {
                 form: {
                     name: "",
-                    genre: "",
+                    genres: [],
                     countryId: "",
                     biography: "",
                     spotifyUrl: "",
@@ -567,7 +589,7 @@ sap.ui.define([
                 },
                 errors: {
                     name: "",
-                    genre: "",
+                    genres: "",
                     countryId: ""
                 }
             };
@@ -681,12 +703,12 @@ sap.ui.define([
             const form = model.getProperty("/form") || {};
             const errors = {
                 name: form.name ? "" : "Enter the artist name",
-                genre: form.genre ? "" : "Select a genre",
+                genres: Array.isArray(form.genres) && form.genres.length > 0 ? "" : "Select at least one genre",
                 countryId: form.countryId ? "" : "Select a country"
             };
             model.setProperty("/errors", errors);
-            this._setStepValidated(this.byId("basicInfoStep"), !errors.name && !errors.genre && !errors.countryId);
-            return !errors.name && !errors.genre && !errors.countryId;
+            this._setStepValidated(this.byId("basicInfoStep"), !errors.name && !errors.genres && !errors.countryId);
+            return !errors.name && !errors.genres && !errors.countryId;
         },
 
         _validatePerformances() {
@@ -739,7 +761,7 @@ sap.ui.define([
             });
             return {
                 name: form.name,
-                genre: form.genre,
+                genres: form.genres || [],
                 biography: form.biography || "",
                 spotifyUrl: form.spotifyUrl || "",
                 instagramHandle: form.instagramHandle || "",
@@ -864,6 +886,33 @@ sap.ui.define([
                 }
                 popover.openBy(opener);
             }, 0);
+        },
+
+        _findGenresContainer(listItem) {
+            if (!listItem || !listItem.getContent) {
+                return null;
+            }
+            const vbox = listItem.getContent()[0];
+            if (!vbox || !vbox.getItems) {
+                return null;
+            }
+            const mainHBox = vbox.getItems()[1];
+            if (!mainHBox || !mainHBox.getItems) {
+                return null;
+            }
+            const innerHBox = mainHBox.getItems()[1];
+            if (!innerHBox || !innerHBox.getItems) {
+                return null;
+            }
+            const rightVBox = innerHBox.getItems()[1];
+            if (!rightVBox || !rightVBox.getItems) {
+                return null;
+            }
+            const genreRow = rightVBox.getItems()[1];
+            if (!genreRow || !genreRow.getItems) {
+                return null;
+            }
+            return genreRow.getItems()[0] || null;
         }
     });
 });
