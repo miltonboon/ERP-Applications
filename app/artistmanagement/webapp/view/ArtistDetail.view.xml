@@ -29,11 +29,11 @@
                     <m:Label text="Popularity"/>
                     <m:RatingIndicator maxValue="5" value="{detail>/popularityScore}" enabled="false" displayOnly="true" iconSize="1.2rem"/>
                 </m:VBox>
-                <m:VBox class="sapUiSmallMarginEnd">
+                <m:VBox class="sapUiSmallMarginEnd" visible="{= !!${detail>/spotifyUrl} }">
                     <m:Label text="Spotify"/>
                     <m:Link text="{detail>/name}" href="{path: 'detail>/spotifyUrl', formatter: '.formatSpotifyHref'}" target="_blank"/>
                 </m:VBox>
-                <m:VBox class="sapUiSmallMarginEnd">
+                <m:VBox class="sapUiSmallMarginEnd" visible="{= !!${detail>/instagramHandle} }">
                     <m:Label text="Instagram"/>
                     <m:Link text="{detail>/instagramHandle}" href="{path: 'detail>/instagramHandle', formatter: '.formatInstagramHref'}" target="_blank"/>
                 </m:VBox>
