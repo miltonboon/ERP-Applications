@@ -35,6 +35,8 @@ sap.ui.define([
                 biography: "",
                 genre: "",
                 country: "",
+                avatar: null,
+                avatarMimeType: "",
                 popularityScore: 0,
                 reviews: [],
                 performances: []
@@ -45,7 +47,7 @@ sap.ui.define([
                 detailView.setModel(detailModel, "detail");
             }
             this._fcl = this.byId("fcl");
-            this._table = this.byId("artistTable");
+            this._list = this.byId("artistList");
             this._sortPopover = null;
             this._sortState = { key: "", descending: false };
             this._filterPopover = null;
@@ -74,6 +76,8 @@ sap.ui.define([
                 biography: "",
                 genre: "",
                 country: "",
+                avatar: data.avatar || null,
+                avatarMimeType: data.avatarMimeType || "",
                 popularityScore: data.popularityScore || 0,
                 reviews: [],
                 performances: []
@@ -81,7 +85,7 @@ sap.ui.define([
 
             const oDataModel = this.getView().getModel();
             const artistBinding = oDataModel.bindContext(`/Artists('${artistId}')`, undefined, {
-                $select: "ID,name,spotifyUrl,instagramHandle,biography,genre",
+                $select: "ID,name,spotifyUrl,instagramHandle,biography,genre,avatar,avatarMimeType",
                 $expand: "country($select=name)"
             });
             artistBinding.requestObject().then((artist) => {
@@ -99,6 +103,8 @@ sap.ui.define([
                     biography: artist.biography || "",
                     genre: artist.genre || "",
                     country: (artist.country && artist.country.name) || "",
+                    avatar: artist.avatar || null,
+                    avatarMimeType: artist.avatarMimeType || "",
                     popularityScore: detailModel.getProperty("/popularityScore") || 0,
                     reviews: [],
                     performances: []
@@ -114,12 +120,14 @@ sap.ui.define([
                     biography: "",
                     genre: "",
                     country: "",
+                    avatar: null,
+                    avatarMimeType: "",
                     popularityScore: 0,
                     reviews: [],
                     performances: []
                 });
             });
-            this._fcl.setLayout(LayoutType.TwoColumnsMidExpanded);
+            this._fcl.setLayout(LayoutType.TwoColumnsBeginExpanded);
         },
 
         onSearch(event) {
@@ -169,7 +177,7 @@ sap.ui.define([
         },
 
         _applySort() {
-            const binding = this._table.getBinding("items");
+            const binding = this._list.getBinding("items");
             if (!binding) {
                 return;
             }
@@ -251,7 +259,7 @@ sap.ui.define([
         },
 
         _applyFilters() {
-            const binding = this._table.getBinding("items");
+            const binding = this._list.getBinding("items");
             if (!binding) {
                 return;
             }
@@ -281,7 +289,7 @@ sap.ui.define([
 
         _refreshCountryOptions() {
             this._filterCountry.removeAllItems();
-            const binding = this._table.getBinding("items");
+            const binding = this._list.getBinding("items");
             if (!binding) {
                 return;
             }
@@ -504,8 +512,8 @@ sap.ui.define([
                 dialogPromise.then((dialog) => dialog.setBusy(false));
                 dialogPromise.then((dialog) => dialog.close());
                 this._resetWizardState();
-                if (this._table && this._table.getBinding("items")) {
-                    this._table.getBinding("items").refresh();
+                if (this._list && this._list.getBinding("items")) {
+                    this._list.getBinding("items").refresh();
                 }
                 MessageToast.show("Artist created");
             }).catch((err) => {
@@ -548,6 +556,8 @@ sap.ui.define([
                     biography: "",
                     spotifyUrl: "",
                     instagramHandle: "",
+                    avatar: "",
+                    avatarMimeType: "",
                     performances: [this._getEmptyPerformance()]
                 },
                 options: {
@@ -648,7 +658,7 @@ sap.ui.define([
                 this._setStepValidated(biographyStep, true);
                 this._setStepValidated(socialStep, true);
                 this._setStepValidated(performancesStep, false);
-                this._setStepValidated(avatarStep, false);
+                this._setStepValidated(avatarStep, true);
             }
             this._syncWizardButtons();
         },
@@ -733,6 +743,8 @@ sap.ui.define([
                 biography: form.biography || "",
                 spotifyUrl: form.spotifyUrl || "",
                 instagramHandle: form.instagramHandle || "",
+                avatar: form.avatar || null,
+                avatarMimeType: form.avatarMimeType || "",
                 country_ID: form.countryId,
                 performances
             };
@@ -746,6 +758,83 @@ sap.ui.define([
         onPerformanceFieldChange() {
             this._validatePerformances();
             this._syncWizardButtons();
+        },
+
+        toAvatarSrc(data, mimeType) {
+            return formatter.toAvatarSrc(data, mimeType);
+        },
+
+        formatInitials(name) {
+            return formatter.formatInitials(name);
+        },
+
+        onAvatarSelected(event) {
+            const files = event.getParameter("files");
+            const file = files && files[0];
+            if (!file) {
+                return;
+            }
+            if (!file.type || !file.type.startsWith("image/")) {
+                MessageToast.show("Select an image file.");
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const result = e && e.target && e.target.result;
+                if (typeof result !== "string") {
+                    return;
+                }
+                this._downscaleAvatar(result).then(({ dataUrl, mimeType }) => {
+                    const base64 = dataUrl.split(",")[1] || "";
+                    const model = this._getCreateModel();
+                    model.setProperty("/form/avatar", base64);
+                    model.setProperty("/form/avatarMimeType", mimeType || "image/jpeg");
+                }).catch(() => {
+                    MessageToast.show("Avatar upload failed.");
+                });
+            };
+            reader.readAsDataURL(file);
+        },
+
+        _downscaleAvatar(dataUrl) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => {
+                    const maxSize = 256;
+                    let { width, height } = img;
+                    if (!width || !height) {
+                        reject();
+                        return;
+                    }
+                    if (width > height && width > maxSize) {
+                        height = Math.round(height * (maxSize / width));
+                        width = maxSize;
+                    } else if (height >= width && height > maxSize) {
+                        width = Math.round(width * (maxSize / height));
+                        height = maxSize;
+                    }
+                    const canvas = document.createElement("canvas");
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext("2d");
+                    if (!ctx) {
+                        reject();
+                        return;
+                    }
+                    ctx.drawImage(img, 0, 0, width, height);
+                    const mimeType = "image/jpeg";
+                    const compressed = canvas.toDataURL(mimeType, 0.85);
+                    resolve({ dataUrl: compressed, mimeType });
+                };
+                img.onerror = () => reject();
+                img.src = dataUrl;
+            });
+        },
+
+        onAvatarClear() {
+            const model = this._getCreateModel();
+            model.setProperty("/form/avatar", "");
+            model.setProperty("/form/avatarMimeType", "");
         },
 
         _getWizardSteps() {

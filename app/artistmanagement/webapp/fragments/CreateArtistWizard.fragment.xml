@@ -1,4 +1,4 @@
-<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:u="sap.ui.unified">
     <Dialog id="createArtistDialog" title="Create Artist" contentWidth="960px" class="sapUiResponsivePadding--Header sapUiResponsivePadding--Content sapUiResponsivePadding--Footer">
         <VBox width="100%" renderType="Bare">
             <Wizard id="createArtistWizard" stepActivate=".onWizardStepChange" class="createArtistWizard">
@@ -84,8 +84,23 @@
                 </WizardStep>
                 <WizardStep id="avatarStep" title="Avatar" validated="true">
                     <VBox class="sapUiSmallMarginTop" renderType="Bare" width="100%" alignItems="Center">
-                        <Avatar displayShape="Circle" initials="NA" tooltip="Avatar placeholder"/>
-                        <Text text="Avatar upload placeholder; wiring comes next so we can plug in upload later." class="sapUiTinyMarginTop"/>
+                        <Avatar displayShape="Circle" imageFitType="Cover"
+                            displaySize="M"
+                            src="{ parts: [{path: 'createModel>/form/avatar'}, {path: 'createModel>/form/avatarMimeType'}], formatter: '.toAvatarSrc' }"
+                            initials="{path: 'createModel>/form/name', formatter: '.formatInitials'}"
+                            fallbackIcon="sap-icon://customer"
+                            />
+                        <HBox class="sapUiSmallMarginTop" alignItems="Center" renderType="Bare">
+                            <items>
+                                <u:FileUploader change=".onAvatarSelected" uploadOnChange="false" width="14rem"
+                                    buttonOnly="true" buttonText="Upload avatar" icon="sap-icon://add-photo"
+                                    mimeType="image/png,image/jpeg,image/jpg,image/gif,image/webp"
+                                    fileType="png,jpg,jpeg,gif,webp"/>
+                                <Button text="Remove" type="Transparent" press=".onAvatarClear"
+                                    enabled="{= !!${createModel>/form/avatar} }" class="sapUiTinyMarginBegin"/>
+                            </items>
+                        </HBox>
+                        <Text text="Optional: stored as binary with MIME type for local avatars." class="sapUiTinyMarginTop"/>
                     </VBox>
                 </WizardStep>
             </Wizard>

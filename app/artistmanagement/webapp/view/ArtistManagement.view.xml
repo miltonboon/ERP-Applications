@@ -6,11 +6,12 @@
     <f:FlexibleColumnLayout id="fcl" layout="OneColumn">
         <f:beginColumnPages>
             <Page id="masterPage" title="Artists">
-                <Table id="artistTable"
+                <List id="artistList"
                     mode="SingleSelectMaster"
+                    includeItemInSelection="true"
                     items="{
                         path: '/ArtistOverview',
-                        parameters: { $select: 'ID,name,genre,country,popularityScore' }
+                        parameters: { $select: 'ID,name,genre,country,popularityScore,avatar,avatarMimeType' }
                     }"
                     selectionChange=".onSelectArtist">
                     <headerToolbar>
@@ -22,31 +23,34 @@
                             <Button type="Transparent" icon="sap-icon://filter" press=".onOpenFilterPopover"/>
                         </OverflowToolbar>
                     </headerToolbar>
-                    <columns>
-                        <Column>
-                            <Text text="Name"/>
-                        </Column>
-                        <Column>
-                            <Text text="Genre"/>
-                        </Column>
-                        <Column>
-                            <Text text="Country"/>
-                        </Column>
-                        <Column>
-                            <Text text="Popularity"/>
-                        </Column>
-                    </columns>
                     <items>
-                        <ColumnListItem>
-                            <cells>
-                                <ObjectIdentifier title="{name}"/>
-                                <Text text="{path: 'genre', formatter: '.formatGenre'}"/>
-                                <Text text="{country}"/>
-                                <RatingIndicator maxValue="5" value="{ path: 'popularityScore', type: 'sap.ui.model.type.Float' }" enabled="false" displayOnly="true" iconSize="1.1rem"/>
-                            </cells>
-                        </ColumnListItem>
+                        <CustomListItem>
+                            <VBox width="100%">
+                                <HBox height="0.5rem"/>
+                                <HBox width="100%" alignItems="Center">
+                                    <HBox width="0.75rem"/>
+                                    <HBox width="100%" alignItems="Center">
+                                        <Avatar displayShape="Circle"
+                                            displaySize="S"
+                                            imageFitType="Cover"
+                                            src="{ parts: [{path: 'avatar'}, {path: 'avatarMimeType'}], formatter: '.toAvatarSrc' }"
+                                            fallbackIcon="sap-icon://customer"
+                                            initials="{path: 'name', formatter: '.formatInitials'}"/>
+                                        <VBox class="sapUiSmallMarginBegin" width="100%">
+                                            <ObjectIdentifier title="{name}" text="{country}"/>
+                                            <HBox alignItems="Center" justifyContent="SpaceBetween" height="2rem">
+                                                <Text text="{path: 'genre', formatter: '.formatGenre'}"/>
+                                                <RatingIndicator maxValue="5" value="{ path: 'popularityScore', type: 'sap.ui.model.type.Float' }" enabled="false" displayOnly="true" iconSize="1.1rem"/>
+                                            </HBox>
+                                        </VBox>
+                                    </HBox>
+                                    <HBox width="0.75rem"/>
+                                </HBox>
+                                <HBox height="0.5rem"/>
+                            </VBox>
+                        </CustomListItem>
                     </items>
-                </Table>
+                </List>
             </Page>
         </f:beginColumnPages>
         <f:midColumnPages>

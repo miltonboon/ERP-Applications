@@ -93,6 +93,38 @@ sap.ui.define([
                 return stageName;
             }
             return slot;
+        },
+
+        toAvatarSrc(data, mimeType) {
+            if (!data || !mimeType) {
+                return "";
+            }
+            if (typeof data === "string") {
+                if (data.startsWith("data:")) {
+                    return data;
+                }
+                if (data.startsWith("http://") || data.startsWith("https://") || data.startsWith("//")) {
+                    return data;
+                }
+                if (data.startsWith("/") && data.length < 200) {
+                    return data;
+                }
+            }
+            const safeMime = mimeType || "image/png";
+            return `data:${safeMime};base64,${data}`;
+        },
+
+        formatInitials(name) {
+            if (!name) {
+                return "";
+            }
+            const initials = name.split(" ")
+                .filter(Boolean)
+                .map((word) => word.charAt(0))
+                .join("")
+                .substring(0, 2)
+                .toUpperCase();
+            return initials;
         }
     };
 });
