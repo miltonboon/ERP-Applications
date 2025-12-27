@@ -45,7 +45,7 @@ entity Countries : cuid {
 entity Artists : cuid, managed {
   name            : String(120) @mandatory;
   country         : Association to Countries @mandatory;
-  genre           : Genre @mandatory;
+  genres          : array of Genre @mandatory;
   biography       : LargeString;
   instagramHandle : String(60);
   spotifyUrl      : String(500);
