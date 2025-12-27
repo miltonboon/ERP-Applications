@@ -11,13 +11,13 @@
             <ObjectPageDynamicHeaderTitle>
                 <expandedHeading>
                     <m:HBox alignItems="Center" renderType="Bare">
-                        <m:Button type="Transparent" icon="sap-icon://nav-back" press=".onCloseDetail" tooltip="Terug" class="sapUiTinyMarginEnd"/>
+                        <m:Button type="Transparent" icon="sap-icon://nav-back" press=".onCloseDetail" tooltip="Back" class="sapUiTinyMarginEnd"/>
                         <m:Title text="{detail>/name}" wrapping="true"/>
                     </m:HBox>
                 </expandedHeading>
                 <snappedHeading>
                     <m:HBox alignItems="Center" renderType="Bare">
-                        <m:Button type="Transparent" icon="sap-icon://nav-back" press=".onCloseDetail" tooltip="Terug" class="sapUiTinyMarginEnd"/>
+                        <m:Button type="Transparent" icon="sap-icon://nav-back" press=".onCloseDetail" tooltip="Back" class="sapUiTinyMarginEnd"/>
                         <m:Title text="{detail>/name}" wrapping="true"/>
                     </m:HBox>
                 </snappedHeading>
@@ -65,8 +65,7 @@
                     <ObjectPageSubSection>
                         <blocks>
                             <m:VBox class="sapUiSmallMargin">
-                                <m:Text text="Geen performances beschikbaar" visible="{= ${detail>/performances}.length === 0 }" class="sapUiTinyMarginBottom"/>
-                                <m:List id="performancesList" items="{detail>/performances}" noDataText="Geen performances beschikbaar" inset="true">
+                                <m:List id="performancesList" items="{detail>/performances}" noDataText="No performances available" inset="true">
                                     <m:CustomListItem class="sapUiSmallMarginBottom">
                                         <m:VBox width="100%" class="sapUiSmallMarginBottom">
                                             <m:HBox justifyContent="SpaceBetween" alignItems="Center">
@@ -89,8 +88,7 @@
                                 <m:HBox justifyContent="End" class="sapUiTinyMarginBottom">
                                     <m:Button text="New review" type="Emphasized" icon="sap-icon://add" press=".onOpenAddReview"/>
                                 </m:HBox>
-                                <m:Text text="Geen reviews beschikbaar" visible="{= ${detail>/reviews}.length === 0 }" class="sapUiTinyMarginBottom"/>
-                                <m:List id="reviewsList" items="{detail>/reviews}" noDataText="Geen reviews beschikbaar" inset="true">
+                                <m:List id="reviewsList" items="{detail>/reviews}" noDataText="No reviews available" inset="true">
                                     <m:CustomListItem class="sapUiSmallMarginBottom">
                                         <m:VBox width="100%" class="sapUiSmallMarginBottom">
                                             <m:HBox justifyContent="SpaceBetween" alignItems="Center">
