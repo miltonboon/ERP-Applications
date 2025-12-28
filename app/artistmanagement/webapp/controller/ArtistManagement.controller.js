@@ -15,11 +15,9 @@ sap.ui.define([
     "sap/m/MultiComboBox",
     "sap/m/Text",
     "artistmanagement/model/formatter",
-    "sap/ui/core/Fragment",
-    "sap/m/MessageToast",
-    "sap/m/MessageBox",
+    "artistmanagement/controller/util/CreateArtist",
     "sap/m/Token"
-], (Controller, JSONModel, fLibrary, Filter, FilterOperator, Sorter, Popover, VBox, Select, Item, SegmentedButton, SegmentedButtonItem, Button, MultiComboBox, Text, formatter, Fragment, MessageToast, MessageBox, Token) => {
+], (Controller, JSONModel, fLibrary, Filter, FilterOperator, Sorter, Popover, VBox, Select, Item, SegmentedButton, SegmentedButtonItem, Button, MultiComboBox, Text, formatter, CreateArtist, Token) => {
     "use strict";
 
     const LayoutType = fLibrary.LayoutType;
@@ -215,7 +213,7 @@ sap.ui.define([
                 selectionChange: this._onFilterSelectionChange.bind(this),
                 placeholder: "Select genres"
             });
-            this._getGenreOptions().forEach((g) => {
+            CreateArtist.getGenreOptions().forEach((g) => {
                 this._filterGenre.addItem(new Item({ key: g.key, text: g.text }));
             });
 
@@ -411,381 +409,42 @@ sap.ui.define([
         },
 
         onOpenCreateArtist() {
-            this._resetWizardState();
-            this._loadCreateOptions();
-            this._getCreateArtistDialog().then((dialog) => {
-                dialog.open();
-                this._syncWizardButtons();
-                this._validateBasicInfo();
-            });
+            CreateArtist.openCreateArtist(this);
         },
 
         onCancelCreateArtist() {
-            this._getCreateArtistDialog().then((dialog) => dialog.close());
+            CreateArtist.cancelCreateArtist(this);
         },
 
         onWizardStepChange(event) {
-            const wizard = event.getSource();
-            const step = event.getParameter("step");
-            const steps = this._getWizardSteps();
-            const newIndex = steps.indexOf(step);
-            if (newIndex === -1) {
-                return;
-            }
-            const prevIndex = this._currentWizardStepIndex || 0;
-            const basicStep = this.byId("basicInfoStep");
-            const performancesStep = this.byId("performancesStep");
-            const basicIndex = steps.indexOf(basicStep);
-            const performanceIndex = steps.indexOf(performancesStep);
-
-            if (newIndex > prevIndex && basicIndex > -1 && newIndex > basicIndex && !this._validateBasicInfo()) {
-                MessageToast.show("Fill in the basic artist info.");
-                wizard.goToStep(basicStep);
-                return;
-            }
-            if (newIndex > prevIndex && performanceIndex > -1 && newIndex > performanceIndex && !this._validatePerformances()) {
-                MessageToast.show("Fix the performance details before continuing.");
-                wizard.goToStep(performancesStep);
-                return;
-            }
-            this._currentWizardStepIndex = newIndex;
-            this._syncWizardButtons();
+            CreateArtist.handleWizardStepChange(this, event);
         },
 
         onWizardNavNext() {
-            const wizard = this.byId("createArtistWizard");
-            if (!wizard) {
-                return;
-            }
-            const currentStepId = wizard.getCurrentStep();
-            const basicStepId = this.byId("basicInfoStep") && this.byId("basicInfoStep").getId();
-            const performanceStepId = this.byId("performancesStep") && this.byId("performancesStep").getId();
-
-            if (currentStepId === basicStepId && !this._validateBasicInfo()) {
-                MessageToast.show("Fill in the required basic info first.");
-                return;
-            }
-            if (currentStepId === performanceStepId && !this._validatePerformances()) {
-                MessageToast.show("Fix the performance details before continuing.");
-                return;
-            }
-            wizard.nextStep();
-            this._syncWizardButtons();
+            CreateArtist.wizardNavNext(this);
         },
 
         onWizardNavBack() {
-            const wizard = this.byId("createArtistWizard");
-            if (!wizard) {
-                return;
-            }
-            wizard.previousStep();
-            this._syncWizardButtons();
+            CreateArtist.wizardNavBack(this);
         },
 
         onAddPerformanceRow() {
-            const model = this._getCreateModel();
-            const performances = model.getProperty("/form/performances") || [];
-            performances.push(this._getEmptyPerformance());
-            model.setProperty("/form/performances", performances);
-            this._validatePerformances();
+            CreateArtist.addPerformanceRow(this);
         },
 
         onRemovePerformanceRow(event) {
-            const context = event.getSource().getBindingContext("createModel");
-            if (!context) {
-                return;
-            }
-            const performances = this._getCreateModel().getProperty("/form/performances") || [];
-            if (performances.length <= 1) {
-                MessageToast.show("Keep at least one performance slot.");
-                return;
-            }
-            const path = context.getPath();
-            const index = Number(path.split("/").pop());
-            if (Number.isInteger(index) && index >= 0) {
-                performances.splice(index, 1);
-                this._getCreateModel().setProperty("/form/performances", performances);
-                this._validatePerformances();
-            }
+            CreateArtist.removePerformanceRow(this, event);
         },
 
         onCreateArtist() {
-            const wizard = this.byId("createArtistWizard");
-            const validBasic = this._validateBasicInfo();
-            const validPerformances = this._validatePerformances();
-            if (!validBasic) {
-                if (wizard) {
-                    wizard.goToStep(this.byId("basicInfoStep"));
-                    this._syncWizardButtons();
-                }
-                MessageToast.show("Fill in the basic artist info.");
-                return;
-            }
-            if (!validPerformances) {
-                if (wizard) {
-                    wizard.goToStep(this.byId("performancesStep"));
-                    this._syncWizardButtons();
-                }
-                return;
-            }
-
-            const payload = this._buildCreatePayload();
-            const dialogPromise = this._getCreateArtistDialog();
-            dialogPromise.then((dialog) => dialog.setBusy(true));
-
-            const oDataModel = this.getView().getModel();
-            const listBinding = oDataModel.bindList("/Artists");
-            const context = listBinding.create(payload);
-            context.created().then(() => context.requestObject()).then(() => {
-                dialogPromise.then((dialog) => dialog.setBusy(false));
-                dialogPromise.then((dialog) => dialog.close());
-                this._resetWizardState();
-                if (this._list && this._list.getBinding("items")) {
-                    this._list.getBinding("items").refresh();
-                }
-                MessageToast.show("Artist created");
-            }).catch((err) => {
-                dialogPromise.then((dialog) => dialog.setBusy(false));
-                MessageBox.error("Create failed. Please try again.");
-                // eslint-disable-next-line no-console
-                console.error("Create artist failed", err);
-            });
+            CreateArtist.createArtist(this);
         },
-
-        _getCreateArtistDialog() {
-            if (!this._createDialogPromise) {
-                this._createDialogPromise = Fragment.load({
-                    id: this.getView().getId(),
-                    name: "artistmanagement.fragments.CreateArtistWizard",
-                    controller: this
-                }).then((dialog) => {
-                    dialog.setModel(this._getCreateModel(), "createModel");
-                    this.getView().addDependent(dialog);
-                    return dialog;
-                });
-            }
-            return this._createDialogPromise;
-        },
-
-        _getCreateModel() {
-            if (!this._createModel) {
-                this._createModel = new JSONModel(this._getDefaultCreateData());
-            }
-            return this._createModel;
-        },
-
-        _getDefaultCreateData() {
-            const genres = this._getGenreOptions();
-            return {
-                form: {
-                    name: "",
-                    genres: [],
-                    countryId: "",
-                    biography: "",
-                    spotifyUrl: "",
-                    instagramHandle: "",
-                    avatar: "",
-                    avatarMimeType: "",
-                    performances: [this._getEmptyPerformance()]
-                },
-                options: {
-                    genres,
-                    countries: [],
-                    stages: []
-                },
-                errors: {
-                    name: "",
-                    genres: "",
-                    countryId: ""
-                }
-            };
-        },
-
-        _getEmptyPerformance() {
-            return {
-                stageId: "",
-                day: "",
-                startTime: "",
-                endTime: "",
-                errors: {
-                    stageId: "",
-                    day: "",
-                    startTime: "",
-                    endTime: "",
-                    timeRange: ""
-                }
-            };
-        },
-
-        _getGenreOptions() {
-            const keys = ["POP", "ROCK", "HIPHOP", "EDM", "TECHNO", "HOUSE", "JAZZ", "CLASSICAL", "RNB", "INDIE", "METAL", "LATIN", "AFROBEATS", "FOLK", "BLUES", "FUNK", "COUNTRY"];
-            const options = keys.map((key) => ({
-                key,
-                text: this.formatGenre(key)
-            }));
-            return options;
-        },
-
-        _loadCreateOptions() {
-            this._loadCountryOptions();
-            this._loadStageOptions();
-        },
-
-        _loadCountryOptions() {
-            const oDataModel = this.getView().getModel();
-            if (!oDataModel) {
-                return;
-            }
-            const binding = oDataModel.bindList("/Countries", undefined, undefined, undefined, {
-                $select: "ID,name"
-            });
-            binding.requestContexts(0, 200).then((contexts) => {
-                const countries = contexts.map((ctx) => ({
-                    key: ctx.getProperty("ID") || "",
-                    text: ctx.getProperty("name") || ""
-                }));
-                this._getCreateModel().setProperty("/options/countries", countries);
-            }).catch(() => {
-                this._getCreateModel().setProperty("/options/countries", []);
-            });
-        },
-
-        _loadStageOptions() {
-            const oDataModel = this.getView().getModel();
-            if (!oDataModel) {
-                return;
-            }
-            const binding = oDataModel.bindList("/Stages", undefined, undefined, undefined, {
-                $select: "ID,name"
-            });
-            binding.requestContexts(0, 200).then((contexts) => {
-                const stages = contexts.map((ctx) => ({
-                    key: ctx.getProperty("ID") || "",
-                    text: ctx.getProperty("name") || ""
-                }));
-                this._getCreateModel().setProperty("/options/stages", stages);
-            }).catch(() => {
-                this._getCreateModel().setProperty("/options/stages", []);
-            });
-        },
-
-        _resetWizardState() {
-            const model = this._getCreateModel();
-            model.setData(this._getDefaultCreateData());
-            const wizard = this.byId("createArtistWizard");
-            const firstStep = this.byId("basicInfoStep");
-            this._currentWizardStepIndex = 0;
-            if (wizard && firstStep) {
-                wizard.discardProgress(firstStep);
-                wizard.goToStep(firstStep);
-                this._setStepValidated(firstStep, false);
-                const biographyStep = this.byId("biographyStep");
-                const socialStep = this.byId("socialStep");
-                const performancesStep = this.byId("performancesStep");
-                const avatarStep = this.byId("avatarStep");
-                this._setStepValidated(biographyStep, true);
-                this._setStepValidated(socialStep, true);
-                this._setStepValidated(performancesStep, false);
-                this._setStepValidated(avatarStep, true);
-            }
-            this._syncWizardButtons();
-        },
-
-        _syncWizardButtons() {
-            const wizard = this.byId("createArtistWizard");
-            const create = this.byId("wizardCreateButton");
-            if (!wizard || !create) {
-                return;
-            }
-            const firstStepId = this.byId("basicInfoStep") && this.byId("basicInfoStep").getId();
-            const lastStepId = this.byId("avatarStep") && this.byId("avatarStep").getId();
-            const currentStepId = wizard.getCurrentStep();
-            const isLast = currentStepId === lastStepId;
-            create.setVisible(true);
-        },
-
-        _validateBasicInfo() {
-            const model = this._getCreateModel();
-            const form = model.getProperty("/form") || {};
-            const errors = {
-                name: form.name ? "" : "Enter the artist name",
-                genres: Array.isArray(form.genres) && form.genres.length > 0 ? "" : "Select at least one genre",
-                countryId: form.countryId ? "" : "Select a country"
-            };
-            model.setProperty("/errors", errors);
-            this._setStepValidated(this.byId("basicInfoStep"), !errors.name && !errors.genres && !errors.countryId);
-            return !errors.name && !errors.genres && !errors.countryId;
-        },
-
-        _validatePerformances() {
-            const model = this._getCreateModel();
-            const performances = model.getProperty("/form/performances") || [];
-            let valid = performances.length > 0;
-            performances.forEach((perf, index) => {
-                const errors = {
-                    stageId: perf.stageId ? "" : "Choose a stage",
-                    day: perf.day ? "" : "Select a day",
-                    startTime: perf.startTime ? "" : "Select a start time",
-                    endTime: perf.endTime ? "" : "Select an end time",
-                    timeRange: ""
-                };
-                if (perf.day && perf.startTime && perf.endTime) {
-                    const start = this._combineDateAndTime(perf.day, perf.startTime);
-                    const end = this._combineDateAndTime(perf.day, perf.endTime);
-                    if (start >= end) {
-                        errors.timeRange = "End time must be after start time";
-                    }
-                }
-                if (errors.stageId || errors.day || errors.startTime || errors.endTime || errors.timeRange) {
-                    valid = false;
-                }
-                model.setProperty(`/form/performances/${index}/errors`, errors);
-            });
-            if (performances.length === 0) {
-                MessageToast.show("Add at least one performance slot.");
-            }
-            this._setStepValidated(this.byId("performancesStep"), valid);
-            return valid;
-        },
-
-        _combineDateAndTime(day, time) {
-            const [year, month, date] = day.split("-").map(Number);
-            const [hours, minutes] = time.split(":").map(Number);
-            return new Date(Date.UTC(year, month - 1, date, hours || 0, minutes || 0));
-        },
-
-        _buildCreatePayload() {
-            const form = this._getCreateModel().getProperty("/form") || {};
-            const performances = (form.performances || []).map((perf) => {
-                const startDate = this._combineDateAndTime(perf.day, perf.startTime);
-                const endDate = this._combineDateAndTime(perf.day, perf.endTime);
-                return {
-                    startAt: startDate.toISOString(),
-                    endAt: endDate.toISOString(),
-                    stage_ID: perf.stageId
-                };
-            });
-            return {
-                name: form.name,
-                genres: form.genres || [],
-                biography: form.biography || "",
-                spotifyUrl: form.spotifyUrl || "",
-                instagramHandle: form.instagramHandle || "",
-                avatar: form.avatar || null,
-                avatarMimeType: form.avatarMimeType || "",
-                country_ID: form.countryId,
-                performances
-            };
-        },
-
         onBasicFieldChange() {
-            this._validateBasicInfo();
-            this._syncWizardButtons();
+            CreateArtist.basicFieldChange(this);
         },
 
         onPerformanceFieldChange() {
-            this._validatePerformances();
-            this._syncWizardButtons();
+            CreateArtist.performanceFieldChange(this);
         },
 
         toAvatarSrc(data, mimeType) {
@@ -797,88 +456,11 @@ sap.ui.define([
         },
 
         onAvatarSelected(event) {
-            const files = event.getParameter("files");
-            const file = files && files[0];
-            if (!file) {
-                return;
-            }
-            if (!file.type || !file.type.startsWith("image/")) {
-                MessageToast.show("Select an image file.");
-                return;
-            }
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const result = e && e.target && e.target.result;
-                if (typeof result !== "string") {
-                    return;
-                }
-                this._downscaleAvatar(result).then(({ dataUrl, mimeType }) => {
-                    const base64 = dataUrl.split(",")[1] || "";
-                    const model = this._getCreateModel();
-                    model.setProperty("/form/avatar", base64);
-                    model.setProperty("/form/avatarMimeType", mimeType || "image/jpeg");
-                }).catch(() => {
-                    MessageToast.show("Avatar upload failed.");
-                });
-            };
-            reader.readAsDataURL(file);
-        },
-
-        _downscaleAvatar(dataUrl) {
-            return new Promise((resolve, reject) => {
-                const img = new Image();
-                img.onload = () => {
-                    const maxSize = 256;
-                    let { width, height } = img;
-                    if (!width || !height) {
-                        reject();
-                        return;
-                    }
-                    if (width > height && width > maxSize) {
-                        height = Math.round(height * (maxSize / width));
-                        width = maxSize;
-                    } else if (height >= width && height > maxSize) {
-                        width = Math.round(width * (maxSize / height));
-                        height = maxSize;
-                    }
-                    const canvas = document.createElement("canvas");
-                    canvas.width = width;
-                    canvas.height = height;
-                    const ctx = canvas.getContext("2d");
-                    if (!ctx) {
-                        reject();
-                        return;
-                    }
-                    ctx.drawImage(img, 0, 0, width, height);
-                    const mimeType = "image/jpeg";
-                    const compressed = canvas.toDataURL(mimeType, 0.85);
-                    resolve({ dataUrl: compressed, mimeType });
-                };
-                img.onerror = () => reject();
-                img.src = dataUrl;
-            });
+            CreateArtist.handleAvatarSelected(this, event);
         },
 
         onAvatarClear() {
-            const model = this._getCreateModel();
-            model.setProperty("/form/avatar", "");
-            model.setProperty("/form/avatarMimeType", "");
-        },
-
-        _getWizardSteps() {
-            return [
-                this.byId("basicInfoStep"),
-                this.byId("biographyStep"),
-                this.byId("socialStep"),
-                this.byId("performancesStep"),
-                this.byId("avatarStep")
-            ].filter(Boolean);
-        },
-
-        _setStepValidated(step, isValid) {
-            if (step && step.setValidated) {
-                step.setValidated(!!isValid);
-            }
+            CreateArtist.clearAvatar(this);
         },
 
         _deferredOpen(popover, opener) {
