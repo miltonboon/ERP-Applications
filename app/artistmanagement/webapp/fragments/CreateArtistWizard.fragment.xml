@@ -100,7 +100,6 @@
                                     enabled="{= !!${createModel>/form/avatar} }" class="sapUiTinyMarginBegin"/>
                             </items>
                         </HBox>
-                        <Text text="Optional: stored as binary with MIME type for local avatars." class="sapUiTinyMarginTop"/>
                     </VBox>
                 </WizardStep>
             </Wizard>

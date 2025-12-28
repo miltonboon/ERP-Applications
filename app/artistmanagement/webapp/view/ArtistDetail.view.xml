@@ -21,6 +21,9 @@
                         <m:Title text="{detail>/name}" wrapping="true"/>
                     </m:HBox>
                 </snappedHeading>
+                <actions>
+                    <m:Button text="Edit Artist" type="Emphasized" icon="sap-icon://edit" press=".onOpenEditDetails"/>
+                </actions>
             </ObjectPageDynamicHeaderTitle>
         </headerTitle>
         <headerContent>

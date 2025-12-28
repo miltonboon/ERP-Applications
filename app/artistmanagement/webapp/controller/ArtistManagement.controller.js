@@ -31,6 +31,7 @@ sap.ui.define([
             const detailModel = new JSONModel({
                 name: "Select an artist",
                 id: "",
+                countryId: "",
                 spotifyUrl: "",
                 instagramHandle: "",
                 biography: "",
@@ -55,6 +56,7 @@ sap.ui.define([
             this._filterGenres = [];
             this._filterCountries = [];
             this._searchQuery = "";
+            sap.ui.getCore().getEventBus().subscribe("artist", "updated", this._onArtistUpdated, this);
         },
 
         onSelectArtist(event) {
@@ -72,6 +74,7 @@ sap.ui.define([
             detailModel.setData({
                 name: "Loading...",
                 id: artistId,
+                countryId: "",
                 spotifyUrl: "",
                 instagramHandle: "",
                 biography: "",
@@ -86,8 +89,8 @@ sap.ui.define([
 
             const oDataModel = this.getView().getModel();
             const artistBinding = oDataModel.bindContext(`/Artists('${artistId}')`, undefined, {
-                $select: "ID,name,spotifyUrl,instagramHandle,biography,genres,avatar,avatarMimeType",
-                $expand: "country($select=name)"
+                $select: "ID,name,spotifyUrl,instagramHandle,biography,genres,avatar,avatarMimeType,country_ID",
+                $expand: "country($select=ID,name)"
             });
             artistBinding.requestObject().then((artist) => {
                 if (!artist) {
@@ -99,6 +102,7 @@ sap.ui.define([
                 detailModel.setData({
                     name: artist.name || "",
                     id: artist.ID || artist.id || artistId,
+                    countryId: (artist.country && artist.country.ID) || artist.country_ID || "",
                     spotifyUrl: artist.spotifyUrl || "",
                     instagramHandle: artist.instagramHandle || "",
                     biography: artist.biography || "",
@@ -116,11 +120,12 @@ sap.ui.define([
                 detailModel.setData({
                     name: "Unavailable",
                     id: artistId,
-                spotifyUrl: "",
-                instagramHandle: "",
-                biography: "",
-                genres: [],
-                country: "",
+                    countryId: "",
+                    spotifyUrl: "",
+                    instagramHandle: "",
+                    biography: "",
+                    genres: [],
+                    country: "",
                 avatar: null,
                 avatarMimeType: "",
                 popularityScore: 0,
@@ -913,6 +918,51 @@ sap.ui.define([
                 return null;
             }
             return genreRow.getItems()[0] || null;
+        },
+
+        _onArtistUpdated(_channel, _event, data) {
+            if (!data || !data.id) {
+                return;
+            }
+            if (this._list && this._list.getBinding("items")) {
+                this._list.getBinding("items").refresh();
+            }
+            if (this._currentArtistId === data.id) {
+                this._reloadCurrentArtist();
+            }
+        },
+
+        _reloadCurrentArtist() {
+            const artistId = this._currentArtistId;
+            if (!artistId) {
+                return;
+            }
+            const detailModel = this.getView().getModel("detail");
+            const oDataModel = this.getView().getModel();
+            const artistBinding = oDataModel.bindContext(`/Artists('${artistId}')`, undefined, {
+                $select: "ID,name,spotifyUrl,instagramHandle,biography,genres,avatar,avatarMimeType,country_ID",
+                $expand: "country($select=ID,name)"
+            });
+            artistBinding.requestObject().then((artist) => {
+                if (!artist || this._currentArtistId !== artistId) {
+                    return;
+                }
+                detailModel.setData({
+                    name: artist.name || "",
+                    id: artist.ID || artist.id || artistId,
+                    countryId: (artist.country && artist.country.ID) || artist.country_ID || "",
+                    spotifyUrl: artist.spotifyUrl || "",
+                    instagramHandle: artist.instagramHandle || "",
+                    biography: artist.biography || "",
+                    genres: artist.genres || [],
+                    country: (artist.country && artist.country.name) || "",
+                    avatar: artist.avatar || null,
+                    avatarMimeType: artist.avatarMimeType || "",
+                    popularityScore: detailModel.getProperty("/popularityScore") || 0,
+                    reviews: detailModel.getProperty("/reviews") || [],
+                    performances: detailModel.getProperty("/performances") || []
+                });
+            });
         }
     });
 });

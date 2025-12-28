@@ -1,0 +1,65 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:u="sap.ui.unified">
+    <Dialog id="editArtistDialog" title="Edit Artist" contentWidth="720px" class="sapUiResponsivePadding--Header sapUiResponsivePadding--Content sapUiResponsivePadding--Footer">
+        <VBox renderType="Bare" class="sapUiMediumMargin sapUiResponsiveMargin">
+            <Label text="Basic Information" design="Bold" class="sapUiSmallMarginBottom"/>
+            <VBox class="sapUiSmallMarginBottom">
+                <Label text="Name"/>
+                <Input value="{editModel>/name}" required="true" placeholder="Enter artist name" width="100%"/>
+
+                <Label text="Genres" class="sapUiSmallMarginTop"/>
+                <MultiComboBox selectedKeys="{editModel>/genres}" width="100%" placeholder="Select genres"
+                    items="{editModel>/options/genres}">
+                    <core:Item key="{editModel>key}" text="{editModel>text}"/>
+                </MultiComboBox>
+
+                <Label text="Country" class="sapUiSmallMarginTop"/>
+                <ComboBox selectedKey="{editModel>/countryId}" width="100%" placeholder="Select a country"
+                    items="{editModel>/options/countries}" showClearIcon="true">
+                    <core:Item key="{editModel>key}" text="{editModel>text}"/>
+                </ComboBox>
+            </VBox>
+
+            <Label text="Social Media" design="Bold" class="sapUiSmallMarginTop sapUiSmallMarginBottom"/>
+            <VBox class="sapUiSmallMarginBottom">
+                <Label text="Spotify URL"/>
+                <Input value="{editModel>/spotifyUrl}" placeholder="https://open.spotify.com/artist/..." width="100%"/>
+
+                <Label text="Instagram handle" class="sapUiSmallMarginTop"/>
+                <HBox alignItems="Center" renderType="Bare">
+                    <Text text="@" class="sapUiTinyMarginEnd"/>
+                    <Input value="{editModel>/instagramHandle}" placeholder="artistname" width="100%"/>
+                </HBox>
+            </VBox>
+
+            <Label text="Biography" design="Bold" class="sapUiSmallMarginTop sapUiSmallMarginBottom"/>
+            <TextArea value="{editModel>/biography}" rows="5" width="100%" growing="true"
+                placeholder="Short biography"/>
+
+            <Label text="Avatar" design="Bold" class="sapUiSmallMarginTop sapUiSmallMarginBottom"/>
+            <VBox alignItems="Center" class="sapUiSmallMarginBottom">
+                <Avatar displayShape="Circle" imageFitType="Cover"
+                    displaySize="L"
+                    src="{ parts: [{path: 'editModel>/avatar'}, {path: 'editModel>/avatarMimeType'}], formatter: '.formatAvatarSrc' }"
+                    initials="{path: 'editModel>/name', formatter: '.formatInitials'}"
+                    fallbackIcon="sap-icon://customer"/>
+                <Text text="No image available" visible="{= !${editModel>/avatar} }" class="sapUiTinyMarginTop"/>
+                <HBox class="sapUiSmallMarginTop" alignItems="Center" renderType="Bare">
+                    <items>
+                        <u:FileUploader change=".onEditAvatarSelected" uploadOnChange="false" width="14rem"
+                            buttonOnly="true" buttonText="Upload avatar" icon="sap-icon://add-photo"
+                            mimeType="image/png,image/jpeg,image/jpg,image/gif,image/webp"
+                            fileType="png,jpg,jpeg,gif,webp"/>
+                        <Button text="Remove" type="Transparent" press=".onEditAvatarClear"
+                            enabled="{= !!${editModel>/avatar} }" class="sapUiTinyMarginBegin"/>
+                    </items>
+                </HBox>
+            </VBox>
+        </VBox>
+        <beginButton>
+            <Button text="Save" type="Emphasized" press=".onSaveEditDetails"/>
+        </beginButton>
+        <endButton>
+            <Button text="Cancel" press=".onCancelEditDetails"/>
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>
