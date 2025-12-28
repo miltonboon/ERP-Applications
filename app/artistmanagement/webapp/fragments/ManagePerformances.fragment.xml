@@ -21,16 +21,21 @@
                         </HBox>
                         <HBox alignItems="Center" class="sapUiTinyMarginBottom" renderType="Bare">
                             <Label text="Day" width="4rem"/>
-                            <DatePicker value="{performanceModel>day}" valueFormat="yyyy-MM-dd" displayFormat="long" width="11rem"
-                                valueState="{= ${performanceModel>errors/day} ? 'Error' : 'None'}"
-                                valueStateText="{performanceModel>errors/day}" change=".onManagePerformanceFieldChange"/>
+                            <ComboBox width="16rem" selectedKey="{performanceModel>dayId}" placeholder="Select a day"
+                                required="true"
+                                items="{performanceModel>/options/festivalDays}"
+                                valueState="{= ${performanceModel>errors/dayId} ? 'Error' : 'None'}"
+                                valueStateText="{performanceModel>errors/dayId}" showClearIcon="true"
+                                selectionChange=".onManagePerformanceFieldChange" change=".onManagePerformanceFieldChange">
+                                <core:Item key="{performanceModel>key}" text="{performanceModel>text}"/>
+                            </ComboBox>
                             <Label text="Start" width="3.5rem" textAlign="Center" class="sapUiTinyMarginBegin"/>
-                            <TimePicker value="{performanceModel>startTime}" valueFormat="HH:mm" displayFormat="HH:mm" width="7rem"
+                            <TimePicker value="{performanceModel>startTime}" valueFormat="HH:mm:ss" displayFormat="HH:mm" width="7rem"
                                 valueState="{= ${performanceModel>errors/startTime} || ${performanceModel>errors/timeRange} ? 'Error' : 'None'}"
                                 valueStateText="{= ${performanceModel>errors/startTime} ? ${performanceModel>errors/startTime} : ${performanceModel>errors/timeRange}}"
                                 change=".onManagePerformanceFieldChange"/>
                             <Label text="End" width="3rem" textAlign="Center" class="sapUiTinyMarginBegin"/>
-                            <TimePicker value="{performanceModel>endTime}" valueFormat="HH:mm" displayFormat="HH:mm" width="7rem"
+                            <TimePicker value="{performanceModel>endTime}" valueFormat="HH:mm:ss" displayFormat="HH:mm" width="7rem"
                                 valueState="{= ${performanceModel>errors/endTime} || ${performanceModel>errors/timeRange} ? 'Error' : 'None'}"
                                 valueStateText="{= ${performanceModel>errors/endTime} ? ${performanceModel>errors/endTime} : ${performanceModel>errors/timeRange}}"
                                 change=".onManagePerformanceFieldChange"/>

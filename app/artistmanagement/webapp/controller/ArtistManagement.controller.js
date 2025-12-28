@@ -375,11 +375,18 @@ sap.ui.define([
                 return;
             }
             const oDataModel = this.getView().getModel();
+            const toMinutes = (value) => {
+                const [hours, minutes] = (value || "").split(":").map(Number);
+                if (Number.isNaN(hours) || Number.isNaN(minutes)) {
+                    return NaN;
+                }
+                return (hours * 60) + minutes;
+            };
             const performancesBinding = oDataModel.bindList("/Performances", undefined, undefined, [
                 new Filter("artist/ID", FilterOperator.EQ, artistId)
             ], {
-                $select: "ID,startAt,endAt,stage_ID",
-                $expand: "stage($select=ID,name)"
+                $select: "ID,startTime,endTime,stage_ID,day_ID",
+                $expand: "stage($select=ID,name),day($select=ID,dayNumber,date,label)"
             });
             performancesBinding.requestContexts(0, 200).then((contexts) => {
                 if (this._currentArtistId !== artistId) {
@@ -389,16 +396,31 @@ sap.ui.define([
                     const perf = ctx.getObject();
                     return {
                         id: perf.ID || perf.id || "",
-                        startAt: perf.startAt,
-                        endAt: perf.endAt,
+                        startTime: perf.startTime,
+                        endTime: perf.endTime,
+                        dayId: perf.day_ID || (perf.day && perf.day.ID) || "",
+                        dayLabel: (perf.day && perf.day.label) || formatter.formatFestivalDay(perf.day && perf.day.dayNumber, perf.day && perf.day.date),
+                        dayDate: perf.day && perf.day.date,
+                        dayNumber: perf.day && perf.day.dayNumber,
                         stageName: (perf.stage && perf.stage.name) || "",
                         stageId: perf.stage_ID || (perf.stage && perf.stage.ID) || ""
                     };
                 });
                 performances.sort((a, b) => {
-                    const aDate = a.startAt ? new Date(a.startAt).getTime() : 0;
-                    const bDate = b.startAt ? new Date(b.startAt).getTime() : 0;
-                    return aDate - bDate;
+                    const dayA = a.dayNumber || 0;
+                    const dayB = b.dayNumber || 0;
+                    if (dayA !== dayB) {
+                        return dayA - dayB;
+                    }
+                    if (!dayA && !dayB && a.dayLabel && b.dayLabel && a.dayLabel !== b.dayLabel) {
+                        return a.dayLabel.localeCompare(b.dayLabel);
+                    }
+                    const startA = toMinutes(a.startTime);
+                    const startB = toMinutes(b.startTime);
+                    if (!Number.isNaN(startA) && !Number.isNaN(startB)) {
+                        return startA - startB;
+                    }
+                    return 0;
                 });
                 detailModel.setProperty("/performances", performances);
             }).catch(() => {

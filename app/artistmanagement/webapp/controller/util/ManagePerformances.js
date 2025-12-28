@@ -3,23 +3,25 @@ sap.ui.define([
     "sap/ui/model/json/JSONModel",
     "sap/m/MessageToast",
     "sap/ui/model/Filter",
-    "sap/ui/model/FilterOperator"
-], (Fragment, JSONModel, MessageToast, Filter, FilterOperator) => {
+    "sap/ui/model/FilterOperator",
+    "artistmanagement/model/formatter"
+], (Fragment, JSONModel, MessageToast, Filter, FilterOperator, formatter) => {
     "use strict";
 
     const getPerformanceModel = (controller) => {
         if (!controller._performanceModel) {
             controller._performanceModel = new JSONModel({
-                artistId: "",
-                performances: [],
-                deletedIds: [],
-                options: {
-                    stages: []
-                }
-            });
-        }
-        return controller._performanceModel;
-    };
+            artistId: "",
+            performances: [],
+            deletedIds: [],
+            options: {
+                stages: [],
+                festivalDays: []
+            }
+        });
+    }
+    return controller._performanceModel;
+};
 
     const getPerformanceDialog = (controller) => {
         if (!controller._performanceDialogPromise) {
@@ -41,23 +43,40 @@ sap.ui.define([
         id: "",
         stageId: "",
         stageName: "",
-        day: "",
+        dayId: "",
+        dayLabel: "",
         startTime: "",
         endTime: "",
         original: null,
         errors: {
             stageId: "",
-            day: "",
+            dayId: "",
             startTime: "",
             endTime: "",
             timeRange: ""
         }
     });
 
-    const combineDateAndTime = (day, time) => {
-        const [year, month, date] = (day || "").split("-").map(Number);
-        const [hours, minutes] = (time || "").split(":").map(Number);
-        return new Date(Date.UTC(year || 0, (month || 1) - 1, date || 1, hours || 0, minutes || 0));
+    const normalizeTime = (value) => {
+        if (!value) {
+            return "";
+        }
+        if (/^\d{2}:\d{2}:\d{2}$/.test(value)) {
+            return value;
+        }
+        if (/^\d{2}:\d{2}$/.test(value)) {
+            return `${value}:00`;
+        }
+        return value;
+    };
+
+    const timeToMinutes = (value) => {
+        const normalized = normalizeTime(value);
+        const [hours, minutes] = (normalized || "").split(":").map(Number);
+        if (Number.isNaN(hours) || Number.isNaN(minutes)) {
+            return NaN;
+        }
+        return (hours * 60) + minutes;
     };
 
     const validatePerformanceForm = (controller) => {
@@ -67,20 +86,20 @@ sap.ui.define([
         rows.forEach((row, index) => {
             const errors = {
                 stageId: row.stageId ? "" : "Choose a stage",
-                day: row.day ? "" : "Select a day",
+                dayId: row.dayId ? "" : "Select a day",
                 startTime: row.startTime ? "" : "Select a start time",
                 endTime: row.endTime ? "" : "Select an end time",
                 timeRange: ""
             };
-            if (row.day && row.startTime && row.endTime) {
-                const startDate = combineDateAndTime(row.day, row.startTime);
-                const endDate = combineDateAndTime(row.day, row.endTime);
-                if (startDate >= endDate) {
+            if (row.startTime && row.endTime) {
+                const startMinutes = timeToMinutes(row.startTime);
+                const endMinutes = timeToMinutes(row.endTime);
+                if (!Number.isNaN(startMinutes) && !Number.isNaN(endMinutes) && startMinutes >= endMinutes) {
                     errors.timeRange = "End time must be after start time";
                 }
             }
             perfModel.setProperty(`/performances/${index}/errors`, errors);
-            if (errors.stageId || errors.day || errors.startTime || errors.endTime || errors.timeRange) {
+            if (errors.stageId || errors.dayId || errors.startTime || errors.endTime || errors.timeRange) {
                 valid = false;
             }
         });
@@ -106,6 +125,25 @@ sap.ui.define([
         });
     };
 
+    const loadFestivalDayOptions = (controller) => {
+        const oDataModel = controller.getView().getModel();
+        if (!oDataModel) {
+            return Promise.resolve();
+        }
+        const binding = oDataModel.bindList("/FestivalDays", undefined, undefined, undefined, {
+            $select: "ID,label,dayNumber,date"
+        });
+        return binding.requestContexts(0, 200).then((contexts) => {
+            const days = contexts.map((ctx) => ({
+                key: ctx.getProperty("ID") || "",
+                text: ctx.getProperty("label") || formatter.formatFestivalDay(ctx.getProperty("dayNumber"), ctx.getProperty("date"))
+            }));
+            getPerformanceModel(controller).setProperty("/options/festivalDays", days);
+        }).catch(() => {
+            getPerformanceModel(controller).setProperty("/options/festivalDays", []);
+        });
+    };
+
     const fetchPerformances = (controller, artistId) => {
         const oDataModel = controller.getView().getModel();
         if (!oDataModel) {
@@ -114,51 +152,60 @@ sap.ui.define([
         const binding = oDataModel.bindList("/Performances", undefined, undefined, [
             new Filter("artist/ID", FilterOperator.EQ, artistId)
         ], {
-            $select: "ID,startAt,endAt,stage_ID",
-            $expand: "stage($select=ID,name)"
+            $select: "ID,startTime,endTime,stage_ID,day_ID",
+            $expand: "stage($select=ID,name),day($select=ID,dayNumber,date,label)"
         });
         return binding.requestContexts(0, 200).then((contexts) => {
             const performances = contexts.map((ctx) => {
                 const perf = ctx.getObject();
                 return {
                     id: perf.ID || perf.id || "",
-                    startAt: perf.startAt,
-                    endAt: perf.endAt,
+                    startTime: perf.startTime,
+                    endTime: perf.endTime,
                     stageId: perf.stage_ID || (perf.stage && perf.stage.ID) || "",
-                    stageName: (perf.stage && perf.stage.name) || ""
+                    stageName: (perf.stage && perf.stage.name) || "",
+                    dayId: perf.day_ID || (perf.day && perf.day.ID) || "",
+                    dayNumber: perf.day && perf.day.dayNumber,
+                    dayLabel: (perf.day && perf.day.label) || formatter.formatFestivalDay(perf.day && perf.day.dayNumber, perf.day && perf.day.date),
+                    dayDate: perf.day && perf.day.date
                 };
             });
             performances.sort((a, b) => {
-                const aDate = a.startAt ? new Date(a.startAt).getTime() : 0;
-                const bDate = b.startAt ? new Date(b.startAt).getTime() : 0;
-                return aDate - bDate;
+                if (a.dayNumber && b.dayNumber && a.dayNumber !== b.dayNumber) {
+                    return a.dayNumber - b.dayNumber;
+                }
+                const aStart = timeToMinutes(a.startTime);
+                const bStart = timeToMinutes(b.startTime);
+                if (!Number.isNaN(aStart) && !Number.isNaN(bStart)) {
+                    return aStart - bStart;
+                }
+                return 0;
             });
             return performances;
         }).catch(() => []);
     };
 
     const mapPerformanceToForm = (perf) => {
-        const start = perf.startAt ? new Date(perf.startAt) : null;
-        const end = perf.endAt ? new Date(perf.endAt) : null;
-        const day = start ? start.toISOString().slice(0, 10) : "";
-        const startTime = start ? start.toISOString().slice(11, 16) : "";
-        const endTime = end ? end.toISOString().slice(11, 16) : "";
+        const startTime = normalizeTime(perf.startTime || "");
+        const endTime = normalizeTime(perf.endTime || "");
         return {
             id: perf.id || "",
             stageId: perf.stageId || "",
             stageName: perf.stageName || "",
-            day,
+            dayId: perf.dayId || "",
+            dayLabel: perf.dayLabel || "",
+            dayNumber: perf.dayNumber,
             startTime,
             endTime,
             original: {
                 stageId: perf.stageId || "",
-                day,
+                dayId: perf.dayId || "",
                 startTime,
                 endTime
             },
             errors: {
                 stageId: "",
-                day: "",
+                dayId: "",
                 startTime: "",
                 endTime: "",
                 timeRange: ""
@@ -182,8 +229,12 @@ sap.ui.define([
         }
         detailModel.setProperty("/performances", performances.map((perf) => ({
             id: perf.id,
-            startAt: perf.startAt,
-            endAt: perf.endAt,
+            startTime: perf.startTime,
+            endTime: perf.endTime,
+            dayId: perf.dayId,
+            dayLabel: perf.dayLabel,
+            dayDate: perf.dayDate,
+            dayNumber: perf.dayNumber,
             stageName: perf.stageName || findStageName(controller, perf.stageId),
             stageId: perf.stageId
         })));
@@ -216,15 +267,14 @@ sap.ui.define([
             return Promise.resolve();
         }
         const original = perf.original || {};
-        if (original.stageId === perf.stageId && original.day === perf.day && original.startTime === perf.startTime && original.endTime === perf.endTime) {
+        if (original.stageId === perf.stageId && original.dayId === perf.dayId && original.startTime === perf.startTime && original.endTime === perf.endTime) {
             return Promise.resolve();
         }
-        const startAt = combineDateAndTime(perf.day, perf.startTime).toISOString();
-        const endAt = combineDateAndTime(perf.day, perf.endTime).toISOString();
         const payload = {
-            startAt,
-            endAt,
-            stage_ID: perf.stageId
+            startTime: normalizeTime(perf.startTime),
+            endTime: normalizeTime(perf.endTime),
+            stage_ID: perf.stageId,
+            day_ID: perf.dayId
         };
         const oDataModel = controller.getView().getModel();
         const serviceUrl = oDataModel && oDataModel.sServiceUrl ? oDataModel.sServiceUrl : "";
@@ -244,12 +294,11 @@ sap.ui.define([
         if (!perf || !artistId) {
             return Promise.resolve();
         }
-        const startAt = combineDateAndTime(perf.day, perf.startTime).toISOString();
-        const endAt = combineDateAndTime(perf.day, perf.endTime).toISOString();
         const payload = {
-            startAt,
-            endAt,
+            startTime: normalizeTime(perf.startTime),
+            endTime: normalizeTime(perf.endTime),
             stage_ID: perf.stageId,
+            day_ID: perf.dayId,
             artist_ID: artistId
         };
         const oDataModel = controller.getView().getModel();
@@ -324,9 +373,9 @@ sap.ui.define([
             artistId,
             performances: [],
             deletedIds: [],
-            options: { stages: [] }
+            options: { stages: [], festivalDays: [] }
         });
-        Promise.all([loadStageOptions(controller), loadPerformancesForEditing(controller, artistId)]).then(() => {
+        Promise.all([loadStageOptions(controller), loadFestivalDayOptions(controller), loadPerformancesForEditing(controller, artistId)]).then(() => {
             validatePerformanceForm(controller);
             return getPerformanceDialog(controller);
         }).then((dialog) => dialog.open()).catch((err) => {
@@ -411,7 +460,6 @@ sap.ui.define([
         cancelManagePerformances,
         saveManagePerformances,
         getPerformanceModel,
-        getEmptyPerformanceRow,
-        combineDateAndTime
+        getEmptyPerformanceRow
     };
 });

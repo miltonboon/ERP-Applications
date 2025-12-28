@@ -34,6 +34,51 @@ sap.ui.define([
         pattern: "HH:mm",
         UTC: true
     });
+    const dayFormatter = new Intl.DateTimeFormat("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+        timeZone: "UTC"
+    });
+
+    const parseDateValue = (value) => {
+        if (!value) {
+            return null;
+        }
+        const parsed = new Date(value);
+        if (!Number.isNaN(parsed.getTime())) {
+            return parsed;
+        }
+        const asUtc = new Date(`${value}T00:00:00Z`);
+        if (!Number.isNaN(asUtc.getTime())) {
+            return asUtc;
+        }
+        return null;
+    };
+
+    const parseTimeValue = (value) => {
+        if (!value) {
+            return null;
+        }
+        const normalized = value.length === 5 ? `${value}:00` : value;
+        const parsed = new Date(`1970-01-01T${normalized}Z`);
+        if (!Number.isNaN(parsed.getTime())) {
+            return parsed;
+        }
+        return null;
+    };
+
+    const formatFestivalDay = (dayNumber, date) => {
+        const parsedDate = parseDateValue(date);
+        const dateText = parsedDate ? dayFormatter.format(parsedDate) : (date || "");
+        if (dayNumber && dateText) {
+            return `Day ${dayNumber} (${dateText})`;
+        }
+        if (dayNumber) {
+            return `Day ${dayNumber}`;
+        }
+        return dateText;
+    };
 
     return {
         formatGenre(value) {
@@ -51,7 +96,10 @@ sap.ui.define([
                 return "";
             }
             try {
-                const parsed = new Date(value);
+                const parsed = parseDateValue(value);
+                if (!parsed) {
+                    return value;
+                }
                 return dateFormatter.format(parsed);
             } catch (e) {
                 return value;
@@ -70,27 +118,33 @@ sap.ui.define([
             }
         },
 
-        formatPerformanceSlot(startAt, endAt) {
-            if (!startAt) {
+        formatPerformanceSlot(dayLabel, startTime, endTime, date) {
+            if (!dayLabel && !startTime && !endTime && !date) {
                 return "";
             }
             try {
-                const start = new Date(startAt);
-                const end = endAt ? new Date(endAt) : null;
-                if (end) {
-                    return `${dateTimeFormatter.format(start)} - ${timeFormatter.format(end)}`;
+                const dayText = dayLabel || formatFestivalDay(undefined, date);
+                const start = parseTimeValue(startTime);
+                const end = parseTimeValue(endTime);
+                const startText = start ? timeFormatter.format(start) : "";
+                const endText = end ? timeFormatter.format(end) : "";
+                if (dayText && startText && endText) {
+                    return `${dayText}, ${startText} - ${endText}`;
                 }
-                return dateTimeFormatter.format(start);
+                if (startText && endText) {
+                    return `${startText} - ${endText}`;
+                }
+                if (dayText && startText) {
+                    return `${dayText}, ${startText}`;
+                }
+                return dayText || startText || endText;
             } catch (e) {
-                if (endAt) {
-                    return `${startAt} - ${endAt}`;
-                }
-                return startAt;
+                return `${dayLabel || date || ""} ${startTime || ""} ${endTime || ""}`.trim();
             }
         },
 
-        formatPerformanceLabel(stageName, startAt, endAt) {
-            const slot = this.formatPerformanceSlot(startAt, endAt);
+        formatPerformanceLabel(stageName, dayLabel, startTime, endTime, date) {
+            const slot = this.formatPerformanceSlot(dayLabel, startTime, endTime, date);
             if (stageName && slot) {
                 return `${stageName} (${slot})`;
             }
@@ -98,6 +152,10 @@ sap.ui.define([
                 return stageName;
             }
             return slot;
+        },
+
+        formatFestivalDay(dayNumber, date) {
+            return formatFestivalDay(dayNumber, date);
         },
 
         toAvatarSrc(data, mimeType) {

@@ -17,12 +17,12 @@ sap.ui.define([
 
     const getEmptyPerformance = () => ({
         stageId: "",
-        day: "",
+        dayId: "",
         startTime: "",
         endTime: "",
         errors: {
             stageId: "",
-            day: "",
+            dayId: "",
             startTime: "",
             endTime: "",
             timeRange: ""
@@ -44,7 +44,8 @@ sap.ui.define([
         options: {
             genres: getGenreOptions(),
             countries: [],
-            stages: []
+            stages: [],
+            festivalDays: []
         },
         errors: {
             name: "",
@@ -111,10 +112,26 @@ sap.ui.define([
         return !errors.name && !errors.genres && !errors.countryId;
     };
 
-    const combineDateAndTime = (day, time) => {
-        const [year, month, date] = (day || "").split("-").map(Number);
-        const [hours, minutes] = (time || "").split(":").map(Number);
-        return new Date(Date.UTC(year || 0, (month || 1) - 1, date || 1, hours || 0, minutes || 0));
+    const normalizeTime = (value) => {
+        if (!value) {
+            return "";
+        }
+        if (/^\d{2}:\d{2}:\d{2}$/.test(value)) {
+            return value;
+        }
+        if (/^\d{2}:\d{2}$/.test(value)) {
+            return `${value}:00`;
+        }
+        return value;
+    };
+
+    const timeToMinutes = (value) => {
+        const normalized = normalizeTime(value);
+        const [hours, minutes] = (normalized || "").split(":").map(Number);
+        if (Number.isNaN(hours) || Number.isNaN(minutes)) {
+            return NaN;
+        }
+        return (hours * 60) + minutes;
     };
 
     const validatePerformances = (controller) => {
@@ -124,19 +141,19 @@ sap.ui.define([
         performances.forEach((perf, index) => {
             const errors = {
                 stageId: perf.stageId ? "" : "Choose a stage",
-                day: perf.day ? "" : "Select a day",
+                dayId: perf.dayId ? "" : "Select a day",
                 startTime: perf.startTime ? "" : "Select a start time",
                 endTime: perf.endTime ? "" : "Select an end time",
                 timeRange: ""
             };
-            if (perf.day && perf.startTime && perf.endTime) {
-                const start = combineDateAndTime(perf.day, perf.startTime);
-                const end = combineDateAndTime(perf.day, perf.endTime);
-                if (start >= end) {
+            if (perf.startTime && perf.endTime) {
+                const startMinutes = timeToMinutes(perf.startTime);
+                const endMinutes = timeToMinutes(perf.endTime);
+                if (!Number.isNaN(startMinutes) && !Number.isNaN(endMinutes) && startMinutes >= endMinutes) {
                     errors.timeRange = "End time must be after start time";
                 }
             }
-            if (errors.stageId || errors.day || errors.startTime || errors.endTime || errors.timeRange) {
+            if (errors.stageId || errors.dayId || errors.startTime || errors.endTime || errors.timeRange) {
                 valid = false;
             }
             model.setProperty(`/form/performances/${index}/errors`, errors);
@@ -208,20 +225,41 @@ sap.ui.define([
         });
     };
 
+    const loadFestivalDayOptions = (controller) => {
+        const oDataModel = controller.getView().getModel();
+        if (!oDataModel) {
+            return;
+        }
+        const binding = oDataModel.bindList("/FestivalDays", undefined, undefined, undefined, {
+            $select: "ID,label,dayNumber,date"
+        });
+        binding.requestContexts(0, 200).then((contexts) => {
+            const days = contexts.map((ctx) => ({
+                key: ctx.getProperty("ID") || "",
+                text: ctx.getProperty("label") || formatter.formatFestivalDay(ctx.getProperty("dayNumber"), ctx.getProperty("date"))
+            }));
+            getCreateModel(controller).setProperty("/options/festivalDays", days);
+        }).catch(() => {
+            getCreateModel(controller).setProperty("/options/festivalDays", []);
+        });
+    };
+
     const loadCreateOptions = (controller) => {
         loadCountryOptions(controller);
         loadStageOptions(controller);
+        loadFestivalDayOptions(controller);
     };
 
     const buildCreatePayload = (controller) => {
         const form = getCreateModel(controller).getProperty("/form") || {};
         const performances = (form.performances || []).map((perf) => {
-            const startDate = combineDateAndTime(perf.day, perf.startTime);
-            const endDate = combineDateAndTime(perf.day, perf.endTime);
+            const startTime = normalizeTime(perf.startTime);
+            const endTime = normalizeTime(perf.endTime);
             return {
-                startAt: startDate.toISOString(),
-                endAt: endDate.toISOString(),
-                stage_ID: perf.stageId
+                startTime,
+                endTime,
+                stage_ID: perf.stageId,
+                day_ID: perf.dayId
             };
         });
         return {
@@ -434,7 +472,6 @@ sap.ui.define([
         performanceFieldChange,
         handleAvatarSelected,
         clearAvatar,
-        getGenreOptions,
-        combineDateAndTime
+        getGenreOptions
     };
 });

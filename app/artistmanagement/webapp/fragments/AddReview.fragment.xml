@@ -3,7 +3,7 @@
         <VBox class="sapUiMediumMargin" renderType="Bare">
             <Text text="Performance"/>
             <Select selectedKey="{reviewForm>/performanceId}" items="{detail>/performances}" width="100%">
-                <core:Item key="{detail>id}" text="{parts: [{path: 'detail>stageName'}, {path: 'detail>startAt'}, {path: 'detail>endAt'}], formatter: '.formatPerformanceLabel'}"/>
+                <core:Item key="{detail>id}" text="{parts: [{path: 'detail>stageName'}, {path: 'detail>dayLabel'}, {path: 'detail>startTime'}, {path: 'detail>endTime'}, {path: 'detail>dayDate'}], formatter: '.formatPerformanceLabel'}"/>
             </Select>
             <Text text="Date" class="sapUiSmallMarginTop"/>
             <DatePicker value="{reviewForm>/date}" valueFormat="yyyy-MM-dd" displayFormat="long" width="100%"/>

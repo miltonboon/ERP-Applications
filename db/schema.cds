@@ -59,10 +59,16 @@ entity Stages : cuid {
   name : String(120) @mandatory;
 }
 
+entity FestivalDays : cuid {
+  date      : Date    @mandatory;
+  dayNumber : Integer @mandatory;
+}
+
 entity Performances : cuid, managed {
-  startAt : DateTime @mandatory;
-  endAt   : DateTime @mandatory;
-  stage   : Association to Stages @mandatory;
+  startTime : Time    @mandatory;
+  endTime   : Time    @mandatory;
+  stage     : Association to Stages @mandatory;
+  day       : Association to FestivalDays @mandatory;
 
   artist   : Association to Artists @mandatory;
   reviews  : Composition of many Reviews on reviews.performance = $self;

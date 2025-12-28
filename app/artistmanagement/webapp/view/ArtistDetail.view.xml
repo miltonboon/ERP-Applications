@@ -76,7 +76,7 @@
                                         <m:VBox width="100%" class="sapUiSmallMarginBottom">
                                             <m:HBox justifyContent="SpaceBetween" alignItems="Center">
                                                 <m:Text text="{detail>stageName}"/>
-                                                <m:Text text="{parts: [{path: 'detail>startAt'}, {path: 'detail>endAt'}], formatter: '.formatPerformanceSlot'}"/>
+                                                <m:Text text="{parts: [{path: 'detail>dayLabel'}, {path: 'detail>startTime'}, {path: 'detail>endTime'}, {path: 'detail>dayDate'}], formatter: '.formatPerformanceSlot'}"/>
                                             </m:HBox>
                                         </m:VBox>
                                     </m:CustomListItem>

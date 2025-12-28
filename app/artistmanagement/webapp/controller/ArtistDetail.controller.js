@@ -61,12 +61,12 @@ sap.ui.define([
             return formatter.formatDateTime(value);
         },
 
-        formatPerformanceSlot(startAt, endAt) {
-            return formatter.formatPerformanceSlot(startAt, endAt);
+        formatPerformanceSlot(dayLabel, startTime, endTime, date) {
+            return formatter.formatPerformanceSlot(dayLabel, startTime, endTime, date);
         },
 
-        formatPerformanceLabel(stageName, startAt, endAt) {
-            return formatter.formatPerformanceLabel(stageName, startAt, endAt);
+        formatPerformanceLabel(stageName, dayLabel, startTime, endTime, date) {
+            return formatter.formatPerformanceLabel(stageName, dayLabel, startTime, endTime, date);
         },
 
         formatAvatarSrc(data, mimeType) {

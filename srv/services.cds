@@ -3,15 +3,21 @@ namespace apmorrowland;
 using { apmorrowland as db } from '../db/schema';
 
 service FestivalService {
-  @cds.redirection.target entity Countries    as projection on db.Countries;
-  @cds.redirection.target entity Artists      as projection on db.Artists;
+  entity Countries    as projection on db.Countries;
+  entity Artists      as projection on db.Artists;
+  @cds.redirection.target entity FestivalDays as select from db.FestivalDays {
+    key ID,
+    dayNumber,
+    date,
+    virtual label : String(80)
+  };
   entity Performances as projection on db.Performances;
-  @cds.redirection.target entity Reviews      as projection on db.Reviews;
-  @cds.redirection.target entity Customers    as projection on db.Customers;
-  @cds.redirection.target entity Items        as projection on db.Items;
+  entity Reviews      as projection on db.Reviews;
+  entity Customers    as projection on db.Customers;
+  entity Items        as projection on db.Items;
   @cds.redirection.target entity Orders       as projection on db.Orders;
-  @cds.redirection.target entity OrderItems   as projection on db.OrderItems;
-  @cds.redirection.target entity Stages       as projection on db.Stages;
+  entity OrderItems   as projection on db.OrderItems;
+  entity Stages       as projection on db.Stages;
 
   @readonly
   entity ArtistOverview as select from db.Artists as a

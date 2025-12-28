@@ -46,7 +46,7 @@
                 </WizardStep>
                 <WizardStep id="performancesStep" title="Performances" validated="true">
                     <VBox class="sapUiSmallMarginTop" renderType="Bare" width="100%">
-                        <Text text="Add at least one performance with stage, day, start, and end time." class="sapUiTinyMarginBottom"/>
+                        <Text text="Add at least one performance with stage, festival day, start, and end time." class="sapUiTinyMarginBottom"/>
                         <List id="performanceList" items="{createModel>/form/performances}" noDataText="No performances added yet">
                             <CustomListItem>
                                 <VBox width="100%" class="sapUiSmallMarginBottom">
@@ -63,15 +63,19 @@
                                     </HBox>
                                     <HBox alignItems="Center" class="sapUiTinyMarginBottom" renderType="Bare">
                                         <Label text="Day" width="4rem"/>
-                                        <DatePicker value="{createModel>day}" valueFormat="yyyy-MM-dd" displayFormat="long" width="11rem"
-                                            valueState="{= ${createModel>errors/day} ? 'Error' : 'None'}"
-                                            valueStateText="{createModel>errors/day}" change=".onPerformanceFieldChange"/>
+                                        <ComboBox selectedKey="{createModel>dayId}" width="16rem" placeholder="Select a day"
+                                            required="true"
+                                            items="{createModel>/options/festivalDays}"
+                                            valueState="{= ${createModel>errors/dayId} ? 'Error' : 'None'}"
+                                            valueStateText="{createModel>errors/dayId}" showClearIcon="true" selectionChange=".onPerformanceFieldChange" change=".onPerformanceFieldChange">
+                                            <core:Item key="{createModel>key}" text="{createModel>text}"/>
+                                        </ComboBox>
                                         <Label text="Start" width="3.5rem" textAlign="Center" class="sapUiTinyMarginBegin"/>
-                                        <TimePicker value="{createModel>startTime}" valueFormat="HH:mm" displayFormat="HH:mm" width="7rem"
+                                        <TimePicker value="{createModel>startTime}" valueFormat="HH:mm:ss" displayFormat="HH:mm" width="7rem"
                                             valueState="{= ${createModel>errors/startTime} || ${createModel>errors/timeRange} ? 'Error' : 'None'}"
                                             valueStateText="{= ${createModel>errors/startTime} ? ${createModel>errors/startTime} : ${createModel>errors/timeRange}}" change=".onPerformanceFieldChange"/>
                                         <Label text="End" width="3rem" textAlign="Center" class="sapUiTinyMarginBegin"/>
-                                        <TimePicker value="{createModel>endTime}" valueFormat="HH:mm" displayFormat="HH:mm" width="7rem"
+                                        <TimePicker value="{createModel>endTime}" valueFormat="HH:mm:ss" displayFormat="HH:mm" width="7rem"
                                             valueState="{= ${createModel>errors/endTime} || ${createModel>errors/timeRange} ? 'Error' : 'None'}"
                                             valueStateText="{= ${createModel>errors/endTime} ? ${createModel>errors/endTime} : ${createModel>errors/timeRange}}" change=".onPerformanceFieldChange"/>
                                     </HBox>
