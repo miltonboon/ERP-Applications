@@ -17,9 +17,9 @@
                     selectionChange=".onSelectArtist">
                     <headerToolbar>
                         <OverflowToolbar>
-                            <Button text="Create Artist" type="Emphasized" icon="sap-icon://add" press=".onOpenCreateArtist"/>
-                            <ToolbarSpacer/>
                             <SearchField width="17.5rem" placeholder="Search by name" search=".onSearch"/>
+                            <ToolbarSpacer/>
+                            <Button type="Transparent" icon="sap-icon://add" press=".onOpenCreateArtist" tooltip="Create artist"/>
                             <Button type="Transparent" icon="sap-icon://sort" press=".onOpenSortPopover"/>
                             <Button type="Transparent" icon="sap-icon://filter" press=".onOpenFilterPopover"/>
                         </OverflowToolbar>

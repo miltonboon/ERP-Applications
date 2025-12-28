@@ -185,6 +185,10 @@ sap.ui.define([
         onOpenAddReview() {
             const detailModel = this.getView().getModel("detail");
             const performances = detailModel.getProperty("/performances") || [];
+            if (!performances.length) {
+                MessageToast.show("Add a performance before creating a review.");
+                return;
+            }
             const defaultPerformanceId = performances.length > 0 ? performances[0].id : "";
             const today = new Date().toISOString().slice(0, 10);
             this._getReviewModel().setData({

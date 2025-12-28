@@ -92,7 +92,8 @@
                         <blocks>
                             <m:VBox class="sapUiSmallMargin">
                                 <m:HBox justifyContent="End" class="sapUiTinyMarginBottom">
-                                    <m:Button text="New review" type="Emphasized" icon="sap-icon://add" press=".onOpenAddReview"/>
+                                    <m:Button text="New review" type="Emphasized" icon="sap-icon://add" press=".onOpenAddReview"
+                                        enabled="{= ${detail>/performances}.length > 0 }"/>
                                 </m:HBox>
                                 <m:List id="reviewsList" items="{detail>/reviews}" noDataText="No reviews available" inset="true">
                                     <m:CustomListItem class="sapUiSmallMarginBottom">
