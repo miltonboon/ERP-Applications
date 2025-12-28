@@ -68,6 +68,9 @@
                     <ObjectPageSubSection>
                         <blocks>
                             <m:VBox class="sapUiSmallMargin">
+                                <m:HBox justifyContent="End" class="sapUiTinyMarginBottom">
+                                    <m:Button text="Manage performances" icon="sap-icon://activity-items" type="Transparent" press=".onOpenManagePerformances"/>
+                                </m:HBox>
                                 <m:List id="performancesList" items="{detail>/performances}" noDataText="No performances available" inset="true">
                                     <m:CustomListItem class="sapUiSmallMarginBottom">
                                         <m:VBox width="100%" class="sapUiSmallMarginBottom">

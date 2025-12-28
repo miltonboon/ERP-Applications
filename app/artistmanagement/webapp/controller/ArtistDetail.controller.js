@@ -4,8 +4,10 @@ sap.ui.define([
     "artistmanagement/model/formatter",
     "sap/ui/core/Fragment",
     "sap/ui/model/json/JSONModel",
-    "sap/m/MessageToast"
-], (Controller, fLibrary, formatter, Fragment, JSONModel, MessageToast) => {
+    "sap/m/MessageToast",
+    "sap/ui/model/Filter",
+    "sap/ui/model/FilterOperator"
+], (Controller, fLibrary, formatter, Fragment, JSONModel, MessageToast, Filter, FilterOperator) => {
     "use strict";
 
     const LayoutType = fLibrary.LayoutType;
@@ -16,6 +18,9 @@ sap.ui.define([
         onExit() {
             if (this._reviewDialogPromise) {
                 this._reviewDialogPromise.then((dialog) => dialog.destroy());
+            }
+            if (this._performanceDialogPromise) {
+                this._performanceDialogPromise.then((dialog) => dialog.destroy());
             }
         },
 
@@ -242,6 +247,97 @@ sap.ui.define([
             });
         },
 
+        onOpenManagePerformances() {
+            const detailModel = this.getView().getModel("detail");
+            const artistId = detailModel && detailModel.getProperty("/id");
+            if (!artistId) {
+                MessageToast.show("Select an artist first.");
+                return;
+            }
+            const perfModel = this._getPerformanceModel();
+            perfModel.setData({
+                artistId,
+                performances: [],
+                deletedIds: [],
+                options: { stages: [] }
+            });
+            Promise.all([this._loadStageOptions(), this._loadPerformancesForEditing(artistId)]).then(() => {
+                this._validatePerformanceForm();
+                this._getPerformanceDialog().then((dialog) => dialog.open());
+            }).catch((err) => {
+                MessageToast.show("Unable to load performances.");
+                console.error("Load performances failed", err);
+            });
+        },
+
+        onAddPerformanceRow() {
+            const perfModel = this._getPerformanceModel();
+            const rows = perfModel.getProperty("/performances") || [];
+            rows.push(this._getEmptyPerformanceRow());
+            perfModel.setProperty("/performances", rows);
+            this._validatePerformanceForm();
+        },
+
+        onRemovePerformanceRow(event) {
+            const context = event.getSource().getBindingContext("performanceModel");
+            if (!context) {
+                return;
+            }
+            const path = context.getPath();
+            const index = Number(path.split("/").pop());
+            const perfModel = this._getPerformanceModel();
+            const rows = perfModel.getProperty("/performances") || [];
+            const deletedIds = perfModel.getProperty("/deletedIds") || [];
+            const removed = rows.splice(index, 1)[0];
+            if (removed && removed.id) {
+                deletedIds.push(removed.id);
+            }
+            perfModel.setProperty("/performances", rows);
+            perfModel.setProperty("/deletedIds", deletedIds);
+            this._validatePerformanceForm();
+        },
+
+        onManagePerformanceFieldChange() {
+            this._validatePerformanceForm();
+        },
+
+        onCancelManagePerformances() {
+            this._getPerformanceDialog().then((dialog) => dialog.close());
+        },
+
+        onSaveManagePerformances() {
+            const perfModel = this._getPerformanceModel();
+            const data = perfModel.getData();
+            if (!this._validatePerformanceForm()) {
+                MessageToast.show("Fix the performance details.");
+                return;
+            }
+            const dialogPromise = this._getPerformanceDialog();
+            dialogPromise.then((dialog) => dialog.setBusy(true));
+            const operations = [];
+            (data.deletedIds || []).forEach((id) => {
+                operations.push(() => this._deletePerformance(id));
+            });
+            (data.performances || []).forEach((perf) => {
+                if (perf.id) {
+                    operations.push(() => this._updatePerformance(perf));
+                } else {
+                    operations.push(() => this._createPerformance(perf, data.artistId));
+                }
+            });
+            operations.reduce((prev, op) => prev.then(() => op()), Promise.resolve()).then(() => {
+                dialogPromise.then((dialog) => dialog.setBusy(false));
+                dialogPromise.then((dialog) => dialog.close());
+                return this._refreshPerformancesAfterSave(data.artistId);
+            }).then(() => {
+                MessageToast.show("Performances updated");
+            }).catch((err) => {
+                dialogPromise.then((dialog) => dialog.setBusy(false));
+                MessageToast.show("Could not save performances");
+                console.error("Manage performances failed", err);
+            });
+        },
+
         _appendReview(createdReview) {
             const detailModel = this.getView().getModel("detail");
             const reviews = detailModel.getProperty("/reviews") || [];
@@ -327,6 +423,270 @@ sap.ui.define([
                     return artist;
                 }).catch(() => artist);
             }).catch(() => null);
+        },
+
+        _getPerformanceDialog() {
+            if (!this._performanceDialogPromise) {
+                this._performanceDialogPromise = Fragment.load({
+                    id: this.getView().getId(),
+                    name: "artistmanagement.fragments.ManagePerformances",
+                    controller: this
+                }).then((dialog) => {
+                    dialog.setModel(this._getPerformanceModel(), "performanceModel");
+                    dialog.setModel(this.getView().getModel("detail"), "detail");
+                    this.getView().addDependent(dialog);
+                    return dialog;
+                });
+            }
+            return this._performanceDialogPromise;
+        },
+
+        _getPerformanceModel() {
+            if (!this._performanceModel) {
+                this._performanceModel = new JSONModel({
+                    artistId: "",
+                    performances: [],
+                    deletedIds: [],
+                    options: {
+                        stages: []
+                    }
+                });
+            }
+            return this._performanceModel;
+        },
+
+        _getEmptyPerformanceRow() {
+            return {
+                id: "",
+                stageId: "",
+                stageName: "",
+                day: "",
+                startTime: "",
+                endTime: "",
+                original: null,
+                errors: {
+                    stageId: "",
+                    day: "",
+                    startTime: "",
+                    endTime: "",
+                    timeRange: ""
+                }
+            };
+        },
+
+        _loadStageOptions() {
+            const oDataModel = this.getView().getModel();
+            if (!oDataModel) {
+                return Promise.resolve();
+            }
+            const binding = oDataModel.bindList("/Stages", undefined, undefined, undefined, {
+                $select: "ID,name"
+            });
+            return binding.requestContexts(0, 200).then((contexts) => {
+                const stages = contexts.map((ctx) => ({
+                    key: ctx.getProperty("ID") || "",
+                    text: ctx.getProperty("name") || ""
+                }));
+                this._getPerformanceModel().setProperty("/options/stages", stages);
+            }).catch(() => {
+                this._getPerformanceModel().setProperty("/options/stages", []);
+            });
+        },
+
+        _fetchPerformances(artistId) {
+            const oDataModel = this.getView().getModel();
+            if (!oDataModel) {
+                return Promise.resolve([]);
+            }
+            const binding = oDataModel.bindList("/Performances", undefined, undefined, [
+                new Filter("artist/ID", FilterOperator.EQ, artistId)
+            ], {
+                $select: "ID,startAt,endAt,stage_ID",
+                $expand: "stage($select=ID,name)"
+            });
+            return binding.requestContexts(0, 200).then((contexts) => {
+                const performances = contexts.map((ctx) => {
+                    const perf = ctx.getObject();
+                    return {
+                        id: perf.ID || perf.id || "",
+                        startAt: perf.startAt,
+                        endAt: perf.endAt,
+                        stageId: perf.stage_ID || (perf.stage && perf.stage.ID) || "",
+                        stageName: (perf.stage && perf.stage.name) || ""
+                    };
+                });
+                performances.sort((a, b) => {
+                    const aDate = a.startAt ? new Date(a.startAt).getTime() : 0;
+                    const bDate = b.startAt ? new Date(b.startAt).getTime() : 0;
+                    return aDate - bDate;
+                });
+                return performances;
+            }).catch(() => []);
+        },
+
+        _loadPerformancesForEditing(artistId) {
+            return this._fetchPerformances(artistId).then((performances) => {
+                const rows = performances.map((perf) => this._mapPerformanceToForm(perf));
+                const perfModel = this._getPerformanceModel();
+                perfModel.setProperty("/performances", rows);
+                perfModel.setProperty("/deletedIds", []);
+                this._setDetailPerformances(performances);
+                return performances;
+            });
+        },
+
+        _mapPerformanceToForm(perf) {
+            const start = perf.startAt ? new Date(perf.startAt) : null;
+            const end = perf.endAt ? new Date(perf.endAt) : null;
+            const day = start ? start.toISOString().slice(0, 10) : "";
+            const startTime = start ? start.toISOString().slice(11, 16) : "";
+            const endTime = end ? end.toISOString().slice(11, 16) : "";
+            return {
+                id: perf.id || "",
+                stageId: perf.stageId || "",
+                stageName: perf.stageName || "",
+                day,
+                startTime,
+                endTime,
+                original: {
+                    stageId: perf.stageId || "",
+                    day,
+                    startTime,
+                    endTime
+                },
+                errors: {
+                    stageId: "",
+                    day: "",
+                    startTime: "",
+                    endTime: "",
+                    timeRange: ""
+                }
+            };
+        },
+
+        _validatePerformanceForm() {
+            const perfModel = this._getPerformanceModel();
+            const rows = perfModel.getProperty("/performances") || [];
+            let valid = true;
+            rows.forEach((row, index) => {
+                const errors = {
+                    stageId: row.stageId ? "" : "Choose a stage",
+                    day: row.day ? "" : "Select a day",
+                    startTime: row.startTime ? "" : "Select a start time",
+                    endTime: row.endTime ? "" : "Select an end time",
+                    timeRange: ""
+                };
+                if (row.day && row.startTime && row.endTime) {
+                    const startDate = this._combineDateAndTime(row.day, row.startTime);
+                    const endDate = this._combineDateAndTime(row.day, row.endTime);
+                    if (startDate >= endDate) {
+                        errors.timeRange = "End time must be after start time";
+                    }
+                }
+                perfModel.setProperty(`/performances/${index}/errors`, errors);
+                if (errors.stageId || errors.day || errors.startTime || errors.endTime || errors.timeRange) {
+                    valid = false;
+                }
+            });
+            return valid;
+        },
+
+        _combineDateAndTime(day, time) {
+            const [year, month, date] = (day || "").split("-").map(Number);
+            const [hours, minutes] = (time || "").split(":").map(Number);
+            return new Date(Date.UTC(year || 0, (month || 1) - 1, date || 1, hours || 0, minutes || 0));
+        },
+
+        _deletePerformance(performanceId) {
+            if (!performanceId) {
+                return Promise.resolve();
+            }
+            const oDataModel = this.getView().getModel();
+            const serviceUrl = oDataModel && oDataModel.sServiceUrl ? oDataModel.sServiceUrl : "";
+            const url = `${serviceUrl}/Performances('${performanceId}')`;
+            return fetch(url, {
+                method: "DELETE"
+            }).then((res) => {
+                if (!res.ok) {
+                    throw new Error(`Delete failed ${res.status}`);
+                }
+            });
+        },
+
+        _updatePerformance(perf) {
+            if (!perf || !perf.id) {
+                return Promise.resolve();
+            }
+            const original = perf.original || {};
+            if (original.stageId === perf.stageId && original.day === perf.day && original.startTime === perf.startTime && original.endTime === perf.endTime) {
+                return Promise.resolve();
+            }
+            const startAt = this._combineDateAndTime(perf.day, perf.startTime).toISOString();
+            const endAt = this._combineDateAndTime(perf.day, perf.endTime).toISOString();
+            const payload = {
+                startAt,
+                endAt,
+                stage_ID: perf.stageId
+            };
+            const oDataModel = this.getView().getModel();
+            const serviceUrl = oDataModel && oDataModel.sServiceUrl ? oDataModel.sServiceUrl : "";
+            const url = `${serviceUrl}/Performances('${perf.id}')`;
+            return fetch(url, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            }).then((res) => {
+                if (!res.ok) {
+                    throw new Error(`Update failed ${res.status}`);
+                }
+            });
+        },
+
+        _createPerformance(perf, artistId) {
+            if (!perf || !artistId) {
+                return Promise.resolve();
+            }
+            const startAt = this._combineDateAndTime(perf.day, perf.startTime).toISOString();
+            const endAt = this._combineDateAndTime(perf.day, perf.endTime).toISOString();
+            const payload = {
+                startAt,
+                endAt,
+                stage_ID: perf.stageId,
+                artist_ID: artistId
+            };
+            const oDataModel = this.getView().getModel();
+            const listBinding = oDataModel.bindList("/Performances");
+            const context = listBinding.create(payload);
+            return context.created().then(() => context.requestObject()).then((created) => created).catch((err) => {
+                throw err;
+            });
+        },
+
+        _refreshPerformancesAfterSave(artistId) {
+            return this._fetchPerformances(artistId).then((performances) => {
+                this._setDetailPerformances(performances);
+                sap.ui.getCore().getEventBus().publish("artist", "updated", { id: artistId });
+            });
+        },
+
+        _setDetailPerformances(performances) {
+            const detailModel = this.getView().getModel("detail");
+            if (!detailModel) {
+                return;
+            }
+            detailModel.setProperty("/performances", performances.map((perf) => ({
+                id: perf.id,
+                startAt: perf.startAt,
+                endAt: perf.endAt,
+                stageName: perf.stageName || this._findStageName(perf.stageId),
+                stageId: perf.stageId
+            })));
+        },
+
+        _findStageName(stageId) {
+            const stages = (this._performanceModel && this._performanceModel.getProperty("/options/stages")) || [];
+            const match = stages.find((s) => s.key === stageId);
+            return (match && match.text) || "";
         },
 
         _getReviewModel() {

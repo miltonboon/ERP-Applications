@@ -380,8 +380,8 @@ sap.ui.define([
             const performancesBinding = oDataModel.bindList("/Performances", undefined, undefined, [
                 new Filter("artist/ID", FilterOperator.EQ, artistId)
             ], {
-                $select: "ID,startAt,endAt",
-                $expand: "stage($select=name)"
+                $select: "ID,startAt,endAt,stage_ID",
+                $expand: "stage($select=ID,name)"
             });
             performancesBinding.requestContexts(0, 200).then((contexts) => {
                 if (this._currentArtistId !== artistId) {
@@ -393,7 +393,8 @@ sap.ui.define([
                         id: perf.ID || perf.id || "",
                         startAt: perf.startAt,
                         endAt: perf.endAt,
-                        stageName: (perf.stage && perf.stage.name) || ""
+                        stageName: (perf.stage && perf.stage.name) || "",
+                        stageId: perf.stage_ID || (perf.stage && perf.stage.ID) || ""
                     };
                 });
                 performances.sort((a, b) => {

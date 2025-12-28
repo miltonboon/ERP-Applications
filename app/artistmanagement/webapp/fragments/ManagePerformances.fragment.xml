@@ -1,0 +1,51 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+    <Dialog id="managePerformancesDialog" title="Manage Performances" contentWidth="820px"
+        class="sapUiResponsivePadding--Header sapUiResponsivePadding--Content sapUiResponsivePadding--Footer">
+        <VBox renderType="Bare" class="sapUiMediumMargin sapUiResponsiveMargin">
+            <Label text="Performance Slots" design="Bold" class="sapUiTinyMarginBottom"/>
+            <Text text="Add, edit, or remove performance slots for this artist." class="sapUiTinyMarginBottom"/>
+            <List id="managePerformancesList" items="{performanceModel>/performances}" noDataText="No performances added yet" inset="true">
+                <CustomListItem>
+                    <VBox width="100%" class="sapUiSmallMarginBottom">
+                        <HBox alignItems="Center" class="sapUiTinyMarginBottom">
+                            <Label text="Stage" width="4rem"/>
+                            <ComboBox width="16rem" selectedKey="{performanceModel>stageId}" placeholder="Select a stage"
+                                required="true"
+                                items="{performanceModel>/options/stages}"
+                                valueState="{= ${performanceModel>errors/stageId} ? 'Error' : 'None'}"
+                                valueStateText="{performanceModel>errors/stageId}" showClearIcon="true"
+                                selectionChange=".onManagePerformanceFieldChange" change=".onManagePerformanceFieldChange">
+                                <core:Item key="{performanceModel>key}" text="{performanceModel>text}"/>
+                            </ComboBox>
+                            <Button icon="sap-icon://less" type="Transparent" tooltip="Remove performance" press=".onRemovePerformanceRow" class="sapUiTinyMarginBegin"/>
+                        </HBox>
+                        <HBox alignItems="Center" class="sapUiTinyMarginBottom" renderType="Bare">
+                            <Label text="Day" width="4rem"/>
+                            <DatePicker value="{performanceModel>day}" valueFormat="yyyy-MM-dd" displayFormat="long" width="11rem"
+                                valueState="{= ${performanceModel>errors/day} ? 'Error' : 'None'}"
+                                valueStateText="{performanceModel>errors/day}" change=".onManagePerformanceFieldChange"/>
+                            <Label text="Start" width="3.5rem" textAlign="Center" class="sapUiTinyMarginBegin"/>
+                            <TimePicker value="{performanceModel>startTime}" valueFormat="HH:mm" displayFormat="HH:mm" width="7rem"
+                                valueState="{= ${performanceModel>errors/startTime} || ${performanceModel>errors/timeRange} ? 'Error' : 'None'}"
+                                valueStateText="{= ${performanceModel>errors/startTime} ? ${performanceModel>errors/startTime} : ${performanceModel>errors/timeRange}}"
+                                change=".onManagePerformanceFieldChange"/>
+                            <Label text="End" width="3rem" textAlign="Center" class="sapUiTinyMarginBegin"/>
+                            <TimePicker value="{performanceModel>endTime}" valueFormat="HH:mm" displayFormat="HH:mm" width="7rem"
+                                valueState="{= ${performanceModel>errors/endTime} || ${performanceModel>errors/timeRange} ? 'Error' : 'None'}"
+                                valueStateText="{= ${performanceModel>errors/endTime} ? ${performanceModel>errors/endTime} : ${performanceModel>errors/timeRange}}"
+                                change=".onManagePerformanceFieldChange"/>
+                        </HBox>
+                        <Text text="{performanceModel>errors/timeRange}" visible="{= !!${performanceModel>errors/timeRange} }" class="sapUiTinyMarginTop sapThemeColorCritical"/>
+                    </VBox>
+                </CustomListItem>
+            </List>
+            <Button text="Add performance" type="Transparent" icon="sap-icon://add" press=".onAddPerformanceRow" class="sapUiSmallMarginTop"/>
+        </VBox>
+        <beginButton>
+            <Button text="Save" type="Emphasized" press=".onSaveManagePerformances"/>
+        </beginButton>
+        <endButton>
+            <Button text="Cancel" press=".onCancelManagePerformances"/>
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>
