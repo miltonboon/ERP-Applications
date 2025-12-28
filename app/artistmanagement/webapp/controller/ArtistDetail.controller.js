@@ -665,6 +665,8 @@ sap.ui.define([
         _refreshPerformancesAfterSave(artistId) {
             return this._fetchPerformances(artistId).then((performances) => {
                 this._setDetailPerformances(performances);
+                return this._refreshReviews(artistId);
+            }).then(() => {
                 sap.ui.getCore().getEventBus().publish("artist", "updated", { id: artistId });
             });
         },
@@ -687,6 +689,47 @@ sap.ui.define([
             const stages = (this._performanceModel && this._performanceModel.getProperty("/options/stages")) || [];
             const match = stages.find((s) => s.key === stageId);
             return (match && match.text) || "";
+        },
+
+        _refreshReviews(artistId) {
+            const detailModel = this.getView().getModel("detail");
+            if (!artistId) {
+                return Promise.resolve();
+            }
+            const oDataModel = this.getView().getModel();
+            const reviewsBinding = oDataModel.bindList("/Reviews", undefined, undefined, [
+                new Filter("performance/artist/ID", FilterOperator.EQ, artistId)
+            ], {
+                $select: "ID,rating,date,comment,customerName"
+            });
+            return reviewsBinding.requestContexts(0, 200).then((contexts) => {
+                const reviews = contexts.map((ctx) => {
+                    const review = ctx.getObject();
+                    return {
+                        id: review.ID || review.id || "",
+                        rating: review.rating,
+                        comment: review.comment,
+                        date: review.date,
+                        customerName: review.customerName
+                    };
+                });
+                reviews.sort((a, b) => {
+                    const aDate = a.date ? new Date(a.date).getTime() : 0;
+                    const bDate = b.date ? new Date(b.date).getTime() : 0;
+                    return bDate - aDate;
+                });
+                if (detailModel) {
+                    detailModel.setProperty("/reviews", reviews);
+                }
+                this._updatePopularityFromReviews(reviews);
+                return reviews;
+            }).catch(() => {
+                if (detailModel) {
+                    detailModel.setProperty("/reviews", []);
+                }
+                this._updatePopularityFromReviews([]);
+                return [];
+            });
         },
 
         _getReviewModel() {
