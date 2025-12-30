@@ -5,7 +5,6 @@
     xmlns:core="sap.ui.core">
     <f:FlexibleColumnLayout id="fcl" layout="OneColumn">
         <f:beginColumnPages>
-            <Page id="masterPage" title="Artists">
                 <List id="artistList"
                     mode="SingleSelectMaster"
                     includeItemInSelection="true"
@@ -17,8 +16,9 @@
                     selectionChange=".onSelectArtist">
                     <headerToolbar>
                         <OverflowToolbar>
-                            <SearchField width="17.5rem" placeholder="Search by name" search=".onSearch"/>
+                            <Title text="Artists" level="H3"/>
                             <ToolbarSpacer/>
+                            <SearchField width="17.5rem" placeholder="Search by name" search=".onSearch"/>
                             <Button type="Transparent" icon="sap-icon://add" press=".onOpenCreateArtist" tooltip="Create artist"/>
                             <Button type="Transparent" icon="sap-icon://sort" press=".onOpenSortPopover"/>
                             <Button type="Transparent" icon="sap-icon://filter" press=".onOpenFilterPopover"/>
@@ -52,7 +52,6 @@
                         </CustomListItem>
                     </items>
                 </List>
-            </Page>
         </f:beginColumnPages>
         <f:midColumnPages>
             <mvc:XMLView viewName="artistmanagement.view.ArtistDetail" id="detailView"/>
