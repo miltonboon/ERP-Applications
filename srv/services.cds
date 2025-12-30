@@ -5,12 +5,7 @@ using { apmorrowland as db } from '../db/schema';
 service FestivalService {
   entity Countries    as projection on db.Countries;
   entity Artists      as projection on db.Artists;
-  @cds.redirection.target entity FestivalDays as select from db.FestivalDays {
-    key ID,
-    dayNumber,
-    date,
-    virtual label : String(80)
-  };
+  entity FestivalDays as projection on db.FestivalDays;
   entity Performances as projection on db.Performances;
   entity Reviews      as projection on db.Reviews;
   entity Customers    as projection on db.Customers;

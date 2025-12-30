@@ -131,12 +131,12 @@ sap.ui.define([
             return Promise.resolve();
         }
         const binding = oDataModel.bindList("/FestivalDays", undefined, undefined, undefined, {
-            $select: "ID,label,dayNumber,date"
+            $select: "ID,dayNumber,date"
         });
         return binding.requestContexts(0, 200).then((contexts) => {
             const days = contexts.map((ctx) => ({
                 key: ctx.getProperty("ID") || "",
-                text: ctx.getProperty("label") || formatter.formatFestivalDay(ctx.getProperty("dayNumber"), ctx.getProperty("date"))
+                text: formatter.formatFestivalDay(ctx.getProperty("dayNumber"), ctx.getProperty("date"))
             }));
             getPerformanceModel(controller).setProperty("/options/festivalDays", days);
         }).catch(() => {
@@ -153,7 +153,7 @@ sap.ui.define([
             new Filter("artist/ID", FilterOperator.EQ, artistId)
         ], {
             $select: "ID,startTime,endTime,stage_ID,day_ID",
-            $expand: "stage($select=ID,name),day($select=ID,dayNumber,date,label)"
+            $expand: "stage($select=ID,name),day($select=ID,dayNumber,date)"
         });
         return binding.requestContexts(0, 200).then((contexts) => {
             const performances = contexts.map((ctx) => {
@@ -166,7 +166,7 @@ sap.ui.define([
                     stageName: (perf.stage && perf.stage.name) || "",
                     dayId: perf.day_ID || (perf.day && perf.day.ID) || "",
                     dayNumber: perf.day && perf.day.dayNumber,
-                    dayLabel: (perf.day && perf.day.label) || formatter.formatFestivalDay(perf.day && perf.day.dayNumber, perf.day && perf.day.date),
+                    dayLabel: formatter.formatFestivalDay(perf.day && perf.day.dayNumber, perf.day && perf.day.date),
                     dayDate: perf.day && perf.day.date
                 };
             });

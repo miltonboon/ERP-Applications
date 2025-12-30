@@ -386,7 +386,7 @@ sap.ui.define([
                 new Filter("artist/ID", FilterOperator.EQ, artistId)
             ], {
                 $select: "ID,startTime,endTime,stage_ID,day_ID",
-                $expand: "stage($select=ID,name),day($select=ID,dayNumber,date,label)"
+                $expand: "stage($select=ID,name),day($select=ID,dayNumber,date)"
             });
             performancesBinding.requestContexts(0, 200).then((contexts) => {
                 if (this._currentArtistId !== artistId) {
@@ -399,7 +399,7 @@ sap.ui.define([
                         startTime: perf.startTime,
                         endTime: perf.endTime,
                         dayId: perf.day_ID || (perf.day && perf.day.ID) || "",
-                        dayLabel: (perf.day && perf.day.label) || formatter.formatFestivalDay(perf.day && perf.day.dayNumber, perf.day && perf.day.date),
+                        dayLabel: formatter.formatFestivalDay(perf.day && perf.day.dayNumber, perf.day && perf.day.date),
                         dayDate: perf.day && perf.day.date,
                         dayNumber: perf.day && perf.day.dayNumber,
                         stageName: (perf.stage && perf.stage.name) || "",
