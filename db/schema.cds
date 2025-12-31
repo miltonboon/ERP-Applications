@@ -24,12 +24,6 @@ type OrderType : String enum {
   FoodDrinks;
 }
 
-type ItemType : String enum {
-  Ticket;
-  Merchandise;
-  FoodDrinks;
-}
-
 type OrderStatus : String enum {
   Draft;
   Submitted;
@@ -95,7 +89,7 @@ entity Items : cuid, managed {
   stock : Integer @mandatory;
   price : Decimal(9,2) @mandatory;
 
-  type  : ItemType @mandatory;
+  type  : OrderType @mandatory;
 }
 
 entity Orders : cuid, managed {
