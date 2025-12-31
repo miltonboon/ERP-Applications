@@ -5,53 +5,55 @@
     xmlns:core="sap.ui.core">
     <f:FlexibleColumnLayout id="fcl" layout="OneColumn">
         <f:beginColumnPages>
-                <List id="artistList"
-                    mode="SingleSelectMaster"
-                    includeItemInSelection="true"
-                    items="{
-                        path: '/ArtistOverview',
-                        parameters: { $select: 'ID,name,genres,country,popularityScore,avatar,avatarMimeType' }
-                    }"
-                    updateFinished=".onListUpdateFinished"
-                    selectionChange=".onSelectArtist">
-                    <headerToolbar>
-                        <OverflowToolbar>
-                            <Title text="Artists" level="H3"/>
-                            <ToolbarSpacer/>
-                            <SearchField width="17.5rem" placeholder="Search by name" search=".onSearch"/>
-                            <Button type="Transparent" icon="sap-icon://add" press=".onOpenCreateArtist" tooltip="Create artist"/>
-                            <Button type="Transparent" icon="sap-icon://sort" press=".onOpenSortPopover"/>
-                            <Button type="Transparent" icon="sap-icon://filter" press=".onOpenFilterPopover"/>
-                        </OverflowToolbar>
-                    </headerToolbar>
-                    <items>
-                        <CustomListItem>
-                            <VBox width="100%">
-                                <HBox height="0.5rem"/>
-                                <HBox width="100%" alignItems="Center">
-                                    <HBox width="0.75rem"/>
+                <Page showHeader="false" enableScrolling="true">
+                    <List id="artistList" growing="true" growingScrollToLoad="true" growingThreshold="20"
+                        mode="SingleSelectMaster"
+                        includeItemInSelection="true"
+                        items="{
+                            path: '/ArtistOverview',
+                            parameters: { $select: 'ID,name,genres,country,popularityScore,avatar,avatarMimeType' }
+                        }"
+                        updateFinished=".onListUpdateFinished"
+                        selectionChange=".onSelectArtist">
+                        <headerToolbar>
+                            <OverflowToolbar>
+                                <Title text="Artists" level="H3"/>
+                                <ToolbarSpacer/>
+                                <SearchField width="17.5rem" placeholder="Search by name" search=".onSearch"/>
+                                <Button type="Transparent" icon="sap-icon://add" press=".onOpenCreateArtist" tooltip="Create artist"/>
+                                <Button type="Transparent" icon="sap-icon://sort" press=".onOpenSortPopover"/>
+                                <Button type="Transparent" icon="sap-icon://filter" press=".onOpenFilterPopover"/>
+                            </OverflowToolbar>
+                        </headerToolbar>
+                        <items>
+                            <CustomListItem>
+                                <VBox width="100%">
+                                    <HBox height="0.5rem"/>
                                     <HBox width="100%" alignItems="Center">
-                                        <Avatar displayShape="Circle"
-                                            displaySize="S"
-                                            imageFitType="Cover"
-                                            src="{ parts: [{path: 'avatar'}, {path: 'avatarMimeType'}], formatter: '.toAvatarSrc' }"
-                                            fallbackIcon="sap-icon://customer"
-                                            initials="{path: 'name', formatter: '.formatInitials'}"/>
-                                        <VBox class="sapUiSmallMarginBegin" width="100%">
-                                            <ObjectIdentifier title="{name}" text="{country}"/>
-                                            <HBox alignItems="Center" justifyContent="SpaceBetween" height="2.4rem">
-                                                <FlexBox id="genresContainer" width="100%" wrap="Wrap" alignItems="Center"/>
-                                                <RatingIndicator maxValue="5" value="{ path: 'popularityScore', type: 'sap.ui.model.type.Float' }" enabled="false" displayOnly="true" iconSize="1.1rem"/>
-                                            </HBox>
-                                        </VBox>
+                                        <HBox width="0.75rem"/>
+                                        <HBox width="100%" alignItems="Center">
+                                            <Avatar displayShape="Circle"
+                                                displaySize="S"
+                                                imageFitType="Cover"
+                                                src="{ parts: [{path: 'avatar'}, {path: 'avatarMimeType'}], formatter: '.toAvatarSrc' }"
+                                                fallbackIcon="sap-icon://customer"
+                                                initials="{path: 'name', formatter: '.formatInitials'}"/>
+                                            <VBox class="sapUiSmallMarginBegin" width="100%">
+                                                <ObjectIdentifier title="{name}" text="{country}"/>
+                                                <HBox alignItems="Center" justifyContent="SpaceBetween" height="2.4rem">
+                                                    <FlexBox id="genresContainer" width="100%" wrap="Wrap" alignItems="Center"/>
+                                                    <RatingIndicator maxValue="5" value="{ path: 'popularityScore', type: 'sap.ui.model.type.Float' }" enabled="false" displayOnly="true" iconSize="1.1rem"/>
+                                                </HBox>
+                                            </VBox>
+                                        </HBox>
+                                        <HBox width="0.75rem"/>
                                     </HBox>
-                                    <HBox width="0.75rem"/>
-                                </HBox>
-                                <HBox height="0.5rem"/>
-                            </VBox>
-                        </CustomListItem>
-                    </items>
-                </List>
+                                    <HBox height="0.5rem"/>
+                                </VBox>
+                            </CustomListItem>
+                        </items>
+                    </List>
+                </Page>
         </f:beginColumnPages>
         <f:midColumnPages>
             <mvc:XMLView viewName="artistmanagement.view.ArtistDetail" id="detailView"/>
