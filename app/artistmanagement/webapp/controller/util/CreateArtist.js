@@ -231,12 +231,12 @@ sap.ui.define([
             return;
         }
         const binding = oDataModel.bindList("/FestivalDays", undefined, undefined, undefined, {
-            $select: "ID,label,dayNumber,date"
+            $select: "ID,dayNumber,date"
         });
         binding.requestContexts(0, 200).then((contexts) => {
             const days = contexts.map((ctx) => ({
                 key: ctx.getProperty("ID") || "",
-                text: ctx.getProperty("label") || formatter.formatFestivalDay(ctx.getProperty("dayNumber"), ctx.getProperty("date"))
+                text: formatter.formatFestivalDay(ctx.getProperty("dayNumber"), ctx.getProperty("date"))
             }));
             getCreateModel(controller).setProperty("/options/festivalDays", days);
         }).catch(() => {
