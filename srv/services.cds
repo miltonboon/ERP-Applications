@@ -34,8 +34,8 @@ service FestivalService {
     o.date,
     o.type,
     o.status,
-    o.customer.firstName,
-    o.customer.lastName,
+    o.customer.firstName as customerFirstName,
+    o.customer.lastName  as customerLastName,
     coalesce(round(sum(i.quantity * i.unitPrice), 2), 0) as totalAmount : Decimal(15,2)
   } group by o.ID, o.date, o.type, o.status, o.customer.firstName, o.customer.lastName;
 }
