@@ -28,13 +28,14 @@ service FestivalService {
   } group by a.ID, a.name, a.genres, a.country.name, a.avatar, a.avatarMimeType;
 
   @readonly
-  entity OrdersOverview as select from db.Orders {
-    key ID,
-    date,
-    type,
-    status,
-    customer.firstName,
-    customer.lastName,
-    cast((select sum(i.quantity * i.unitPrice) from db.OrderItems as i where i.order.ID = ID) as Decimal(15,2)) as totalAmount
-  };
+  entity OrdersOverview as select from db.Orders as o
+    left join db.OrderItems as i on o.ID = i.order.ID {
+    key o.ID,
+    o.date,
+    o.type,
+    o.status,
+    o.customer.firstName,
+    o.customer.lastName,
+    coalesce(round(sum(i.quantity * i.unitPrice), 2), 0) as totalAmount : Decimal(15,2)
+  } group by o.ID, o.date, o.type, o.status, o.customer.firstName, o.customer.lastName;
 }
