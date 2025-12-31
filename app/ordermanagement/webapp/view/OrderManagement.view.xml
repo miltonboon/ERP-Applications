@@ -1,6 +1,46 @@
 <mvc:View controllerName="ordermanagement.ordermanagement.controller.OrderManagement"
     xmlns:mvc="sap.ui.core.mvc"
-    xmlns="sap.m">
-    <Page id="page" title="{i18n>title}">
-    </Page>
+    xmlns="sap.m"
+    xmlns:f="sap.f">
+    <f:FlexibleColumnLayout id="fcl" layout="OneColumn">
+        <f:beginColumnPages>
+            <Page showHeader="false" enableScrolling="true">
+                <List id="orderList" mode="SingleSelectMaster" includeItemInSelection="true"
+                    growing="true" growingScrollToLoad="true" growingThreshold="20"
+                    items="{
+                        path: '/OrdersOverview',
+                        parameters: { $select: 'ID,date,type,status,customerFirstName,customerLastName,totalAmount' }
+                    }"
+                    selectionChange=".onSelectOrder">
+                    <headerToolbar>
+                        <OverflowToolbar>
+                            <Title text="Orders" level="H3"/>
+                            <ToolbarSpacer/>
+                            <SearchField width="17.5rem" placeholder="Search by customer" search=".onSearch"/>
+                            <Button type="Transparent" icon="sap-icon://sort" press=".onOpenSortPopover"/>
+                            <Button type="Transparent" icon="sap-icon://filter" press=".onOpenFilterPopover"/>
+                        </OverflowToolbar>
+                    </headerToolbar>
+                    <items>
+                        <ObjectListItem
+                            title="{ parts: [ {path: 'customerFirstName'}, {path: 'customerLastName'} ], formatter: '.formatCustomerName' }"
+                            intro="{ path: 'type', formatter: '.formatOrderType' }"
+                            number="{ path: 'totalAmount', formatter: '.formatAmount' }"
+                            numberUnit="EUR"
+                            type="Active">
+                            <attributes>
+                                <ObjectAttribute text="{ path: 'date', formatter: '.formatDate' }"/>
+                            </attributes>
+                            <firstStatus>
+                                <ObjectStatus text="{status}" state="{ path: 'status', formatter: '.formatStatusState' }"/>
+                            </firstStatus>
+                        </ObjectListItem>
+                    </items>
+                </List>
+            </Page>
+        </f:beginColumnPages>
+        <f:midColumnPages>
+            <mvc:XMLView viewName="ordermanagement.ordermanagement.view.OrderDetail" id="detailView"/>
+        </f:midColumnPages>
+    </f:FlexibleColumnLayout>
 </mvc:View>
