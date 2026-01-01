@@ -39,10 +39,16 @@ sap.ui.define([
         },
 
         formatOrderType(type) {
+            if (!type) {
+                return "";
+            }
             if (type === "FoodDrinks") {
                 return "Food & Drinks";
             }
-            return type || "";
+            if (type === "Ticket") {
+                return "Tickets";
+            }
+            return type;
         },
 
         formatDate(value) {
