@@ -27,7 +27,7 @@ sap.ui.define([
         if (!controller._performanceDialogPromise) {
             controller._performanceDialogPromise = Fragment.load({
                 id: controller.getView().getId(),
-                name: "artistmanagement.fragments.ManagePerformances",
+                name: "artistmanagement.fragment.ManagePerformances",
                 controller
             }).then((dialog) => {
                 dialog.setModel(getPerformanceModel(controller), "performanceModel");

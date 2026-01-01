@@ -233,7 +233,7 @@ sap.ui.define([
             if (!this._reviewDialogPromise) {
                 this._reviewDialogPromise = Fragment.load({
                     id: this.getView().getId(),
-                    name: "artistmanagement.fragments.AddReview",
+                    name: "artistmanagement.fragment.AddReview",
                     controller: this
                 }).then((dialog) => {
                     dialog.setModel(this._getReviewModel(), "reviewForm");

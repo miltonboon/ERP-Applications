@@ -65,7 +65,7 @@ sap.ui.define([
         if (!controller._createDialogPromise) {
             controller._createDialogPromise = Fragment.load({
                 id: controller.getView().getId(),
-                name: "artistmanagement.fragments.CreateArtistWizard",
+                name: "artistmanagement.fragment.CreateArtistWizard",
                 controller
             }).then((dialog) => {
                 dialog.setModel(getCreateModel(controller), "createModel");

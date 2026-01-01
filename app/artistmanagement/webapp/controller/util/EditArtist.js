@@ -38,7 +38,7 @@ sap.ui.define([
         if (!controller._editDialogPromise) {
             controller._editDialogPromise = Fragment.load({
                 id: controller.getView().getId(),
-                name: "artistmanagement.fragments.EditArtistDetails",
+                name: "artistmanagement.fragment.EditArtistDetails",
                 controller
             }).then((dialog) => {
                 dialog.setModel(getEditModel(controller), "editModel");
