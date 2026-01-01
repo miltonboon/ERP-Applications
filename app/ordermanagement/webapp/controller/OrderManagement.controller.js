@@ -13,8 +13,9 @@ sap.ui.define([
     "sap/m/MultiComboBox",
     "sap/m/Text",
     "sap/f/library",
+    "sap/ui/model/json/JSONModel",
     "ordermanagement/ordermanagement/model/formatter"
-], (Controller, Filter, FilterOperator, Sorter, Popover, VBox, Select, Item, SegmentedButton, SegmentedButtonItem, Button, MultiComboBox, Text, fLibrary, formatter) => {
+], (Controller, Filter, FilterOperator, Sorter, Popover, VBox, Select, Item, SegmentedButton, SegmentedButtonItem, Button, MultiComboBox, Text, fLibrary, JSONModel, formatter) => {
     "use strict";
 
     const LayoutType = fLibrary.LayoutType;
@@ -208,7 +209,58 @@ sap.ui.define([
             const context = listItem && listItem.getBindingContext();
             const detailView = this.byId("detailView");
             if (detailView && context) {
-                detailView.setBindingContext(context);
+                const orderId = context.getProperty("ID");
+                const overviewTotal = context.getProperty("totalAmount");
+                const parsedOverviewTotal = typeof overviewTotal === "number" ? overviewTotal : parseFloat(overviewTotal);
+                const overviewData = {
+                    total: Number.isFinite(parsedOverviewTotal) ? parsedOverviewTotal : null,
+                    firstName: context.getProperty("customerFirstName"),
+                    lastName: context.getProperty("customerLastName"),
+                    type: context.getProperty("type"),
+                    status: context.getProperty("status"),
+                    date: context.getProperty("date"),
+                    id: orderId
+                };
+                const overviewModel = detailView.getModel("overview") || new JSONModel();
+                overviewModel.setData(overviewData);
+                detailView.setModel(overviewModel, "overview");
+                if (orderId) {
+                    detailView.bindElement({
+                        path: this._buildOrderPath(orderId),
+                        parameters: {
+                            $expand: "customer,items($expand=item)"
+                        }
+                    });
+                    const elementBinding = detailView.getElementBinding();
+                    const boundContext = elementBinding && elementBinding.getBoundContext ? elementBinding.getBoundContext() : null;
+                    if (boundContext && boundContext.requestObject) {
+                        boundContext.requestObject().then((data) => {
+                            const items = Array.isArray(data.items) ? data.items : [];
+                            const computedTotal = items.reduce((sum, item) => {
+                                const qty = typeof item.quantity === "number" ? item.quantity : parseFloat(item.quantity);
+                                const price = typeof item.unitPrice === "number" ? item.unitPrice : parseFloat(item.unitPrice);
+                                if (Number.isNaN(qty) || Number.isNaN(price)) {
+                                    return sum;
+                                }
+                                return sum + (qty * price);
+                            }, 0);
+                            const merged = Object.assign({}, overviewData, {
+                                firstName: (data.customer && data.customer.firstName) || overviewData.firstName,
+                                lastName: (data.customer && data.customer.lastName) || overviewData.lastName,
+                                type: data.type || overviewData.type,
+                                status: data.status || overviewData.status,
+                                date: data.date || overviewData.date,
+                                total: Number.isFinite(computedTotal) ? computedTotal : overviewData.total
+                            });
+                            overviewModel.setData(merged);
+                        }).catch(() => {
+                            overviewModel.setData(overviewData);
+                        });
+                    }
+                } else {
+                    detailView.unbindElement();
+                    overviewModel.setData({});
+                }
             }
             const sourceList = event.getSource();
             this._clearOtherSelections(sourceList);
@@ -249,6 +301,10 @@ sap.ui.define([
                     list.removeSelections(true);
                 }
             });
+        },
+
+        _buildOrderPath(orderId) {
+            return `/Orders('${orderId}')`;
         },
 
         _deferredOpen(popover, opener) {

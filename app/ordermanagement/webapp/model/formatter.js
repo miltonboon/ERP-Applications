@@ -60,6 +60,36 @@ sap.ui.define([
                 return "";
             }
             return dateFormatter.format(dateObj);
+        },
+
+        calculateItemTotal(quantity, unitPrice) {
+            const qty = typeof quantity === "number" ? quantity : parseFloat(quantity);
+            const price = typeof unitPrice === "number" ? unitPrice : parseFloat(unitPrice);
+            if (Number.isNaN(qty) || Number.isNaN(price)) {
+                return amountFormatter.format(0);
+            }
+            return amountFormatter.format(qty * price);
+        },
+
+        calculateOrderTotal(items) {
+            const collection = Array.isArray(items) ? items : [];
+            const total = collection.reduce((sum, item) => {
+                const qty = typeof item.quantity === "number" ? item.quantity : parseFloat(item.quantity);
+                const price = typeof item.unitPrice === "number" ? item.unitPrice : parseFloat(item.unitPrice);
+                if (Number.isNaN(qty) || Number.isNaN(price)) {
+                    return sum;
+                }
+                return sum + (qty * price);
+            }, 0);
+            return amountFormatter.format(total);
+        },
+
+        displayOrderTotal(items, overviewTotal) {
+            const hasOverview = overviewTotal !== undefined && overviewTotal !== null;
+            if (hasOverview) {
+                return this.formatAmount(overviewTotal);
+            }
+            return this.calculateOrderTotal(items);
         }
     };
 });

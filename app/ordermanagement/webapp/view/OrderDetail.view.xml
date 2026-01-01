@@ -1,5 +1,102 @@
-<mvc:View xmlns:mvc="sap.ui.core.mvc"
-    xmlns="sap.m">
-    <Page showHeader="false">
-    </Page>
+<mvc:View controllerName="ordermanagement.ordermanagement.controller.OrderDetail"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.uxap"
+    xmlns:m="sap.m">
+    <ObjectPageLayout id="orderDetailPage"
+        showTitleInHeaderContent="true"
+        upperCaseAnchorBar="false"
+        headerContentPinnable="true"
+        height="100%">
+        <headerTitle>
+            <ObjectPageDynamicHeaderTitle>
+                <expandedHeading>
+                    <m:HBox alignItems="Center" renderType="Bare">
+                        <m:Button type="Transparent" icon="sap-icon://nav-back" press=".onCloseDetail" class="sapUiTinyMarginEnd"/>
+                        <m:Title text="Order Details" level="H3"/>
+                    </m:HBox>
+                </expandedHeading>
+                <snappedHeading>
+                    <m:HBox alignItems="Center" renderType="Bare">
+                        <m:Button type="Transparent" icon="sap-icon://nav-back" press=".onCloseDetail" class="sapUiTinyMarginEnd"/>
+                        <m:Title text="Order Details" level="H4"/>
+                    </m:HBox>
+                </snappedHeading>
+            </ObjectPageDynamicHeaderTitle>
+        </headerTitle>
+        <headerContent>
+            <m:FlexBox wrap="Wrap" fitContainer="true" alignItems="Center">
+                <m:VBox class="sapUiSmallMarginEnd">
+                    <m:Label text="Customer"/>
+                    <m:Text text="{ parts: [ {path: 'overview>/firstName'}, {path: 'overview>/lastName'} ], formatter: '.formatCustomerName' }"/>
+                </m:VBox>
+                <m:VBox class="sapUiSmallMarginEnd">
+                    <m:Label text="Status"/>
+                    <m:ObjectStatus text="{overview>/status}" state="{ path: 'overview>/status', formatter: '.formatStatusState' }"/>
+                </m:VBox>
+                <m:VBox class="sapUiSmallMarginEnd">
+                    <m:Label text="Order Type"/>
+                    <m:Text text="{ path: 'overview>/type', formatter: '.formatOrderType' }"/>
+                </m:VBox>
+            </m:FlexBox>
+        </headerContent>
+        <sections>
+            <ObjectPageSection title="Order Info">
+                <subSections>
+                    <ObjectPageSubSection>
+                        <blocks>
+                            <m:VBox class="sapUiSmallMargin">
+                                <m:HBox alignItems="Center" class="sapUiTinyMarginBottom">
+                                    <m:Label text="Order ID" width="7rem"/>
+                                    <m:Text text="{overview>/id}"/>
+                                </m:HBox>
+                                <m:HBox alignItems="Center" class="sapUiTinyMarginBottom">
+                                    <m:Label text="Order Date" width="7rem"/>
+                                    <m:Text text="{ path: 'overview>/date', formatter: '.formatDate' }"/>
+                                </m:HBox>
+                                <m:HBox alignItems="Center" class="sapUiTinyMarginBottom">
+                                    <m:Label text="Total" width="7rem"/>
+                                    <m:ObjectNumber number="{ path: 'overview>/total', formatter: '.formatAmount' }" unit="EUR" emphasized="true"/>
+                                </m:HBox>
+                            </m:VBox>
+                        </blocks>
+                    </ObjectPageSubSection>
+                </subSections>
+            </ObjectPageSection>
+            <ObjectPageSection title="Items">
+                <subSections>
+                    <ObjectPageSubSection>
+                        <blocks>
+                            <m:VBox class="sapUiSmallMargin">
+                                <m:List id="itemsList" items="{
+                                        path: 'items',
+                                        parameters: { $expand: 'item' }
+                                    }"
+                                    growing="false"
+                                    noDataText="No items available"
+                                    inset="true">
+                                    <m:items>
+                                        <m:ObjectListItem
+                                            title="{item/name}"
+                                            number="{ parts: [ {path: 'quantity'}, {path: 'unitPrice'} ], formatter: '.calculateItemTotal' }"
+                                            numberUnit="EUR">
+                                            <m:attributes>
+                                                <m:ObjectAttribute title="Quantity" text="{quantity}"/>
+                                                <m:ObjectAttribute title="Unit Price" text="{ path: 'unitPrice', formatter: '.formatAmount' }" />
+                                            </m:attributes>
+                                        </m:ObjectListItem>
+                                    </m:items>
+                                </m:List>
+                                <m:HBox justifyContent="End" class="sapUiSmallMarginTop">
+                                    <m:VBox alignItems="End">
+                                        <m:Label text="Order Total"/>
+                                        <m:ObjectNumber number="{ path: 'overview>/total', formatter: '.formatAmount' }" unit="EUR" emphasized="true"/>
+                                    </m:VBox>
+                                </m:HBox>
+                            </m:VBox>
+                        </blocks>
+                    </ObjectPageSubSection>
+                </subSections>
+            </ObjectPageSection>
+        </sections>
+    </ObjectPageLayout>
 </mvc:View>
