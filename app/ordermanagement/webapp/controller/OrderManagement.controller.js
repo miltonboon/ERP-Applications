@@ -228,7 +228,7 @@ sap.ui.define([
                     detailView.bindElement({
                         path: this._buildOrderPath(orderId),
                         parameters: {
-                            $expand: "customer($expand=country),items($expand=item)"
+                            $expand: "customer($select=ID,firstName,lastName,email,phone,address,postalCode,country_ID;$expand=country($select=ID,name,code)),items($expand=item)"
                         }
                     });
                     const elementBinding = detailView.getElementBinding();

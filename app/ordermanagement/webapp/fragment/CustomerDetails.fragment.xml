@@ -25,11 +25,18 @@
             <HBox alignItems="Center">
                 <Label text="Country" width="6rem"/>
                 <Text text="{customer/country/name}" visible="{= !${customerDialog>/editable} }"/>
-                <Input value="{customer/country/name}" visible="{customerDialog>/editable}"/>
+                <ComboBox
+                    visible="{customerDialog>/editable}"
+                    items="{/Countries}"
+                    selectedKey="{customer/country_ID}"
+                    change=".onCustomerCountryChange"
+                    placeholder="Select country">
+                    <core:Item text="{name}" key="{ID}"/>
+                </ComboBox>
             </HBox>
         </VBox>
         <beginButton>
-            <Button text="{= ${customerDialog>/editable} ? 'Done' : 'Edit' }" press=".onToggleCustomerEdit"/>
+            <Button text="{= ${customerDialog>/editable} ? 'Save' : 'Edit' }" press=".onToggleCustomerEdit"/>
         </beginButton>
         <endButton>
             <Button text="Close" press=".onCloseCustomerDetails"/>

@@ -92,6 +92,14 @@ sap.ui.define([
             const model = this._getCustomerDialogModel();
             const editable = !!model.getProperty("/editable");
             model.setProperty("/editable", !editable);
+        },
+
+        onCustomerCountryChange(event) {
+            const source = event.getSource();
+            const context = source && source.getBindingContext();
+            if (context && context.requestSideEffects) {
+                context.requestSideEffects([{ $NavigationPropertyPath: "customer/country" }]).catch(() => {});
+            }
         }
     });
 });
