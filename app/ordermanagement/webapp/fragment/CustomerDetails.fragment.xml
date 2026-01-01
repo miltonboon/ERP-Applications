@@ -1,0 +1,30 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+    <Dialog id="customerDetailsDialog" title="Customer Details" stretchOnPhone="true">
+        <VBox class="sapUiSmallMargin">
+            <Title text="{ parts: [ {path: 'customer/firstName'}, {path: 'customer/lastName'} ], formatter: '.formatCustomerName' }" level="H4"/>
+            <HBox alignItems="Center" class="sapUiTinyMarginTop sapUiTinyMarginBottom">
+                <Label text="Email" width="6rem"/>
+                <Text text="{customer/email}"/>
+            </HBox>
+            <HBox alignItems="Center" class="sapUiTinyMarginBottom">
+                <Label text="Phone" width="6rem"/>
+                <Text text="{customer/phone}"/>
+            </HBox>
+            <HBox alignItems="Center" class="sapUiTinyMarginBottom">
+                <Label text="Address" width="6rem"/>
+                <Text text="{customer/address}" wrapping="true"/>
+            </HBox>
+            <HBox alignItems="Center" class="sapUiTinyMarginBottom">
+                <Label text="Postal Code" width="6rem"/>
+                <Text text="{customer/postalCode}"/>
+            </HBox>
+            <HBox alignItems="Center">
+                <Label text="Country" width="6rem"/>
+                <Text text="{customer/country/name}"/>
+            </HBox>
+        </VBox>
+        <endButton>
+            <Button text="Close" press=".onCloseCustomerDetails"/>
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>

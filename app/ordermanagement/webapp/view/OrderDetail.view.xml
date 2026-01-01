@@ -27,7 +27,7 @@
             <m:FlexBox wrap="Wrap" fitContainer="true" alignItems="Center">
                 <m:VBox class="sapUiSmallMarginEnd">
                     <m:Label text="Customer"/>
-                    <m:Text text="{ parts: [ {path: 'overview>/firstName'}, {path: 'overview>/lastName'} ], formatter: '.formatCustomerName' }"/>
+                    <m:Link text="{ parts: [ {path: 'overview>/firstName'}, {path: 'overview>/lastName'} ], formatter: '.formatCustomerName' }" press=".onOpenCustomerDetails"/>
                 </m:VBox>
                 <m:VBox class="sapUiSmallMarginEnd">
                     <m:Label text="Status"/>
