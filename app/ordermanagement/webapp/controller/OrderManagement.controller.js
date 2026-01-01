@@ -26,7 +26,18 @@ sap.ui.define([
 
         onInit() {
             this._fcl = this.byId("fcl");
-            this._list = this.byId("orderList");
+            this._statusLists = {
+                Draft: this.byId("listDraft"),
+                Submitted: this.byId("listSubmitted"),
+                Paid: this.byId("listPaid"),
+                Cancelled: this.byId("listCancelled")
+            };
+            this._statusPanels = {
+                Draft: this.byId("panelDraft"),
+                Submitted: this.byId("panelSubmitted"),
+                Paid: this.byId("panelPaid"),
+                Cancelled: this.byId("panelCancelled")
+            };
             this._sortPopover = null;
             this._sortSelect = null;
             this._sortDirection = null;
@@ -37,6 +48,7 @@ sap.ui.define([
             this._filterStatuses = [];
             this._filterTypes = [];
             this._sortState = { key: "", descending: false };
+            this._applyFilters();
         },
 
         onSearch(event) {
@@ -84,22 +96,24 @@ sap.ui.define([
         },
 
         _applySort() {
-            const binding = this._list.getBinding("items");
-            if (!binding) {
-                return;
-            }
             const key = this._sortSelect.getSelectedKey();
             const descending = this._sortDirection.getSelectedKey() === "desc";
             const hasKey = !!key;
             this._sortDirection.setVisible(hasKey);
             this._sortDirection.setEnabled(hasKey);
-            if (!key) {
-                binding.sort([]);
+            const sorters = [];
+            if (key) {
+                this._sortState = { key, descending };
+                sorters.push(new Sorter(key, descending));
+            } else {
                 this._sortState = { key: "", descending: false };
-                return;
             }
-            this._sortState = { key, descending };
-            binding.sort(new Sorter(key, descending));
+            this._forEachStatusList((status, list) => {
+                const binding = list && list.getBinding("items");
+                if (binding) {
+                    binding.sort(sorters);
+                }
+            });
         },
 
         onOpenFilterPopover(event) {
@@ -167,10 +181,6 @@ sap.ui.define([
         },
 
         _applyFilters() {
-            const binding = this._list.getBinding("items");
-            if (!binding) {
-                return;
-            }
             const filters = [];
 
             if (this._searchQuery) {
@@ -191,17 +201,32 @@ sap.ui.define([
                 filters.push(new Filter({ filters: searchFilters, and: false }));
             }
 
-            if (this._filterStatuses.length > 0) {
-                const statusFilters = this._filterStatuses.map((s) => new Filter("status", FilterOperator.EQ, s));
-                filters.push(new Filter({ filters: statusFilters, and: false }));
-            }
-
             if (this._filterTypes.length > 0) {
                 const typeFilters = this._filterTypes.map((t) => new Filter("type", FilterOperator.EQ, t));
                 filters.push(new Filter({ filters: typeFilters, and: false }));
             }
 
-            binding.filter(filters);
+            this._forEachStatusList((status, list, panel) => {
+                const binding = list && list.getBinding("items");
+                if (!binding) {
+                    if (list) {
+                        list.attachEventOnce("updateFinished", () => {
+                            this._applyFilters();
+                        });
+                    }
+                    return;
+                }
+                const statusFilter = new Filter("status", FilterOperator.EQ, status);
+                const finalFilters = [statusFilter].concat(filters);
+                binding.filter(finalFilters);
+                const visible = this._filterStatuses.length === 0 || this._filterStatuses.includes(status);
+                if (panel) {
+                    panel.setVisible(visible);
+                }
+                if (!visible && list) {
+                    list.removeSelections(true);
+                }
+            });
         },
 
         onSelectOrder(event) {
@@ -211,6 +236,8 @@ sap.ui.define([
             if (detailView && context) {
                 detailView.setBindingContext(context);
             }
+            const sourceList = event.getSource();
+            this._clearOtherSelections(sourceList);
             if (this._fcl) {
                 this._fcl.setLayout(LayoutType.TwoColumnsBeginExpanded);
             }
@@ -234,6 +261,20 @@ sap.ui.define([
 
         formatDate(value) {
             return formatter.formatDate(value);
+        },
+
+        _forEachStatusList(callback) {
+            Object.keys(this._statusLists || {}).forEach((status) => {
+                callback(status, this._statusLists[status], this._statusPanels[status]);
+            });
+        },
+
+        _clearOtherSelections(sourceList) {
+            this._forEachStatusList((_status, list) => {
+                if (list && list !== sourceList) {
+                    list.removeSelections(true);
+                }
+            });
         },
 
         _deferredOpen(popover, opener) {
