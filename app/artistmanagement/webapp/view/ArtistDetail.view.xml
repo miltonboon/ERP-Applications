@@ -5,7 +5,7 @@
     <ObjectPageLayout id="detailPage"
         showTitleInHeaderContent="true"
         upperCaseAnchorBar="false"
-        headerContentPinnable="true"
+        headerContentPinnable="false"
         height="100%">
         <headerTitle>
             <ObjectPageDynamicHeaderTitle>
