@@ -2,14 +2,23 @@ sap.ui.define([
     "sap/ui/core/mvc/Controller",
     "sap/f/library",
     "sap/ui/core/Fragment",
+    "sap/ui/model/json/JSONModel",
     "ordermanagement/ordermanagement/model/formatter"
-], (Controller, fLibrary, Fragment, formatter) => {
+], (Controller, fLibrary, Fragment, JSONModel, formatter) => {
     "use strict";
 
     const LayoutType = fLibrary.LayoutType;
 
     return Controller.extend("ordermanagement.ordermanagement.controller.OrderDetail", {
         formatter,
+        _getCustomerDialogModel() {
+            if (!this._customerDialogModel) {
+                this._customerDialogModel = new JSONModel({
+                    editable: false
+                });
+            }
+            return this._customerDialogModel;
+        },
 
         onExit() {
             if (this._customerDialogPromise) {
@@ -62,10 +71,12 @@ sap.ui.define([
                     controller: this
                 }).then((dialog) => {
                     this.getView().addDependent(dialog);
+                    dialog.setModel(this._getCustomerDialogModel(), "customerDialog");
                     return dialog;
                 });
             }
             this._customerDialogPromise.then((dialog) => {
+                this._getCustomerDialogModel().setProperty("/editable", false);
                 dialog.setBindingContext(this.getView().getBindingContext());
                 dialog.open();
             });
@@ -75,6 +86,12 @@ sap.ui.define([
             if (this._customerDialogPromise) {
                 this._customerDialogPromise.then((dialog) => dialog.close());
             }
+        },
+
+        onToggleCustomerEdit() {
+            const model = this._getCustomerDialogModel();
+            const editable = !!model.getProperty("/editable");
+            model.setProperty("/editable", !editable);
         }
     });
 });

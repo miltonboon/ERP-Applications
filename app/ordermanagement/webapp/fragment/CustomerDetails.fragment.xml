@@ -4,25 +4,33 @@
             <Title text="{ parts: [ {path: 'customer/firstName'}, {path: 'customer/lastName'} ], formatter: '.formatCustomerName' }" level="H4"/>
             <HBox alignItems="Center" class="sapUiTinyMarginTop sapUiTinyMarginBottom">
                 <Label text="Email" width="6rem"/>
-                <Text text="{customer/email}"/>
+                <Text text="{customer/email}" visible="{= !${customerDialog>/editable} }"/>
+                <Input value="{customer/email}" type="Email" visible="{customerDialog>/editable}"/>
             </HBox>
             <HBox alignItems="Center" class="sapUiTinyMarginBottom">
                 <Label text="Phone" width="6rem"/>
-                <Text text="{customer/phone}"/>
+                <Text text="{customer/phone}" visible="{= !${customerDialog>/editable} }"/>
+                <Input value="{customer/phone}" type="Tel" visible="{customerDialog>/editable}"/>
             </HBox>
             <HBox alignItems="Center" class="sapUiTinyMarginBottom">
                 <Label text="Address" width="6rem"/>
-                <Text text="{customer/address}" wrapping="true"/>
+                <Text text="{customer/address}" wrapping="true" visible="{= !${customerDialog>/editable} }"/>
+                <TextArea value="{customer/address}" rows="2" visible="{customerDialog>/editable}"/>
             </HBox>
             <HBox alignItems="Center" class="sapUiTinyMarginBottom">
                 <Label text="Postal Code" width="6rem"/>
-                <Text text="{customer/postalCode}"/>
+                <Text text="{customer/postalCode}" visible="{= !${customerDialog>/editable} }"/>
+                <Input value="{customer/postalCode}" visible="{customerDialog>/editable}"/>
             </HBox>
             <HBox alignItems="Center">
                 <Label text="Country" width="6rem"/>
-                <Text text="{customer/country/name}"/>
+                <Text text="{customer/country/name}" visible="{= !${customerDialog>/editable} }"/>
+                <Input value="{customer/country/name}" visible="{customerDialog>/editable}"/>
             </HBox>
         </VBox>
+        <beginButton>
+            <Button text="{= ${customerDialog>/editable} ? 'Done' : 'Edit' }" press=".onToggleCustomerEdit"/>
+        </beginButton>
         <endButton>
             <Button text="Close" press=".onCloseCustomerDetails"/>
         </endButton>
