@@ -46,6 +46,7 @@ sap.ui.define([
             this._filterTypes = [];
             this._sortState = { key: "", descending: false };
             this._applyFilters();
+            this._applySort();
         },
 
         onSearch(event) {
@@ -65,8 +66,8 @@ sap.ui.define([
                 width: "100%",
                 change: this._applySort.bind(this)
             });
-            this._sortSelect.addItem(new Item({ key: "", text: "No Sorting" }));
             this._sortSelect.addItem(new Item({ key: "date", text: "Order Date" }));
+            this._sortSelect.setSelectedKey("date");
 
             this._sortDirection = new SegmentedButton({
                 selectionChange: this._applySort.bind(this),
@@ -76,8 +77,8 @@ sap.ui.define([
                 ]
             });
             this._sortDirection.setSelectedKey("desc");
-            this._sortDirection.setVisible(false);
-            this._sortDirection.setEnabled(false);
+            this._sortDirection.setVisible(true);
+            this._sortDirection.setEnabled(true);
 
             const content = new VBox({
                 width: "16rem",
@@ -93,22 +94,19 @@ sap.ui.define([
         },
 
         _applySort() {
-            const key = this._sortSelect.getSelectedKey();
-            const descending = this._sortDirection.getSelectedKey() === "desc";
-            const hasKey = !!key;
-            this._sortDirection.setVisible(hasKey);
-            this._sortDirection.setEnabled(hasKey);
-            const sorters = [];
-            if (key) {
-                this._sortState = { key, descending };
-                sorters.push(new Sorter(key, descending));
-            } else {
-                this._sortState = { key: "", descending: false };
-            }
+            const key = this._sortSelect ? this._sortSelect.getSelectedKey() : "date";
+            const descending = this._sortDirection ? this._sortDirection.getSelectedKey() === "desc" : true;
+            const finalKey = key || "date";
+            const sorters = [new Sorter(finalKey, descending)];
+            this._sortState = { key: finalKey, descending };
             this._forEachStatusList((status, list) => {
                 const binding = list && list.getBinding("items");
                 if (binding) {
                     binding.sort(sorters);
+                } else if (list) {
+                    list.attachEventOnce("updateFinished", () => {
+                        this._applySort();
+                    });
                 }
             });
         },
