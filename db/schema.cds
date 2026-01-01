@@ -80,6 +80,11 @@ entity Reviews : cuid, managed {
 entity Customers : cuid, managed {
   firstName : String(80)  @mandatory;
   lastName  : String(80)  @mandatory;
+  email     : String(120);
+  phone     : String(30);
+  country   : Association to Countries;
+  address   : String(200);
+  postalCode: String(20);
 
   orders    : Composition of many Orders on orders.customer = $self;
 }
