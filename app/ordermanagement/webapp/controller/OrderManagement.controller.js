@@ -18,7 +18,6 @@ sap.ui.define([
     "use strict";
 
     const LayoutType = fLibrary.LayoutType;
-    const STATUS_OPTIONS = ["Draft", "Submitted", "Paid", "Cancelled"];
     const TYPE_OPTIONS = ["Ticket", "Merchandise", "FoodDrinks"];
 
     return Controller.extend("ordermanagement.ordermanagement.controller.OrderManagement", {
@@ -42,10 +41,8 @@ sap.ui.define([
             this._sortSelect = null;
             this._sortDirection = null;
             this._filterPopover = null;
-            this._filterStatus = null;
             this._filterType = null;
             this._searchQuery = "";
-            this._filterStatuses = [];
             this._filterTypes = [];
             this._sortState = { key: "", descending: false };
             this._applyFilters();
@@ -124,15 +121,6 @@ sap.ui.define([
         },
 
         _createFilterPopover() {
-            this._filterStatus = new MultiComboBox({
-                width: "100%",
-                selectionChange: this._onFilterSelectionChange.bind(this),
-                placeholder: "Select status"
-            });
-            STATUS_OPTIONS.forEach((s) => {
-                this._filterStatus.addItem(new Item({ key: s, text: s }));
-            });
-
             this._filterType = new MultiComboBox({
                 width: "100%",
                 selectionChange: this._onFilterSelectionChange.bind(this),
@@ -145,9 +133,7 @@ sap.ui.define([
             const clearButton = new Button({
                 text: "Clear Filters",
                 press: () => {
-                    this._filterStatus.removeAllSelectedItems();
                     this._filterType.removeAllSelectedItems();
-                    this._filterStatuses = [];
                     this._filterTypes = [];
                     this._applyFilters();
                 }
@@ -156,8 +142,6 @@ sap.ui.define([
             const content = new VBox({
                 width: "16rem",
                 items: [
-                    new Text({ text: "Status" }),
-                    this._filterStatus,
                     new Text({ text: "Order type" }),
                     this._filterType,
                     clearButton
@@ -175,7 +159,6 @@ sap.ui.define([
         },
 
         _onFilterSelectionChange() {
-            this._filterStatuses = this._filterStatus.getSelectedKeys();
             this._filterTypes = this._filterType.getSelectedKeys();
             this._applyFilters();
         },
@@ -219,13 +202,6 @@ sap.ui.define([
                 const statusFilter = new Filter("status", FilterOperator.EQ, status);
                 const finalFilters = [statusFilter].concat(filters);
                 binding.filter(finalFilters);
-                const visible = this._filterStatuses.length === 0 || this._filterStatuses.includes(status);
-                if (panel) {
-                    panel.setVisible(visible);
-                }
-                if (!visible && list) {
-                    list.removeSelections(true);
-                }
             });
         },
 
