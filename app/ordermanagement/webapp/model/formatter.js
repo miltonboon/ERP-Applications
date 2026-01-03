@@ -7,8 +7,7 @@ sap.ui.define([
     const statusStateMap = {
         Paid: "Success",
         Cancelled: "Error",
-        Submitted: "Information",
-        Draft: "None"
+        Submitted: "Warning"
     };
 
     const amountFormatter = NumberFormat.getFloatInstance({

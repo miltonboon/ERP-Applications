@@ -27,13 +27,11 @@ sap.ui.define([
         onInit() {
             this._fcl = this.byId("fcl");
             this._statusLists = {
-                Draft: this.byId("listDraft"),
                 Submitted: this.byId("listSubmitted"),
                 Paid: this.byId("listPaid"),
                 Cancelled: this.byId("listCancelled")
             };
             this._statusPanels = {
-                Draft: this.byId("panelDraft"),
                 Submitted: this.byId("panelSubmitted"),
                 Paid: this.byId("panelPaid"),
                 Cancelled: this.byId("panelCancelled")

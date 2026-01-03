@@ -9,10 +9,9 @@ sap.ui.define([
 
     const LayoutType = fLibrary.LayoutType;
     const statusColorMap = {
-        Submitted: [11, 98, 179],
+        Submitted: [235, 180, 0],
         Paid: [16, 126, 62],
-        Cancelled: [204, 0, 0],
-        Draft: [120, 120, 120]
+        Cancelled: [204, 0, 0]
     };
 
     return Controller.extend("ordermanagement.ordermanagement.controller.OrderDetail", {

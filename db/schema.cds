@@ -25,7 +25,6 @@ type OrderType : String enum {
 }
 
 type OrderStatus : String enum {
-  Draft;
   Submitted;
   Paid;
   Cancelled;
@@ -100,7 +99,7 @@ entity Items : cuid, managed {
 entity Orders : cuid, managed {
   date     : Date @mandatory;
   type     : OrderType @mandatory;
-  status   : OrderStatus @mandatory default 'Draft';
+  status   : OrderStatus @mandatory default 'Submitted';
 
   customer : Association to Customers @mandatory;
   items    : Composition of many OrderItems on items.order = $self;

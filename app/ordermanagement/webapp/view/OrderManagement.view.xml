@@ -13,34 +13,6 @@
                         <Button type="Transparent" icon="sap-icon://sort" press=".onOpenSortPopover"/>
                         <Button type="Transparent" icon="sap-icon://filter" press=".onOpenFilterPopover"/>
                     </OverflowToolbar>
-                    <Panel id="panelDraft" headerText="Draft" expandable="true" expanded="true" class="sapUiNoContentPadding sapUiTinyMargin" backgroundDesign="Transparent">
-                        <List id="listDraft" mode="SingleSelectMaster" includeItemInSelection="true"
-                            growing="true" growingScrollToLoad="true" growingThreshold="20"
-                            inset="false"
-                            class="sapUiNoMargin"
-                            items="{
-                                path: '/OrdersOverview',
-                                parameters: { $select: 'ID,date,type,status,customerFirstName,customerLastName,totalAmount' }
-                            }"
-                            selectionChange=".onSelectOrder">
-                            <items>
-                                <ObjectListItem
-                                    title="{ parts: [ {path: 'customerFirstName'}, {path: 'customerLastName'} ], formatter: '.formatCustomerName' }"
-                                    intro="{ path: 'type', formatter: '.formatOrderType' }"
-                                    number="{ path: 'totalAmount', formatter: '.formatAmount' }"
-                                    numberUnit="EUR"
-                                    type="Active">
-                                    <attributes>
-                                        <ObjectAttribute text="{ path: 'date', formatter: '.formatDate' }"/>
-                                    </attributes>
-                                    <firstStatus>
-                                        <ObjectStatus text="{status}" state="{ path: 'status', formatter: '.formatStatusState' }"/>
-                                    </firstStatus>
-                                </ObjectListItem>
-                            </items>
-                        </List>
-                    </Panel>
-
                     <Panel id="panelSubmitted" headerText="Submitted" expandable="true" expanded="true" class="sapUiNoContentPadding sapUiTinyMargin" backgroundDesign="Transparent">
                         <List id="listSubmitted" mode="SingleSelectMaster" includeItemInSelection="true"
                             growing="true" growingScrollToLoad="true" growingThreshold="20"
