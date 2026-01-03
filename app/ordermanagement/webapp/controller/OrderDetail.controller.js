@@ -182,15 +182,16 @@ sap.ui.define([
             console.log("Quantities to restock", Array.from(quantities.entries()));
             const operations = [];
             for (const [itemId, quantity] of quantities.entries()) {
-                const itemContext = mainModel.bindContext(`/Items('${itemId}')`, undefined, {
+                const itemBinding = mainModel.bindContext(`/Items('${itemId}')`, undefined, {
                     $$updateGroupId: updateGroupId || "$auto"
                 });
-                const data = await (itemContext.requestObject ? itemContext.requestObject() : Promise.resolve({}));
+                const data = await (itemBinding.requestObject ? itemBinding.requestObject() : Promise.resolve({}));
+                const boundContext = itemBinding.getBoundContext ? itemBinding.getBoundContext() : itemBinding;
                 const stockFromItem = data && data.stock;
                 const currentStock = Number(stockFromItem);
                 const previousStock = Number.isFinite(currentStock) ? currentStock : 0;
                 operations.push({
-                    context: itemContext,
+                    context: boundContext,
                     previousStock,
                     nextStock: previousStock + quantity,
                     groupId: updateGroupId || "$auto"
