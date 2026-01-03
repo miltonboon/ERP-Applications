@@ -1,10 +1,11 @@
 sap.ui.define([
     "sap/ui/core/mvc/Controller",
     "sap/f/library",
+    "sap/m/MessageToast",
     "ordermanagement/ordermanagement/model/formatter",
     "ordermanagement/ordermanagement/controller/util/CustomerDialog",
     "ordermanagement/ordermanagement/controller/util/ExportPDF"
-], (Controller, fLibrary, formatter, CustomerDialog, ExportPDF) => {
+], (Controller, fLibrary, MessageToast, formatter, CustomerDialog, ExportPDF) => {
     "use strict";
 
     const LayoutType = fLibrary.LayoutType;
@@ -65,6 +66,18 @@ sap.ui.define([
             if (this._exportPdf) {
                 this._exportPdf.download();
             }
+        },
+
+        onProceedToPayment() {
+            const overviewModel = this.getView().getModel("overview");
+            const orderId = overviewModel && overviewModel.getProperty("/id");
+            if (!orderId) {
+                MessageToast.show("Select an order before proceeding to payment.");
+                return;
+            }
+            const targetHash = `#/payment/${encodeURIComponent(orderId)}`;
+            const baseUrl = window.location.href.split("#")[0];
+            window.open(`${baseUrl}${targetHash}`, "_blank");
         },
 
         onOpenCustomerDetails() {

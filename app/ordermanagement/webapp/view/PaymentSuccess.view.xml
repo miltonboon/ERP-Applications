@@ -1,0 +1,33 @@
+<mvc:View controllerName="ordermanagement.ordermanagement.controller.PaymentSuccess"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core">
+    <Page id="paymentSuccessPage" showHeader="false" class="sapUiContentPadding">
+        <content>
+            <VBox width="100%" height="100%" alignItems="Center" justifyContent="Center">
+                <VBox width="24rem" class="sapUiLargeMarginTop sapUiLargeMarginBottom sapUiMediumMargin">
+                    <Panel class="sapUiSmallMargin" width="100%">
+                        <VBox alignItems="Center" class="sapUiMediumMargin">
+                            <core:Icon src="sap-icon://accept" color="#107C41" size="3rem" class="sapUiSmallMarginBottom"/>
+                            <Title text="Payment Successful" level="H3" class="sapUiTinyMarginTop"/>
+                            <Text text="Thank you! Your payment has been processed." class="sapUiTinyMarginTop sapUiTinyMarginBottom"/>
+                        </VBox>
+                        <VBox class="sapUiSmallMarginTop sapUiSmallMarginBottom">
+                            <HBox justifyContent="SpaceBetween">
+                                <Text text="Order ID"/>
+                                <Text text="{= ${success>/orderId} || ${ID} }" />
+                            </HBox>
+                            <HBox justifyContent="SpaceBetween">
+                                <Text text="Total Paid"/>
+                                <ObjectNumber number="{ path: 'success>/amount', formatter: '.formatAmount' }" unit="EUR" emphasized="true"/>
+                            </HBox>
+                        </VBox>
+                        <VBox alignItems="Center" class="sapUiMediumMarginTop sapUiSmallMarginBottom">
+                            <Button text="Download Invoice" type="Emphasized" icon="sap-icon://pdf-attachment" press=".onDownloadInvoice"/>
+                        </VBox>
+                    </Panel>
+                </VBox>
+            </VBox>
+        </content>
+    </Page>
+</mvc:View>

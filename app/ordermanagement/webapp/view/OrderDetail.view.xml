@@ -22,6 +22,11 @@
                     </m:HBox>
                 </snappedHeading>
                 <actions>
+                    <m:Button text="Proceed to Payment"
+                        type="Emphasized"
+                        visible="{= ${overview>/status} !== 'Paid' &amp;&amp; ${overview>/status} !== 'Cancelled' }"
+                        enabled="{= !!${overview>/id} }"
+                        press=".onProceedToPayment"/>
                     <m:Button text="Export to PDF" icon="sap-icon://pdf-attachment" type="Emphasized" press=".onExportPdf"/>
                 </actions>
             </ObjectPageDynamicHeaderTitle>

@@ -101,12 +101,34 @@
           "target": [
             "TargetOrderManagement"
           ]
+        },
+        {
+          "name": "RoutePayment",
+          "pattern": "payment/{orderId}",
+          "target": [
+            "TargetPayment"
+          ]
+        },
+        {
+          "name": "RoutePaymentSuccess",
+          "pattern": "payment-success/{orderId}/{method}",
+          "target": [
+            "TargetPaymentSuccess"
+          ]
         }
       ],
       "targets": {
         "TargetOrderManagement": {
           "id": "OrderManagement",
           "name": "OrderManagement"
+        },
+        "TargetPayment": {
+          "id": "Payment",
+          "name": "Payment"
+        },
+        "TargetPaymentSuccess": {
+            "id": "PaymentSuccess",
+            "name": "PaymentSuccess"
         }
       }
     },

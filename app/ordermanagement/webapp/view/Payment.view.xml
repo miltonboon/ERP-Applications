@@ -1,0 +1,121 @@
+<mvc:View controllerName="ordermanagement.ordermanagement.controller.Payment"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:form="sap.ui.layout.form">
+    <Page id="paymentPage"
+        title="Payment Simulation"
+        showHeader="false"
+        class="sapUiContentPadding">
+        <content>
+            <VBox width="100%" class="sapUiSmallMarginBottom">
+                <MessageStrip text="This is a simulated payment flow. No charges will be made."
+                    type="Information"
+                    showIcon="true"
+                    showCloseButton="false"/>
+                <FlexBox wrap="Wrap" fitContainer="true" alignItems="Start" class="sapUiSmallMarginBottom" renderType="Div">
+                    <VBox width="60%" class="sapUiSmallMarginEnd sapUiSmallMarginBottom">
+                        <Panel headerText="Order Summary" class="sapUiSmallMarginTop">
+                            <form:SimpleForm editable="false" layout="ResponsiveGridLayout" columnsXL="2" columnsL="2" columnsM="1">
+                                <Label text="Order ID"/>
+                                <Text text="{payment>/orderId}"/>
+                                <Label text="Order Date"/>
+                                <Text text="{ path: 'payment>/orderDate', formatter: '.formatDate' }"/>
+                                <Label text="Total Due"/>
+                                <ObjectNumber number="{ path: 'payment>/amount', formatter: '.formatAmount' }" unit="EUR" emphasized="true"/>
+                            </form:SimpleForm>
+                        </Panel>
+
+                        <Panel class="sapUiSmallMarginTop">
+                            <headerToolbar>
+                                <Toolbar>
+                                    <Title text="Customer Information" level="H5"/>
+                                </Toolbar>
+                            </headerToolbar>
+                            <form:SimpleForm editable="false" layout="ResponsiveGridLayout" columnsXL="2" columnsL="2" columnsM="1">
+                                <Label text="First Name"/>
+                                <Text text="{payment>/customer/firstName}" />
+                                <Label text="Last Name"/>
+                                <Text text="{payment>/customer/lastName}" />
+                                <Label text="Email"/>
+                                <Text text="{payment>/customer/email}" />
+                                <Label text="Phone"/>
+                                <Text text="{payment>/customer/phone}" />
+                                <Label text="Address"/>
+                                <Text text="{payment>/customer/address}" />
+                                <Label text="Postal Code"/>
+                                <Text text="{payment>/customer/postalCode}" />
+                                <Label text="Country"/>
+                                <Text text="{payment>/customer/country}" />
+                            </form:SimpleForm>
+                        </Panel>
+
+                        <Panel headerText="Payment Method" class="sapUiSmallMarginTop">
+                            <VBox>
+                                <List id="paymentMethodList"
+                                    mode="SingleSelectMaster"
+                                    includeItemInSelection="true"
+                                    selectionChange=".onSelectPaymentMethod">
+                                    <CustomListItem selected="{= ${payment>/paymentMethod} === 'Bancontact' }">
+                                        <HBox alignItems="Center" class="sapUiSmallMargin">
+                                            <Image src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Bancontact_logo.svg/2560px-Bancontact_logo.svg.png" width="58px"/>
+                                            <VBox class="sapUiSmallMarginBegin">
+                                                <Title text="Bancontact" level="H5"/>
+                                                <Text text="Use your Bancontact app or card." />
+                                            </VBox>
+                                        </HBox>
+                                        <customData>
+                                            <core:CustomData key="paymentMethod" value="Bancontact"/>
+                                        </customData>
+                                    </CustomListItem>
+                                    <CustomListItem selected="{= ${payment>/paymentMethod} === 'PayPal' }">
+                                        <HBox alignItems="Center" class="sapUiSmallMargin">
+                                            <Image src="https://upload.wikimedia.org/wikipedia/commons/9/93/PayPal_Logo2014.png" width="57px"/>
+                                            <VBox class="sapUiSmallMarginBegin">
+                                                <Title text="PayPal" level="H5"/>
+                                                <Text text="Pay quickly with your PayPal account." />
+                                            </VBox>
+                                        </HBox>
+                                        <customData>
+                                            <core:CustomData key="paymentMethod" value="PayPal"/>
+                                        </customData>
+                                    </CustomListItem>
+                                </List>
+                                <HBox justifyContent="End" alignItems="Center" class="sapUiSmallMarginTop sapUiTinyMarginBottom">
+                                    <Button text="Pay Now" type="Emphasized" press=".onSimulatePayment" enabled="{= !!${payment>/paymentMethod} }"/>
+                                </HBox>
+                            </VBox>
+                        </Panel>
+                    </VBox>
+
+                    <VBox width="38%" class="sapUiSmallMarginBottom">
+                        <Panel headerText="Items" class="sapUiSmallMarginTop">
+                            <List items="{ path: 'items', parameters: { $expand: 'item' } }"
+                                inset="false"
+                                growing="false"
+                                noDataText="No items found">
+                                <items>
+                                    <ObjectListItem
+                                        title="{item/name}"
+                                        number="{ parts: [ {path: 'quantity'}, {path: 'unitPrice'} ], formatter: '.calculateItemTotal' }"
+                                        numberUnit="EUR">
+                                        <attributes>
+                                            <ObjectAttribute title="Quantity" text="{quantity}"/>
+                                            <ObjectAttribute title="Unit Price" text="{ path: 'unitPrice', formatter: '.formatAmount' }"/>
+                                        </attributes>
+                                    </ObjectListItem>
+                                </items>
+                            </List>
+                            <HBox justifyContent="End" class="sapUiSmallMarginTop">
+                                <VBox alignItems="End">
+                                    <Label text="Total" design="Bold"/>
+                                    <ObjectNumber number="{ path: 'payment>/amount', formatter: '.formatAmount' }" unit="EUR" emphasized="true"/>
+                                </VBox>
+                            </HBox>
+                        </Panel>
+                    </VBox>
+                </FlexBox>
+            </VBox>
+        </content>
+    </Page>
+</mvc:View>
