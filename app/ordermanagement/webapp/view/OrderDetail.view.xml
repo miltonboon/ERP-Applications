@@ -27,6 +27,11 @@
                         visible="{= ${overview>/status} !== 'Paid' &amp;&amp; ${overview>/status} !== 'Cancelled' }"
                         enabled="{= !!${overview>/id} }"
                         press=".onProceedToPayment"/>
+                    <m:Button text="Cancel Order"
+                        icon="sap-icon://decline"
+                        visible="{= ${overview>/status} !== 'Cancelled' }"
+                        enabled="{= !!${overview>/id} }"
+                        press=".onCancelOrder"/>
                     <m:Button text="Export to PDF" icon="sap-icon://pdf-attachment" type="Emphasized" press=".onExportPdf"/>
                 </actions>
             </ObjectPageDynamicHeaderTitle>

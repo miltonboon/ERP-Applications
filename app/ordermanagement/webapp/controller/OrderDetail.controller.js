@@ -2,10 +2,11 @@ sap.ui.define([
     "sap/ui/core/mvc/Controller",
     "sap/f/library",
     "sap/m/MessageToast",
+    "sap/m/MessageBox",
     "ordermanagement/ordermanagement/model/formatter",
     "ordermanagement/ordermanagement/controller/util/CustomerDialog",
     "ordermanagement/ordermanagement/controller/util/ExportPDF"
-], (Controller, fLibrary, MessageToast, formatter, CustomerDialog, ExportPDF) => {
+], (Controller, fLibrary, MessageToast, MessageBox, formatter, CustomerDialog, ExportPDF) => {
     "use strict";
 
     const LayoutType = fLibrary.LayoutType;
@@ -66,6 +67,47 @@ sap.ui.define([
             if (this._exportPdf) {
                 this._exportPdf.download();
             }
+        },
+
+        async onCancelOrder() {
+            const view = this.getView();
+            const elementBinding = view && view.getElementBinding && view.getElementBinding();
+            const context = elementBinding && elementBinding.getBoundContext && elementBinding.getBoundContext();
+            if (!context || !context.setProperty) {
+                MessageToast.show("Select an order before cancelling.");
+                return;
+            }
+            const currentStatus = context.getProperty("status");
+            if (currentStatus === "Cancelled") {
+                MessageToast.show("Order is already cancelled.");
+                return;
+            }
+            MessageBox.confirm("Are you sure you want to cancel this order?", {
+                title: "Cancel Order",
+                actions: [MessageBox.Action.YES, MessageBox.Action.CANCEL],
+                emphasizedAction: MessageBox.Action.YES,
+                onClose: async (action) => {
+                    if (action !== MessageBox.Action.YES) {
+                        return;
+                    }
+                    context.setProperty("status", "Cancelled");
+                    const mainModel = this.getOwnerComponent().getModel();
+                    try {
+                        await mainModel.submitBatch("$auto");
+                        const overviewModel = view.getModel("overview");
+                        if (overviewModel) {
+                            overviewModel.setProperty("/status", "Cancelled");
+                        }
+                        if (mainModel && mainModel.refresh) {
+                            mainModel.refresh();
+                        }
+                        MessageToast.show("Order cancelled.");
+                    } catch (_e) {
+                        context.setProperty("status", currentStatus);
+                        MessageToast.show("Failed to cancel order.");
+                    }
+                }
+            });
         },
 
         onProceedToPayment() {
