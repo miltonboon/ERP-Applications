@@ -1,0 +1,184 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:form="sap.ui.layout.form">
+    <Dialog id="orderWizardDialog"
+        title="Create Order"
+        contentWidth="48rem"
+        contentHeight="42rem"
+        stretchOnPhone="true"
+        draggable="true"
+        resizable="true"
+        busyIndicatorDelay="0"
+        class="sapUiResponsivePadding--header sapUiResponsivePadding--content">
+        <content>
+            <VBox width="100%" fitContainer="true">
+                <Wizard id="orderWizard" showNextButton="false">
+                    <WizardStep id="wizardCustomerStep" title="Customer" validated="{wizard>/validations/customer}">
+                        <VBox width="100%" class="sapUiSmallMarginTop">
+                            <SegmentedButton width="100%" selectedKey="{wizard>/customerMode}" selectionChange=".onCustomerModeChange">
+                                <items>
+                                    <SegmentedButtonItem key="existing" text="Existing customer"/>
+                                    <SegmentedButtonItem key="new" text="New customer"/>
+                                </items>
+                            </SegmentedButton>
+                            <VBox visible="{= ${wizard>/customerMode} === 'existing'}" class="sapUiSmallMarginTop">
+                                <SearchField width="100%" placeholder="Search customers" liveChange=".onCustomerSearch"/>
+                                <List id="wizardCustomerList"
+                                    mode="SingleSelectMaster"
+                                    includeItemInSelection="true"
+                                    growing="true"
+                                    items="{
+                                        path: 'wizard>/customers'
+                                    }"
+                                    selectionChange=".onSelectCustomer"
+                                    noDataText="No customers available">
+                                    <items>
+                                        <StandardListItem
+                                            title="{ parts: [ {path: 'wizard>firstName'}, {path: 'wizard>lastName'} ], formatter: '.formatCustomerName' }"
+                                            description="{wizard>email}"
+                                            info="{wizard>phone}"
+                                            selected="{= ${wizard>/customerId} === ${wizard>ID} }"/>
+                                    </items>
+                                </List>
+                            </VBox>
+                            <VBox visible="{= ${wizard>/customerMode} === 'new'}" class="sapUiSmallMarginTop">
+                                <form:SimpleForm editable="true" layout="ResponsiveGridLayout" adjustLabelSpan="false" width="100%">
+                                    <form:content>
+                                        <Label text="First name" required="true"/>
+                                        <Input value="{wizard>/newCustomer/firstName}" placeholder="Enter first name" liveChange=".onNewCustomerChange"/>
+                                        <Label text="Last name" required="true"/>
+                                        <Input value="{wizard>/newCustomer/lastName}" placeholder="Enter last name" liveChange=".onNewCustomerChange"/>
+                                        <Label text="Email"/>
+                                        <Input value="{wizard>/newCustomer/email}" placeholder="Enter email" type="Email" liveChange=".onNewCustomerChange"/>
+                                        <Label text="Phone"/>
+                                        <Input value="{wizard>/newCustomer/phone}" placeholder="Enter phone" type="Tel" liveChange=".onNewCustomerChange"/>
+                                        <Label text="Country"/>
+                                        <Select selectedKey="{wizard>/newCustomer/country_ID}" forceSelection="false" items="{
+                                                path: 'wizard>/countries'
+                                            }" width="100%" showSecondaryValues="true">
+                                            <core:Item key="{wizard>ID}" text="{= ${wizard>name} + (${wizard>code} ? ' (' + ${wizard>code} + ')' : '') }"/>
+                                        </Select>
+                                        <Label text="Address"/>
+                                        <Input value="{wizard>/newCustomer/address}" placeholder="Enter address" liveChange=".onNewCustomerChange"/>
+                                        <Label text="Postal code"/>
+                                        <Input value="{wizard>/newCustomer/postalCode}" placeholder="Enter postal code" liveChange=".onNewCustomerChange"/>
+                                    </form:content>
+                                </form:SimpleForm>
+                            </VBox>
+                            <HBox justifyContent="End" class="sapUiSmallMarginTop">
+                                <Button text="Next" type="Emphasized" press=".onContinueFromCustomer" enabled="{wizard>/validations/customer}"/>
+                            </HBox>
+                        </VBox>
+                    </WizardStep>
+
+                    <WizardStep id="wizardTypeStep" title="Order type" validated="{wizard>/validations/type}">
+                        <VBox width="100%" class="sapUiSmallMarginTop">
+                            <Select width="100%" selectedKey="{wizard>/orderType}" change=".onOrderTypeChange" forceSelection="false">
+                                <core:Item key="Ticket" text="Tickets"/>
+                                <core:Item key="Merchandise" text="Merchandise"/>
+                                <core:Item key="FoodDrinks" text="Food &amp; Drinks"/>
+                            </Select>
+                            <VBox class="sapUiSmallMarginTop">
+                                <Label text="Order date"/>
+                                <DatePicker width="100%" value="{wizard>/orderDate}" displayFormat="long" valueFormat="yyyy-MM-dd" change=".onOrderDateChange"/>
+                            </VBox>
+                            <HBox justifyContent="End" class="sapUiSmallMarginTop">
+                                <Button text="Next" type="Emphasized" press=".onContinueFromType" enabled="{wizard>/validations/type}"/>
+                            </HBox>
+                        </VBox>
+                    </WizardStep>
+
+                    <WizardStep id="wizardItemsStep" title="Items" validated="{wizard>/validations/items}">
+                        <VBox width="100%" class="sapUiSmallMarginTop">
+                            <Text text="Select items and quantities for this order." class="sapUiTinyMarginBottom"/>
+                            <List id="wizardItemsList"
+                                items="{
+                                    path: 'wizard>/items'
+                                }"
+                                growing="true"
+                                inset="false"
+                                noDataText="Select an order type first">
+                                <items>
+                                    <CustomListItem>
+                                        <VBox width="100%" class="sapUiSmallMarginBottom">
+                                            <HBox justifyContent="SpaceBetween" alignItems="Center">
+                                                <VBox>
+                                                    <Title text="{wizard>name}" level="H5"/>
+                                                    <ObjectStatus text="{= ${wizard>stock} > 0 ? ${wizard>stock} + ' available' : 'Out of stock'}" state="{= ${wizard>stock} > 0 ? 'Success' : 'Error'}"/>
+                                                </VBox>
+                                                <VBox alignItems="End">
+                                                    <ObjectNumber number="{ path: 'wizard>price', formatter: '.formatAmount' }" unit="EUR" emphasized="true"/>
+                                                </VBox>
+                                            </HBox>
+                                            <HBox justifyContent="SpaceBetween" alignItems="Center" class="sapUiSmallMarginTop">
+                                                <Text text="Quantity"/>
+                                                <StepInput min="0" max="{wizard>stock}" value="{wizard>selectedQuantity}" change=".onItemQuantityChange" enabled="{= ${wizard>stock} > 0 }"/>
+                                            </HBox>
+                                        </VBox>
+                                    </CustomListItem>
+                                </items>
+                            </List>
+                            <HBox justifyContent="SpaceBetween" class="sapUiSmallMarginTop">
+                                <Text text="{= ${wizard>/summary/itemCount} === 1 ? '1 item selected' : ${wizard>/summary/itemCount} + ' items selected' }"/>
+                                <ObjectNumber number="{ path: 'wizard>/summary/total', formatter: '.formatAmount' }" unit="EUR" emphasized="true"/>
+                            </HBox>
+                            <HBox justifyContent="End" class="sapUiSmallMarginTop">
+                                <Button text="Review order" type="Emphasized" press=".onContinueFromItems" enabled="{wizard>/validations/items}"/>
+                            </HBox>
+                        </VBox>
+                    </WizardStep>
+
+                    <WizardStep id="wizardSummaryStep" title="Summary">
+                        <VBox width="100%" class="sapUiSmallMarginTop">
+                            <HBox justifyContent="SpaceBetween">
+                                <VBox>
+                                    <Label text="Customer"/>
+                                    <Text text="{wizard>/summary/customerLabel}" wrapping="true"/>
+                                </VBox>
+                                <VBox alignItems="End">
+                                    <Label text="Order type"/>
+                                    <Text text="{ path: 'wizard>/orderType', formatter: '.formatOrderType' }"/>
+                                </VBox>
+                            </HBox>
+                            <HBox justifyContent="SpaceBetween" class="sapUiSmallMarginTop">
+                                <VBox>
+                                    <Label text="Order date"/>
+                                    <Text text="{ path: 'wizard>/orderDate', formatter: '.formatDate' }"/>
+                                </VBox>
+                            </HBox>
+                            <VBox class="sapUiSmallMarginTop">
+                                <Label text="Items"/>
+                                <List items="{
+                                        path: 'wizard>/selectedItems'
+                                    }"
+                                    growing="false"
+                                    inset="true"
+                                    noDataText="No items selected">
+                                    <items>
+                                        <ObjectListItem
+                                            title="{wizard>name}"
+                                            number="{ parts: [ {path: 'wizard>selectedQuantity'}, {path: 'wizard>price'} ], formatter: '.calculateItemTotal' }"
+                                            numberUnit="EUR">
+                                            <attributes>
+                                                <ObjectAttribute title="Quantity" text="{wizard>selectedQuantity}"/>
+                                                <ObjectAttribute title="Unit price" text="{ path: 'wizard>price', formatter: '.formatAmount' }"/>
+                                            </attributes>
+                                        </ObjectListItem>
+                                    </items>
+                                </List>
+                            </VBox>
+                            <HBox justifyContent="End" class="sapUiSmallMarginTop">
+                                <VBox alignItems="End">
+                                    <Label text="Order total"/>
+                                    <ObjectNumber number="{ path: 'wizard>/summary/total', formatter: '.formatAmount' }" unit="EUR" emphasized="true"/>
+                                </VBox>
+                            </HBox>
+                        </VBox>
+                    </WizardStep>
+                </Wizard>
+            </VBox>
+        </content>
+        <buttons>
+            <Button text="Cancel" press=".onCloseOrderWizard"/>
+            <Button text="Confirm order" type="Emphasized" press=".onConfirmOrder" enabled="{= ${wizard>/validations/customer} &amp;&amp; ${wizard>/validations/type} &amp;&amp; ${wizard>/validations/items} }"/>
+        </buttons>
+    </Dialog>
+</core:FragmentDefinition>

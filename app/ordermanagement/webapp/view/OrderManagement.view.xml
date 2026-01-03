@@ -10,6 +10,7 @@
                         <Title text="Orders" level="H3"/>
                         <ToolbarSpacer/>
                         <SearchField width="17.5rem" placeholder="Search by customer" search=".onSearch" class="sapUiTinyMarginTop sapUiTinyMarginBottom"/>
+                        <Button type="Transparent" icon="sap-icon://add" press=".onOpenCreateOrder" tooltip="Create order"/>
                         <Button type="Transparent" icon="sap-icon://sort" press=".onOpenSortPopover"/>
                         <Button type="Transparent" icon="sap-icon://filter" press=".onOpenFilterPopover"/>
                     </OverflowToolbar>

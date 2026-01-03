@@ -15,7 +15,7 @@ sap.ui.define([
         maxFractionDigits: 2
     });
 
-    const dateFormatter = DateFormat.getDateInstance({ style: "medium", UTC: true });
+    const dateFormatter = DateFormat.getDateInstance({ style: "medium" });
 
     return {
         formatCustomerName(firstName, lastName) {
@@ -30,7 +30,13 @@ sap.ui.define([
         },
 
         formatAmount(value) {
-            const number = typeof value === "number" ? value : parseFloat(value);
+            let number = null;
+            if (typeof value === "number") {
+                number = value;
+            } else if (typeof value === "string") {
+                const normalized = value.replace(/[^0-9.-]/g, "");
+                number = parseFloat(normalized);
+            }
             if (Number.isNaN(number)) {
                 return amountFormatter.format(0);
             }
