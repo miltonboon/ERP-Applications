@@ -90,10 +90,35 @@ sap.ui.define([
                     if (action !== MessageBox.Action.YES) {
                         return;
                     }
-                    context.setProperty("status", "Cancelled");
                     const mainModel = this.getOwnerComponent().getModel();
+                    const overviewModel = view.getModel("overview");
+                    const orderId = overviewModel && overviewModel.getProperty("/id");
+                    const updateGroupId = this._getUpdateGroupId(mainModel);
+                    let orderItems = [];
                     try {
-                        await mainModel.submitBatch("$auto");
+                        orderItems = await this._loadOrderItemsForRestock(orderId, context);
+                    } catch (_e) {
+                        MessageToast.show("Could not load order items to restock.");
+                        return;
+                    }
+                    let restockOperations = [];
+                    try {
+                        restockOperations = await this._prepareRestockOperations(orderItems, updateGroupId);
+                    } catch (_e) {
+                    MessageToast.show("Could not prepare stock update.");
+                    return;
+                }
+                if (!restockOperations || restockOperations.length === 0) {
+                    MessageToast.show("No items to restock for this order.");
+                    return;
+                }
+                /* Debug log for restock payload */
+                // eslint-disable-next-line no-console
+                console.log("Restock operations", restockOperations);
+                    context.setProperty("status", "Cancelled", updateGroupId);
+                    try {
+                        this._applyRestockOperations(restockOperations);
+                        await mainModel.submitBatch(updateGroupId);
                         const overviewModel = view.getModel("overview");
                         if (overviewModel) {
                             overviewModel.setProperty("/status", "Cancelled");
@@ -101,13 +126,85 @@ sap.ui.define([
                         if (mainModel && mainModel.refresh) {
                             mainModel.refresh();
                         }
-                        MessageToast.show("Order cancelled.");
+                        MessageToast.show("Order cancelled and stock restored.");
                     } catch (_e) {
+                        this._revertRestockOperations(restockOperations);
                         context.setProperty("status", currentStatus);
                         MessageToast.show("Failed to cancel order.");
                     }
                 }
             });
+        },
+
+        async _loadOrderItemsForRestock(orderId, context) {
+            const mainModel = this.getOwnerComponent().getModel();
+            const path = orderId ? `/Orders('${orderId}')/items` : `${context.getPath()}/items`;
+            const binding = mainModel.bindList(path, undefined, undefined, undefined, {
+                $expand: "item($select=ID,stock)"
+            });
+            const contexts = await binding.requestContexts(0, 200);
+            return contexts.map((ctx) => ctx.getObject());
+        },
+
+        async _prepareRestockOperations(orderItems, updateGroupId) {
+            if (!Array.isArray(orderItems) || orderItems.length === 0) {
+                return [];
+            }
+            const mainModel = this.getOwnerComponent().getModel();
+            const quantities = new Map();
+            orderItems.forEach((orderItem) => {
+                const itemData = orderItem ? (orderItem.item || {}) : {};
+                const itemId = orderItem.item_ID || itemData.ID || itemData.Id || itemData.id || orderItem.itemId || orderItem.item_id;
+                const quantity = Number(orderItem.quantity);
+                if (!itemId || !Number.isFinite(quantity) || quantity <= 0) {
+                    return;
+                }
+                const current = quantities.get(itemId) || 0;
+                quantities.set(itemId, current + quantity);
+            });
+            /* Debug log quantities per item */
+            // eslint-disable-next-line no-console
+            console.log("Quantities to restock", Array.from(quantities.entries()));
+            const operations = [];
+            for (const [itemId, quantity] of quantities.entries()) {
+                const itemContext = mainModel.bindContext(`/Items('${itemId}')`, undefined, {
+                    $$updateGroupId: updateGroupId || "$auto"
+                });
+                const data = await (itemContext.requestObject ? itemContext.requestObject() : Promise.resolve({}));
+                const stockFromItem = data && data.stock;
+                const currentStock = Number(stockFromItem);
+                const previousStock = Number.isFinite(currentStock) ? currentStock : 0;
+                operations.push({
+                    context: itemContext,
+                    previousStock,
+                    nextStock: previousStock + quantity,
+                    groupId: updateGroupId || "$auto"
+                });
+            }
+            return operations;
+        },
+
+        _applyRestockOperations(operations) {
+            operations.forEach((op) => {
+                if (op && op.context && op.context.setProperty) {
+                    op.context.setProperty("stock", op.nextStock, op.groupId);
+                }
+            });
+        },
+
+        _revertRestockOperations(operations) {
+            operations.forEach((op) => {
+                if (op && op.context && op.context.setProperty) {
+                    op.context.setProperty("stock", op.previousStock, op.groupId || "$auto");
+                }
+            });
+        },
+
+        _getUpdateGroupId(mainModel) {
+            if (mainModel && typeof mainModel.getUpdateGroupId === "function") {
+                return mainModel.getUpdateGroupId();
+            }
+            return "$auto";
         },
 
         onProceedToPayment() {
