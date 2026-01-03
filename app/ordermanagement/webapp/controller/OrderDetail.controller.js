@@ -3,10 +3,12 @@ sap.ui.define([
     "sap/f/library",
     "sap/m/MessageToast",
     "sap/m/MessageBox",
+    "sap/m/ActionSheet",
+    "sap/m/Button",
     "ordermanagement/ordermanagement/model/formatter",
     "ordermanagement/ordermanagement/controller/util/CustomerDialog",
     "ordermanagement/ordermanagement/controller/util/ExportPDF"
-], (Controller, fLibrary, MessageToast, MessageBox, formatter, CustomerDialog, ExportPDF) => {
+], (Controller, fLibrary, MessageToast, MessageBox, ActionSheet, Button, formatter, CustomerDialog, ExportPDF) => {
     "use strict";
 
     const LayoutType = fLibrary.LayoutType;
@@ -17,11 +19,16 @@ sap.ui.define([
         onInit() {
             this._customerDialog = new CustomerDialog(this);
             this._exportPdf = new ExportPDF(this);
+            this._actionsSheet = null;
+            this._actionButtons = {};
         },
 
         onExit() {
             if (this._customerDialog) {
                 this._customerDialog.destroy();
+            }
+            if (this._actionsSheet) {
+                this._actionsSheet.destroy();
             }
         },
 
@@ -61,6 +68,14 @@ sap.ui.define([
 
         calculateOrderTotal(items) {
             return formatter.calculateOrderTotal(items);
+        },
+
+        onOpenActionsMenu(event) {
+            const sheet = this._getActionsSheet();
+            this._updateActionSheetState();
+            if (sheet) {
+                sheet.openBy(event.getSource());
+            }
         },
 
         onExportPdf() {
@@ -105,16 +120,16 @@ sap.ui.define([
                     try {
                         restockOperations = await this._prepareRestockOperations(orderItems, updateGroupId);
                     } catch (_e) {
-                    MessageToast.show("Could not prepare stock update.");
-                    return;
-                }
-                if (!restockOperations || restockOperations.length === 0) {
-                    MessageToast.show("No items to restock for this order.");
-                    return;
-                }
-                /* Debug log for restock payload */
-                // eslint-disable-next-line no-console
-                console.log("Restock operations", restockOperations);
+                        MessageToast.show("Could not prepare stock update.");
+                        return;
+                    }
+                    if (!restockOperations || restockOperations.length === 0) {
+                        MessageToast.show("No items to restock for this order.");
+                        return;
+                    }
+                    /* Debug log for restock payload */
+                    // eslint-disable-next-line no-console
+                    console.log("Restock operations", restockOperations);
                     context.setProperty("status", "Cancelled", updateGroupId);
                     try {
                         this._applyRestockOperations(restockOperations);
@@ -205,6 +220,62 @@ sap.ui.define([
                 return mainModel.getUpdateGroupId();
             }
             return "$auto";
+        },
+
+        _getActionsSheet() {
+            if (this._actionsSheet) {
+                return this._actionsSheet;
+            }
+            const view = this.getView();
+            this._actionButtons.proceed = new Button({
+                text: "Proceed to Payment",
+                icon: "sap-icon://credit-card",
+                type: "Transparent",
+                press: this.onProceedToPayment.bind(this)
+            });
+            this._actionButtons.cancel = new Button({
+                text: "Cancel Order",
+                icon: "sap-icon://decline",
+                type: "Transparent",
+                press: this.onCancelOrder.bind(this)
+            });
+            this._actionButtons.export = new Button({
+                text: "Export to PDF",
+                icon: "sap-icon://pdf-attachment",
+                type: "Transparent",
+                press: this.onExportPdf.bind(this)
+            });
+            this._actionsSheet = new ActionSheet({
+                buttons: [
+                    this._actionButtons.proceed,
+                    this._actionButtons.cancel,
+                    this._actionButtons.export
+                ]
+            });
+            if (view && view.addDependent) {
+                view.addDependent(this._actionsSheet);
+            }
+            return this._actionsSheet;
+        },
+
+        _updateActionSheetState() {
+            const overviewModel = this.getView().getModel("overview");
+            const status = overviewModel && overviewModel.getProperty("/status");
+            const orderId = overviewModel && overviewModel.getProperty("/id");
+            const hasOrder = !!orderId;
+            const isCancelled = status === "Cancelled";
+            const isPaid = status === "Paid";
+            if (this._actionButtons.proceed) {
+                this._actionButtons.proceed.setVisible(!isPaid && !isCancelled);
+                this._actionButtons.proceed.setEnabled(hasOrder && !isPaid && !isCancelled);
+            }
+            if (this._actionButtons.cancel) {
+                this._actionButtons.cancel.setVisible(!isCancelled);
+                this._actionButtons.cancel.setEnabled(hasOrder && !isCancelled);
+            }
+            if (this._actionButtons.export) {
+                this._actionButtons.export.setEnabled(hasOrder);
+            }
         },
 
         onProceedToPayment() {

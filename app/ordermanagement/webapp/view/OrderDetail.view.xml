@@ -22,17 +22,11 @@
                     </m:HBox>
                 </snappedHeading>
                 <actions>
-                    <m:Button text="Proceed to Payment"
-                        type="Emphasized"
-                        visible="{= ${overview>/status} !== 'Paid' &amp;&amp; ${overview>/status} !== 'Cancelled' }"
+                    <m:Button type="Transparent"
+                        icon="sap-icon://overflow"
+                        tooltip="Actions"
                         enabled="{= !!${overview>/id} }"
-                        press=".onProceedToPayment"/>
-                    <m:Button text="Cancel Order"
-                        icon="sap-icon://decline"
-                        visible="{= ${overview>/status} !== 'Cancelled' }"
-                        enabled="{= !!${overview>/id} }"
-                        press=".onCancelOrder"/>
-                    <m:Button text="Export to PDF" icon="sap-icon://pdf-attachment" type="Emphasized" press=".onExportPdf"/>
+                        press=".onOpenActionsMenu"/>
                 </actions>
             </ObjectPageDynamicHeaderTitle>
         </headerTitle>
