@@ -126,7 +126,7 @@ sap.ui.define([
                 placeholder: "Select order type"
             });
             TYPE_OPTIONS.forEach((t) => {
-                this._filterType.addItem(new Item({ key: t, text: t }));
+                this._filterType.addItem(new Item({ key: t, text: formatter.formatOrderType(t) }));
             });
 
             const clearButton = new Button({
