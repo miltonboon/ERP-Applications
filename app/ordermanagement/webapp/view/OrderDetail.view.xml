@@ -21,6 +21,9 @@
                         <m:Title text="Order Details" level="H4"/>
                     </m:HBox>
                 </snappedHeading>
+                <actions>
+                    <m:Button text="Export to PDF" icon="sap-icon://pdf-attachment" type="Emphasized" press=".onExportPdf"/>
+                </actions>
             </ObjectPageDynamicHeaderTitle>
         </headerTitle>
         <headerContent>
