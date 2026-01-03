@@ -1,0 +1,1 @@
+using apmorrowland.FestivalService as service from '../../srv/services';
