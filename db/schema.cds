@@ -53,6 +53,7 @@ entity Stages : cuid {
 }
 
 entity FestivalDays : cuid {
+  @assert.unique: { date }
   date      : Date    @mandatory;
   dayNumber : Integer @mandatory;
 }
