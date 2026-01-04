@@ -1,6 +1,57 @@
 <mvc:View controllerName="planningoverview.planningoverview.controller.Planning"
     xmlns:mvc="sap.ui.core.mvc"
-    xmlns="sap.m">
-    <Page id="page" title="{i18n>title}">
+    xmlns="sap.m"
+    xmlns:unified="sap.ui.unified">
+    <Page id="page"
+        title="{i18n>title}"
+        busy="{calendar>/busy}"
+        busyIndicatorDelay="0">
+        <content>
+            <Toolbar>
+                <Title text="{i18n>hourViewDescription}" level="H4"/>
+                <ToolbarSpacer />
+                <SegmentedButton
+                    selectedKey="{calendar>/selectedDayId}"
+                    selectionChange=".onDaySelection"
+                    items="{calendar>/days}">
+                    <items>
+                        <SegmentedButtonItem key="{calendar>id}" text="{calendar>label}"/>
+                    </items>
+                </SegmentedButton>
+            </Toolbar>
+            <PlanningCalendar
+                id="festivalPlanning"
+                startDate="{calendar>/startDate}"
+                viewKey="hourView"
+                showEmptyIntervalHeaders="false"
+                appointmentSelect=".onAppointmentSelect"
+                rows="{path: 'calendar>/visibleRows'}">
+                <views>
+                    <PlanningCalendarView
+                        description="{i18n>hourViewDescription}"
+                        key="hourView"
+                        intervalType="Hour"
+                        intervalsS="{calendar>/intervalCount}"
+                        intervalsM="{calendar>/intervalCount}"
+                        intervalsL="{calendar>/intervalCount}" />
+                </views>
+                <rows>
+                    <PlanningCalendarRow
+                        title="{calendar>title}"
+                        text="{calendar>subtitle}"
+                        appointments="{calendar>appointments}">
+                        <appointments>
+                            <unified:CalendarAppointment
+                                startDate="{calendar>startDate}"
+                                endDate="{calendar>endDate}"
+                                title="{calendar>artist}"
+                                text="{calendar>timeRange}"
+                                type="{calendar>type}"
+                                icon="{calendar>icon}" />
+                        </appointments>
+                    </PlanningCalendarRow>
+                </rows>
+            </PlanningCalendar>
+        </content>
     </Page>
 </mvc:View>
