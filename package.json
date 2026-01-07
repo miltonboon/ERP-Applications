@@ -14,7 +14,8 @@
     "start": "cds-serve",
     "watch-artistmanagement": "cds watch --open artistmanagement/index.html?sap-ui-xx-viewCache=false --livereload false",
     "watch-ordermanagement": "cds watch --open ordermanagement.ordermanagement/index.html?sap-ui-xx-viewCache=false --livereload false",
-    "watch-planningoverview": "cds watch --open planningoverview.planningoverview/index.html?sap-ui-xx-viewCache=false --livereload false"
+    "watch-planningoverview": "cds watch --open planningoverview.planningoverview/index.html?sap-ui-xx-viewCache=false --livereload false",
+    "watch-leaderboardoverview": "cds watch --open leaderboardoverview.leaderboardoverview/index.html?sap-ui-xx-viewCache=false --livereload false"
   },
   "private": true,
   "workspaces": [
