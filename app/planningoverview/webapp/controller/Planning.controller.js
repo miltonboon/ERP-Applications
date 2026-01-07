@@ -46,7 +46,13 @@ sap.ui.define([
                 visibleRows: [],
                 days: [],
                 selectedDayId: "",
-                legendItems: []
+                legendItems: [],
+                viewMode: "day",
+                selectionKey: "",
+                selectionOptions: [],
+                currentViewKey: "hourView",
+                dayCount: 1,
+                earliestDayDate: null
             });
 
             this.getView().setModel(oViewModel, "calendar");
@@ -73,14 +79,20 @@ sap.ui.define([
                     this._fetchFestivalDays(),
                     this._fetchPerformances()
                 ]);
-                const { rows: aRows, days, legendItems } = this._buildCalendarRows(aPerformances, aFestivalDays);
+                const { rows: aRows, days, legendItems, earliestDayDate } = this._buildCalendarRows(aPerformances, aFestivalDays);
 
                 oViewModel.setProperty("/rows", aRows);
                 oViewModel.setProperty("/days", days);
                 oViewModel.setProperty("/legendItems", legendItems);
+                oViewModel.setProperty("/dayCount", days.length || 1);
+                oViewModel.setProperty("/earliestDayDate", earliestDayDate || null);
                 const sSelectedDayId = days[0]?.id || "";
                 oViewModel.setProperty("/selectedDayId", sSelectedDayId);
-                this._applyDaySelection(sSelectedDayId, oViewModel);
+                oViewModel.setProperty("/selectionKey", sSelectedDayId);
+                oViewModel.setProperty("/viewMode", "day");
+                oViewModel.setProperty("/currentViewKey", "hourView");
+                this._refreshSelectionOptions(oViewModel);
+                this._applySelection(oViewModel);
             } catch (error) {
                 Log.error("Failed to load festival planning data", error);
                 oViewModel.setProperty("/rows", []);
@@ -120,6 +132,7 @@ sap.ui.define([
             const mStageRows = {};
             const mDays = {};
             const mLegend = {};
+            let oEarliestDayDate = null;
 
             (aFestivalDays || []).forEach((oDay) => {
                 const sDayId = oDay.ID || oDay.id;
@@ -133,6 +146,12 @@ sap.ui.define([
                     minStartMinutes: null,
                     maxEndMinutes: null
                 };
+                const baseDate = oDay.date ? new Date(oDay.date) : null;
+                if (baseDate && !Number.isNaN(baseDate.getTime())) {
+                    if (!oEarliestDayDate || baseDate < oEarliestDayDate) {
+                        oEarliestDayDate = baseDate;
+                    }
+                }
             });
 
             aPerformances.forEach((oPerformance) => {
@@ -170,6 +189,7 @@ sap.ui.define([
                 const sStageId = oStage.ID;
                 if (!mStageRows[sStageId]) {
                     mStageRows[sStageId] = {
+                        id: sStageId,
                         title: oStage.name,
                         subtitle: "Stage",
                         appointments: []
@@ -229,7 +249,7 @@ sap.ui.define([
 
             const legendItems = Object.entries(mLegend).map(([type, label]) => ({ type, label })).sort((a, b) => a.label.localeCompare(b.label));
 
-            return { rows, days, legendItems };
+            return { rows, days, legendItems, earliestDayDate: oEarliestDayDate };
         },
 
         _combineDateTime(sDate, sTime) {
@@ -284,6 +304,13 @@ sap.ui.define([
                 return null;
             }
             return (iHour * 60) + iMinutes;
+        },
+
+        _getMinutesFromDate(oDate) {
+            if (!(oDate instanceof Date) || Number.isNaN(oDate.getTime())) {
+                return null;
+            }
+            return (oDate.getHours() * 60) + oDate.getMinutes();
         },
 
         _formatTimeRange(sStartTime, sEndTime, oStartDate, oEndDate) {
@@ -404,6 +431,7 @@ sap.ui.define([
         },
 
         _applyDaySelection(sDayId, oViewModel) {
+            oViewModel.setProperty("/currentViewKey", "hourView");
             const aRows = oViewModel.getProperty("/rows") || [];
             const aDays = oViewModel.getProperty("/days") || [];
             const oDay = aDays.find((d) => d.id === sDayId) || aDays[0];
@@ -422,6 +450,99 @@ sap.ui.define([
             oViewModel.setProperty("/visibleRows", aVisibleRows);
             oViewModel.setProperty("/startDate", oDay ? oDay.startDate : new Date());
             oViewModel.setProperty("/intervalCount", oDay ? oDay.intervalCount : 12);
+        },
+
+        _applyStageSelection(sStageId, oViewModel) {
+            oViewModel.setProperty("/currentViewKey", "hourView");
+            const aStageRows = oViewModel.getProperty("/rows") || [];
+            const aDays = oViewModel.getProperty("/days") || [];
+            const oStage = aStageRows.find((r) => r.id === sStageId) || aStageRows[0];
+            if (!oStage) {
+                oViewModel.setProperty("/visibleRows", []);
+                return;
+            }
+
+            const allApps = oStage.appointments || [];
+            let iMinMinutes = Infinity;
+            let iMaxMinutes = 0;
+            allApps.forEach((app) => {
+                const minOfDay = this._getMinutesFromDate(app.startDate);
+                const maxOfDay = this._getMinutesFromDate(app.endDate);
+                if (minOfDay !== null && minOfDay < iMinMinutes) {
+                    iMinMinutes = minOfDay;
+                }
+                if (maxOfDay !== null && maxOfDay > iMaxMinutes) {
+                    iMaxMinutes = maxOfDay;
+                }
+            });
+
+            if (!Number.isFinite(iMinMinutes) || !Number.isFinite(iMaxMinutes) || iMinMinutes === Infinity) {
+                oViewModel.setProperty("/visibleRows", []);
+                return;
+            }
+
+            const iStartHour = Math.max(0, Math.floor(iMinMinutes / 60));
+            const iEndHour = Math.min(24, Math.ceil(iMaxMinutes / 60));
+            const intervalCount = Math.max(1, iEndHour - iStartHour);
+
+            const baseDate = new Date();
+            baseDate.setHours(iStartHour, 0, 0, 0);
+
+            const rowsByDay = aDays.map((d) => {
+                const apps = (oStage.appointments || [])
+                    .filter((app) => app.dayId === d.id)
+                    .map((app) => {
+                        const start = new Date(baseDate);
+                        const end = new Date(baseDate);
+                        if (app.startDate instanceof Date) {
+                            start.setHours(app.startDate.getHours(), app.startDate.getMinutes(), app.startDate.getSeconds(), 0);
+                        }
+                        if (app.endDate instanceof Date) {
+                            end.setHours(app.endDate.getHours(), app.endDate.getMinutes(), app.endDate.getSeconds(), 0);
+                        }
+                        return { ...app, startDate: start, endDate: end };
+                    });
+                return {
+                    title: d.label,
+                    text: "",
+                    appointments: apps
+                };
+            });
+
+            oViewModel.setProperty("/visibleRows", rowsByDay);
+            oViewModel.setProperty("/startDate", baseDate);
+            oViewModel.setProperty("/intervalCount", intervalCount);
+        },
+
+        _applySelection(oViewModel) {
+            const sMode = oViewModel.getProperty("/viewMode") || "day";
+            const sKey = oViewModel.getProperty("/selectionKey") || "";
+            if (sMode === "stage") {
+                this._applyStageSelection(sKey, oViewModel);
+            } else {
+                this._applyDaySelection(sKey, oViewModel);
+            }
+        },
+
+        _refreshSelectionOptions(oViewModel) {
+            const sMode = oViewModel.getProperty("/viewMode") || "day";
+            if (sMode === "stage") {
+                const aRows = oViewModel.getProperty("/rows") || [];
+                const options = aRows.map((r) => ({ key: r.id, text: r.title }));
+                oViewModel.setProperty("/selectionOptions", options);
+                const currentKey = oViewModel.getProperty("/selectionKey");
+                if (!options.some((o) => o.key === currentKey) && options[0]) {
+                    oViewModel.setProperty("/selectionKey", options[0].key);
+                }
+            } else {
+                const aDays = oViewModel.getProperty("/days") || [];
+                const options = aDays.map((d) => ({ key: d.id, text: d.label }));
+                oViewModel.setProperty("/selectionOptions", options);
+                const currentKey = oViewModel.getProperty("/selectionKey");
+                if (!options.some((o) => o.key === currentKey) && options[0]) {
+                    oViewModel.setProperty("/selectionKey", options[0].key);
+                }
+            }
         },
 
         _buildGenreTokens(aGenres) {
@@ -477,7 +598,23 @@ sap.ui.define([
             const sKey = oEvent.getParameter("item").getKey();
             const oViewModel = this.getView().getModel("calendar");
             oViewModel.setProperty("/selectedDayId", sKey);
-            this._applyDaySelection(sKey, oViewModel);
+            oViewModel.setProperty("/selectionKey", sKey);
+            this._applySelection(oViewModel);
+        },
+
+        onModeChange(oEvent) {
+            const sKey = oEvent.getParameter("selectedItem").getKey();
+            const oViewModel = this.getView().getModel("calendar");
+            oViewModel.setProperty("/viewMode", sKey);
+            this._refreshSelectionOptions(oViewModel);
+            this._applySelection(oViewModel);
+        },
+
+        onSelectionChange(oEvent) {
+            const sKey = oEvent.getParameter("selectedItem").getKey();
+            const oViewModel = this.getView().getModel("calendar");
+            oViewModel.setProperty("/selectionKey", sKey);
+            this._applySelection(oViewModel);
         },
 
         onAppointmentSelect(oEvent) {

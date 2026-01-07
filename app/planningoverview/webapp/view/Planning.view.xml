@@ -1,6 +1,7 @@
 <mvc:View controllerName="planningoverview.planningoverview.controller.Planning"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
+    xmlns:core="sap.ui.core"
     xmlns:unified="sap.ui.unified">
     <Page id="page"
         title="{i18n>title}"
@@ -11,19 +12,22 @@
                 <Title text="{i18n>hourViewDescription}" level="H4"/>
                 <Button text="Color key" type="Transparent" icon="sap-icon://legend" press=".onOpenLegend"/>
                 <ToolbarSpacer />
-                <SegmentedButton
-                    selectedKey="{calendar>/selectedDayId}"
-                    selectionChange=".onDaySelection"
-                    items="{calendar>/days}">
+                <Select selectedKey="{calendar>/viewMode}" change=".onModeChange" width="8rem">
                     <items>
-                        <SegmentedButtonItem key="{calendar>id}" text="{calendar>label}"/>
+                        <core:Item key="day" text="By day"/>
+                        <core:Item key="stage" text="By stage"/>
                     </items>
-                </SegmentedButton>
+                </Select>
+                <Select selectedKey="{calendar>/selectionKey}" change=".onSelectionChange" width="12rem" items="{calendar>/selectionOptions}">
+                    <items>
+                        <core:Item key="{calendar>key}" text="{calendar>text}"/>
+                    </items>
+                </Select>
             </Toolbar>
             <PlanningCalendar
                 id="festivalPlanning"
                 startDate="{calendar>/startDate}"
-                viewKey="hourView"
+                viewKey="{calendar>/currentViewKey}"
                 showEmptyIntervalHeaders="false"
                 appointmentSelect=".onAppointmentSelect"
                 rows="{path: 'calendar>/visibleRows'}">
@@ -35,6 +39,13 @@
                         intervalsS="{calendar>/intervalCount}"
                         intervalsM="{calendar>/intervalCount}"
                         intervalsL="{calendar>/intervalCount}" />
+                    <PlanningCalendarView
+                        description="Days"
+                        key="dayRange"
+                        intervalType="Day"
+                        intervalsS="{calendar>/dayCount}"
+                        intervalsM="{calendar>/dayCount}"
+                        intervalsL="{calendar>/dayCount}" />
                 </views>
                 <rows>
                     <PlanningCalendarRow
