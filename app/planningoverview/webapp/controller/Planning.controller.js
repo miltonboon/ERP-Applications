@@ -10,9 +10,31 @@ sap.ui.define([
     "sap/m/ObjectIdentifier",
     "sap/m/Text",
     "sap/m/FlexBox",
-    "sap/m/Token"
-], (Controller, JSONModel, Log, Dialog, Button, VBox, HBox, Avatar, ObjectIdentifier, Text, FlexBox, Token) => {
+    "sap/m/Token",
+    "sap/m/PlanningCalendarLegend",
+    "sap/ui/unified/CalendarLegendItem"
+], (Controller, JSONModel, Log, Dialog, Button, VBox, HBox, Avatar, ObjectIdentifier, Text, FlexBox, Token, PlanningCalendarLegend, CalendarLegendItem) => {
     "use strict";
+
+    const GENRE_TYPE_MAP = {
+        HIPHOP: "Type01",
+        RNB: "Type02",
+        EDM: "Type03",
+        POP: "Type04",
+        ROCK: "Type05",
+        TECHNO: "Type06",
+        HOUSE: "Type07",
+        JAZZ: "Type08",
+        CLASSICAL: "Type09",
+        INDIE: "Type10",
+        METAL: "Type11",
+        LATIN: "Type12",
+        AFROBEATS: "Type13",
+        FUNK: "Type14",
+        FOLK: "Type15",
+        BLUES: "Type16",
+        COUNTRY: "Type17"
+    };
 
     return Controller.extend("planningoverview.planningoverview.controller.Planning", {
         onInit() {
@@ -23,11 +45,19 @@ sap.ui.define([
                 rows: [],
                 visibleRows: [],
                 days: [],
-                selectedDayId: ""
+                selectedDayId: "",
+                legendItems: []
             });
 
             this.getView().setModel(oViewModel, "calendar");
             this._loadCalendarData(oViewModel);
+        },
+
+        onExit() {
+            if (this._legendDialog) {
+                this._legendDialog.destroy();
+                this._legendDialog = null;
+            }
         },
 
         onAfterRendering() {
@@ -43,10 +73,11 @@ sap.ui.define([
                     this._fetchFestivalDays(),
                     this._fetchPerformances()
                 ]);
-                const { rows: aRows, days } = this._buildCalendarRows(aPerformances, aFestivalDays);
+                const { rows: aRows, days, legendItems } = this._buildCalendarRows(aPerformances, aFestivalDays);
 
                 oViewModel.setProperty("/rows", aRows);
                 oViewModel.setProperty("/days", days);
+                oViewModel.setProperty("/legendItems", legendItems);
                 const sSelectedDayId = days[0]?.id || "";
                 oViewModel.setProperty("/selectedDayId", sSelectedDayId);
                 this._applyDaySelection(sSelectedDayId, oViewModel);
@@ -88,6 +119,7 @@ sap.ui.define([
         _buildCalendarRows(aPerformances, aFestivalDays) {
             const mStageRows = {};
             const mDays = {};
+            const mLegend = {};
 
             (aFestivalDays || []).forEach((oDay) => {
                 const sDayId = oDay.ID || oDay.id;
@@ -148,6 +180,7 @@ sap.ui.define([
                 mStageRows[sStageId].appointments.push({
                     startDate: oStartDate,
                     endDate: oEndDate,
+                    artistId: oArtist.ID || oArtist.id,
                     artist: oArtist.name,
                     timeRange: this._formatTimeRange(oPerformance.startTime, oPerformance.endTime, oStartDate, oEndDate),
                     type: this._getAppointmentTypeFromGenre(oArtist.genres, oDay.dayNumber),
@@ -159,6 +192,15 @@ sap.ui.define([
                     dayLabel: this._getDayLabel(oDay),
                     dayId: sDayId
                 });
+
+                if (Array.isArray(oArtist.genres) && oArtist.genres.length) {
+                    const sGenre = oArtist.genres[0];
+                    const sType = this._getAppointmentTypeFromGenre(oArtist.genres, oDay.dayNumber);
+                    const sLabel = this._formatGenre(sGenre);
+                    if (sType && sLabel) {
+                        mLegend[sType] = sLabel;
+                    }
+                }
             });
 
             const rows = Object.values(mStageRows)
@@ -185,7 +227,9 @@ sap.ui.define([
                 };
             }).sort((a, b) => (a.startDate || 0) - (b.startDate || 0));
 
-            return { rows, days };
+            const legendItems = Object.entries(mLegend).map(([type, label]) => ({ type, label })).sort((a, b) => a.label.localeCompare(b.label));
+
+            return { rows, days, legendItems };
         },
 
         _combineDateTime(sDate, sTime) {
@@ -224,23 +268,8 @@ sap.ui.define([
         _getAppointmentTypeFromGenre(aGenres, iDayNumber) {
             if (Array.isArray(aGenres) && aGenres.length) {
                 const genre = aGenres[0];
-                const map = {
-                    HIPHOP: "Type01",
-                    RNB: "Type02",
-                    EDM: "Type03",
-                    POP: "Type04",
-                    ROCK: "Type05",
-                    TECHNO: "Type06",
-                    HOUSE: "Type07",
-                    JAZZ: "Type08",
-                    CLASSICAL: "Type09",
-                    INDIE: "Type10",
-                    METAL: "Type11",
-                    LATIN: "Type12",
-                    AFROBEATS: "Type13"
-                };
-                if (map[genre]) {
-                    return map[genre];
+                if (GENRE_TYPE_MAP[genre]) {
+                    return GENRE_TYPE_MAP[genre];
                 }
             }
             return this._getAppointmentType(iDayNumber);
@@ -287,7 +316,11 @@ sap.ui.define([
                 INDIE: "Indie",
                 METAL: "Metal",
                 LATIN: "Latin",
-                AFROBEATS: "Afrobeats"
+                AFROBEATS: "Afrobeats",
+                FUNK: "Funk",
+                FOLK: "Folk",
+                BLUES: "Blues",
+                COUNTRY: "Country"
             };
             return map[value] || value;
         },
@@ -402,6 +435,41 @@ sap.ui.define([
                     editable: false
                 }).addStyleClass("sapUiTinyMarginEnd sapUiMicroMarginBottom");
             });
+        },
+
+        onOpenLegend() {
+            if (!this._legendDialog) {
+                const oLegend = new PlanningCalendarLegend({
+                    appointmentItems: {
+                        path: "calendar>/legendItems",
+                        template: new CalendarLegendItem({
+                            text: "{calendar>label}",
+                            type: "{calendar>type}"
+                        })
+                    },
+                    title: "Performances"
+                });
+                oLegend.setModel(this.getView().getModel("calendar"), "calendar");
+
+                this._legendDialog = new Dialog({
+                    title: "Color key",
+                    contentWidth: "20rem",
+                    content: [oLegend],
+                    beginButton: new Button({
+                        text: "Close",
+                        press: () => {
+                            this._legendDialog.close();
+                        }
+                    }),
+                    afterClose: () => {
+                        oLegend.destroy();
+                        this._legendDialog.destroy();
+                        this._legendDialog = null;
+                    }
+                });
+            }
+
+            this._legendDialog.open();
         },
 
         onDaySelection(oEvent) {

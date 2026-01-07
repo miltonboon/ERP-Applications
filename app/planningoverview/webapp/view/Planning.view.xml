@@ -9,6 +9,7 @@
         <content>
             <Toolbar>
                 <Title text="{i18n>hourViewDescription}" level="H4"/>
+                <Button text="Color key" type="Transparent" icon="sap-icon://legend" press=".onOpenLegend"/>
                 <ToolbarSpacer />
                 <SegmentedButton
                     selectedKey="{calendar>/selectedDayId}"
