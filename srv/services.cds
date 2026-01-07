@@ -38,4 +38,18 @@ service FestivalService {
     o.customer.lastName  as customerLastName,
     coalesce(round(sum(i.quantity * i.unitPrice), 2), 0) as totalAmount : Decimal(15,2)
   } group by o.ID, o.date, o.type, o.status, o.customer.firstName, o.customer.lastName;
+
+  @readonly
+  entity Leaderboard as select from db.Artists as a
+    left join db.Performances as p on p.artist.ID = a.ID
+    left join db.Reviews as r on r.performance.ID = p.ID {
+    key a.ID,
+    a.name,
+    a.genres,
+    a.country.name as country,
+    a.avatar,
+    a.avatarMimeType,
+    coalesce(cast(round(avg(r.rating) * 10, 0) / 10 as Decimal(4,1)), 0) as averageRating : Decimal(4,1),
+    coalesce(count(r.ID), 0) as reviewCount : Integer
+  } group by a.ID, a.name, a.genres, a.country.name, a.avatar, a.avatarMimeType;
 }

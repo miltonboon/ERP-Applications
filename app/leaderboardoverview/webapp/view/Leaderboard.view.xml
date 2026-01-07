@@ -1,6 +1,75 @@
 <mvc:View controllerName="leaderboardoverview.leaderboardoverview.controller.Leaderboard"
     xmlns:mvc="sap.ui.core.mvc"
-    xmlns="sap.m">
-    <Page id="page" title="{i18n>title}">
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core">
+    <Page id="page" title="{i18n>title}" showHeader="false" class="sapUiNoContentPadding" busyIndicatorDelay="0" busy="{leaderboard>/busy}">
+        <content>
+            <VBox width="100%" class="sapUiNoMargin sapUiNoPadding">
+                <OverflowToolbar height="2.75rem" design="Transparent">
+                    <Title text="Top Performing Artists" level="H3"/>
+                    <ToolbarSpacer/>
+                    <MultiComboBox width="18rem"
+                        showSecondaryValues="false"
+                        placeholder="Filter by genre"
+                        selectedKeys="{leaderboard>/selectedGenres}"
+                        selectionChange=".onGenreSelectionChange"
+                        items="{
+                            path: 'leaderboard>/genreOptions'
+                        }">
+                        <core:Item key="{leaderboard>key}" text="{leaderboard>text}"/>
+                    </MultiComboBox>
+                </OverflowToolbar>
+                <Table id="leaderboardTable"
+                    inset="false"
+                    items="{
+                        path: 'leaderboard>/filteredItems'
+                    }">
+                    <columns>
+                        <Column width="4rem" hAlign="Center" demandPopin="true">
+                            <Label text="Rank"/>
+                        </Column>
+                        <Column hAlign="Left" width="18rem" demandPopin="true">
+                            <Label text="Artist"/>
+                        </Column>
+                        <Column hAlign="Left" width="16rem" demandPopin="true" minScreenWidth="Tablet">
+                            <Label text="Genres"/>
+                        </Column>
+                        <Column hAlign="Center" width="12rem" demandPopin="true" popinDisplay="Inline">
+                            <Label text="Average rating"/>
+                        </Column>
+                        <Column hAlign="End" width="10rem" demandPopin="true" minScreenWidth="Tablet">
+                            <Label text="Reviews"/>
+                        </Column>
+                    </columns>
+                    <items>
+                        <ColumnListItem vAlign="Middle">
+                            <cells>
+                                <Text text="{leaderboard>rank}" textAlign="Center"/>
+                            <HBox alignItems="Center" width="100%" justifyContent="Start">
+                                <Avatar displayShape="Circle"
+                                    displaySize="S"
+                                    imageFitType="Cover"
+                                    src="{ parts: [{path: 'leaderboard>avatar'}, {path: 'leaderboard>avatarMimeType'}, {path: 'leaderboard>ID'}], formatter: '.toAvatarSrc' }"
+                                    fallbackIcon="sap-icon://customer"
+                                    initials="{path: 'leaderboard>name', formatter: '.formatInitials'}"/>
+                                <VBox class="sapUiSmallMarginBegin">
+                                    <ObjectIdentifier title="{leaderboard>name}" text="{leaderboard>country}"/>
+                                </VBox>
+                            </HBox>
+                            <Text text="{path: 'leaderboard>genres', formatter: '.formatGenresList'}" wrapping="true"/>
+                                <HBox alignItems="Center" justifyContent="End" width="100%">
+                                    <RatingIndicator maxValue="5" value="{leaderboard>averageRating}" displayOnly="true"/>
+                                    <ObjectNumber class="sapUiSmallMarginBegin"
+                                        number="{path: 'leaderboard>averageRating', formatter: '.formatAverage'}"
+                                        unit="avg"
+                                        emphasized="false"/>
+                                </HBox>
+                                <Text text="{path: 'leaderboard>reviewCount', formatter: '.formatReviewCount'}" textAlign="End"/>
+                            </cells>
+                        </ColumnListItem>
+                    </items>
+                </Table>
+            </VBox>
+        </content>
     </Page>
 </mvc:View>
