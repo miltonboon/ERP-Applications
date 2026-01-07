@@ -70,12 +70,12 @@ sap.ui.define([
             if (!oDataModel) {
                 return Promise.resolve();
             }
-            const binding = oDataModel.bindList("/Leaderboard", undefined, [
+            const binding = oDataModel.bindList("/ArtistLeaderboard", undefined, [
                 new Sorter("averageRating", true),
                 new Sorter("reviewCount", true),
                 new Sorter("name", false)
             ], undefined, {
-                $select: "ID,name,country,genres,avatar,avatarMimeType,averageRating,reviewCount"
+                $select: "ID,name,country,genres,avatar,avatarMimeType,averageRating,reviewCount,performanceCount"
             });
 
             return binding.requestContexts(0, Infinity).then((contexts) => {
@@ -250,6 +250,10 @@ sap.ui.define([
             const dayPart = dayNumber ? `Day ${dayNumber}${dayDate ? ` (${dayDate})` : ""}` : (dayDate || "");
             const timePart = [startTime, endTime].filter(Boolean).map((t) => (t && t.length >= 5 ? t.substring(0, 5) : t)).join(" - ");
             return [dayPart, timePart].filter(Boolean).join(" | ");
+        },
+
+        formatPerformanceCount(value) {
+            return formatter.formatPerformanceCount(value);
         },
 
         onModeChange(event) {

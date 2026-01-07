@@ -67,6 +67,11 @@ sap.ui.define([], () => {
         return genres.map((g) => formatGenre(g)).filter(Boolean).join(", ");
     };
 
+    const formatPerformanceCount = (value) => {
+        const count = Number(value) || 0;
+        return count === 1 ? "1 performance" : `${count} performances`;
+    };
+
     const getGenreOptions = () => Object.keys(GENRE_LABELS).map((key) => ({
         key,
         text: GENRE_LABELS[key] || key
@@ -97,6 +102,7 @@ sap.ui.define([], () => {
         formatGenre,
         formatGenresList,
         normalizeGenres,
-        getGenreOptions
+        getGenreOptions,
+        formatPerformanceCount
     };
 });

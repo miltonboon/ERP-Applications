@@ -73,7 +73,7 @@
                                         fallbackIcon="sap-icon://customer"
                                         initials="{path: 'leaderboard>name', formatter: '.formatInitials'}"/>
                                     <VBox class="sapUiSmallMarginBegin">
-                                        <ObjectIdentifier title="{leaderboard>name}" text="{leaderboard>country}"/>
+                                        <ObjectIdentifier title="{leaderboard>name}" text="{path: 'leaderboard>performanceCount', formatter: '.formatPerformanceCount'}"/>
                                     </VBox>
                                 </HBox>
                                 <Text text="{path: 'leaderboard>genres', formatter: '.formatGenresList'}" wrapping="true"/>
