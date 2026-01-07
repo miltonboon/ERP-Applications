@@ -4,7 +4,7 @@ sap.ui.define([
     "sap/m/MessageToast",
     "sap/ui/model/Filter",
     "sap/ui/model/FilterOperator",
-    "artistmanagement/model/formatter"
+    "artistmanagement/artistmanagement/model/formatter"
 ], (Fragment, JSONModel, MessageToast, Filter, FilterOperator, formatter) => {
     "use strict";
 
@@ -27,7 +27,7 @@ sap.ui.define([
         if (!controller._performanceDialogPromise) {
             controller._performanceDialogPromise = Fragment.load({
                 id: controller.getView().getId(),
-                name: "artistmanagement.fragment.ManagePerformances",
+                name: "artistmanagement.artistmanagement.fragment.ManagePerformances",
                 controller
             }).then((dialog) => {
                 dialog.setModel(getPerformanceModel(controller), "performanceModel");

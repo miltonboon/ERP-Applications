@@ -2,7 +2,7 @@ sap.ui.define([
     "sap/ui/core/Fragment",
     "sap/ui/model/json/JSONModel",
     "sap/m/MessageToast",
-    "artistmanagement/model/formatter",
+    "artistmanagement/artistmanagement/model/formatter",
     "./Avatar"
 ], (Fragment, JSONModel, MessageToast, formatter, AvatarUtil) => {
     "use strict";
@@ -38,7 +38,7 @@ sap.ui.define([
         if (!controller._editDialogPromise) {
             controller._editDialogPromise = Fragment.load({
                 id: controller.getView().getId(),
-                name: "artistmanagement.fragment.EditArtistDetails",
+                name: "artistmanagement.artistmanagement.fragment.EditArtistDetails",
                 controller
             }).then((dialog) => {
                 dialog.setModel(getEditModel(controller), "editModel");

@@ -1,4 +1,4 @@
-<mvc:View controllerName="artistmanagement.controller.ArtistManagement"
+<mvc:View controllerName="artistmanagement.artistmanagement.controller.ArtistManagement"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
     xmlns:f="sap.f"
@@ -56,7 +56,7 @@
                 </Page>
         </f:beginColumnPages>
         <f:midColumnPages>
-            <mvc:XMLView viewName="artistmanagement.view.ArtistDetail" id="detailView"/>
+            <mvc:XMLView viewName="artistmanagement.artistmanagement.view.ArtistDetail" id="detailView"/>
         </f:midColumnPages>
     </f:FlexibleColumnLayout>
 </mvc:View>

@@ -10,7 +10,7 @@
 |**Service URL**<br>http://localhost:4004/odata/v4/|
 |**Module Name**<br>artistmanagement|
 |**Application Title**<br>Artist Management Applicationj|
-|**Namespace**<br>|
+|**Namespace**<br>artistmanagement|
 |**UI5 Theme**<br>sap_horizon|
 |**UI5 Version**<br>1.143.2|
 |**Enable Code Assist Libraries**<br>False|
@@ -25,10 +25,9 @@ An SAP Fiori application to manage Artists
 
 -   This app has been generated using the SAP Fiori tools - App Generator, as part of the SAP Fiori tools suite.  To launch the generated app, start your CAP project:  and navigate to the following location in your browser:
 
-http://localhost:4004/artistmanagement/webapp/index.html
+http://localhost:4004/artistmanagement.artistmanagement/index.html
 
 #### Pre-requisites:
 
 1. Active NodeJS LTS (Long Term Support) version and associated supported NPM version.  (See https://nodejs.org)
-
 

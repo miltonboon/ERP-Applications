@@ -14,15 +14,15 @@ sap.ui.define([
     "sap/m/Button",
     "sap/m/MultiComboBox",
     "sap/m/Text",
-    "artistmanagement/model/formatter",
-    "artistmanagement/controller/util/CreateArtist",
+    "artistmanagement/artistmanagement/model/formatter",
+    "artistmanagement/artistmanagement/controller/util/CreateArtist",
     "sap/m/Token"
 ], (Controller, JSONModel, fLibrary, Filter, FilterOperator, Sorter, Popover, VBox, Select, Item, SegmentedButton, SegmentedButtonItem, Button, MultiComboBox, Text, formatter, CreateArtist, Token) => {
     "use strict";
 
     const LayoutType = fLibrary.LayoutType;
 
-    return Controller.extend("artistmanagement.controller.ArtistManagement", {
+    return Controller.extend("artistmanagement.artistmanagement.controller.ArtistManagement", {
         formatter,
 
         onInit() {

@@ -1,4 +1,4 @@
-<mvc:View controllerName="artistmanagement.controller.ArtistDetail"
+<mvc:View controllerName="artistmanagement.artistmanagement.controller.ArtistDetail"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.uxap"
     xmlns:m="sap.m">

@@ -1,18 +1,18 @@
 sap.ui.define([
     "sap/ui/core/mvc/Controller",
     "sap/f/library",
-    "artistmanagement/model/formatter",
+    "artistmanagement/artistmanagement/model/formatter",
     "sap/ui/core/Fragment",
     "sap/ui/model/json/JSONModel",
     "sap/m/MessageToast",
-    "artistmanagement/controller/util/EditArtist",
-    "artistmanagement/controller/util/ManagePerformances"
+    "artistmanagement/artistmanagement/controller/util/EditArtist",
+    "artistmanagement/artistmanagement/controller/util/ManagePerformances"
 ], (Controller, fLibrary, formatter, Fragment, JSONModel, MessageToast, EditArtist, ManagePerformances) => {
     "use strict";
 
     const LayoutType = fLibrary.LayoutType;
 
-    return Controller.extend("artistmanagement.controller.ArtistDetail", {
+    return Controller.extend("artistmanagement.artistmanagement.controller.ArtistDetail", {
         formatter,
 
         onExit() {
@@ -233,7 +233,7 @@ sap.ui.define([
             if (!this._reviewDialogPromise) {
                 this._reviewDialogPromise = Fragment.load({
                     id: this.getView().getId(),
-                    name: "artistmanagement.fragment.AddReview",
+                    name: "artistmanagement.artistmanagement.fragment.AddReview",
                     controller: this
                 }).then((dialog) => {
                     dialog.setModel(this._getReviewModel(), "reviewForm");

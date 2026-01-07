@@ -1,7 +1,7 @@
 {
   "_version": "1.76.0",
   "sap.app": {
-    "id": "artistmanagement",
+    "id": "artistmanagement.artistmanagement",
     "type": "application",
     "i18n": "i18n/i18n.properties",
     "applicationVersion": {
@@ -62,7 +62,7 @@
       "i18n": {
         "type": "sap.ui.model.resource.ResourceModel",
         "settings": {
-          "bundleName": "artistmanagement.i18n.i18n"
+          "bundleName": "artistmanagement.artistmanagement.i18n.i18n"
         }
       },
       "": {
@@ -90,9 +90,9 @@
         "transition": "slide",
         "type": "View",
         "viewType": "XML",
-        "path": "artistmanagement.view",
+        "path": "artistmanagement.artistmanagement.view",
         "async": true,
-        "viewPath": "artistmanagement.view"
+        "viewPath": "artistmanagement.artistmanagement.view"
       },
       "routes": [
         {
@@ -111,7 +111,7 @@
       }
     },
     "rootView": {
-      "viewName": "artistmanagement.view.App",
+      "viewName": "artistmanagement.artistmanagement.view.App",
       "type": "XML",
       "id": "App",
       "async": true

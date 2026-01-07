@@ -3,7 +3,7 @@ sap.ui.define([
     "sap/ui/core/Fragment",
     "sap/m/MessageToast",
     "sap/m/MessageBox",
-    "artistmanagement/model/formatter",
+    "artistmanagement/artistmanagement/model/formatter",
     "./Avatar"
 ], (JSONModel, Fragment, MessageToast, MessageBox, formatter, AvatarUtil) => {
     "use strict";
@@ -65,7 +65,7 @@ sap.ui.define([
         if (!controller._createDialogPromise) {
             controller._createDialogPromise = Fragment.load({
                 id: controller.getView().getId(),
-                name: "artistmanagement.fragment.CreateArtistWizard",
+                name: "artistmanagement.artistmanagement.fragment.CreateArtistWizard",
                 controller
             }).then((dialog) => {
                 dialog.setModel(getCreateModel(controller), "createModel");
