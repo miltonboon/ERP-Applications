@@ -40,8 +40,13 @@ sap.ui.define([
             const viewModel = new JSONModel({
                 items: [],
                 filteredItems: [],
+                performances: [],
+                filteredPerformances: [],
                 genreOptions: [],
+                artistOptions: [],
                 selectedGenres: [],
+                selectedArtist: "",
+                mode: "artists",
                 busy: true
             });
             this.getView().setModel(viewModel, "leaderboard");
@@ -49,10 +54,21 @@ sap.ui.define([
         },
 
         _loadLeaderboard() {
+            this.getView().getModel("leaderboard").setProperty("/busy", true);
+            Promise.all([
+                this._loadArtists(),
+                this._loadPerformances()
+            ]).then(() => {
+                this._applyGenreFilter();
+            }).finally(() => {
+                this.getView().getModel("leaderboard").setProperty("/busy", false);
+            });
+        },
+
+        _loadArtists() {
             const oDataModel = this.getOwnerComponent().getModel();
             if (!oDataModel) {
-                this.getView().getModel("leaderboard").setProperty("/busy", false);
-                return;
+                return Promise.resolve();
             }
             const binding = oDataModel.bindList("/Leaderboard", undefined, [
                 new Sorter("averageRating", true),
@@ -62,7 +78,7 @@ sap.ui.define([
                 $select: "ID,name,country,genres,avatar,avatarMimeType,averageRating,reviewCount"
             });
 
-            binding.requestContexts(0, Infinity).then((contexts) => {
+            return binding.requestContexts(0, Infinity).then((contexts) => {
                 const data = contexts.map((ctx) => ctx.getObject());
                 const ranked = data.map((item, index) => ({
                     ...item,
@@ -72,19 +88,51 @@ sap.ui.define([
                     const model = this.getView().getModel("leaderboard");
                     model.setProperty("/items", items || []);
                     const genreOptions = this._buildGenreOptions(items);
+                    const artistOptions = this._buildArtistOptions(items);
                     model.setProperty("/genreOptions", genreOptions);
+                    model.setProperty("/artistOptions", artistOptions);
                     const optionKeys = new Set((genreOptions || []).map((o) => o.key));
                     const selected = (model.getProperty("/selectedGenres") || []).filter((g) => optionKeys.has(g));
                     model.setProperty("/selectedGenres", selected);
-                    this._applyGenreFilter();
+                    const artistOptionKeys = new Set((artistOptions || []).map((o) => o.key));
+                    const selectedArtist = model.getProperty("/selectedArtist") || "";
+                    model.setProperty("/selectedArtist", artistOptionKeys.has(selectedArtist) ? selectedArtist : "");
                 });
             }).catch(() => {
                 const model = this.getView().getModel("leaderboard");
                 model.setProperty("/items", []);
                 model.setProperty("/genreOptions", []);
+                model.setProperty("/artistOptions", []);
+                model.setProperty("/selectedArtist", "");
                 model.setProperty("/filteredItems", []);
-            }).finally(() => {
-                this.getView().getModel("leaderboard").setProperty("/busy", false);
+            });
+        },
+
+        _loadPerformances() {
+            const oDataModel = this.getOwnerComponent().getModel();
+            if (!oDataModel) {
+                return Promise.resolve();
+            }
+            const binding = oDataModel.bindList("/PerformanceLeaderboard", undefined, [
+                new Sorter("averageRating", true),
+                new Sorter("reviewCount", true),
+                new Sorter("artistName", false)
+            ], undefined, {
+                $select: "ID,artistId,artistName,genres,stageName,dayNumber,dayDate,startTime,endTime,averageRating,reviewCount"
+            });
+
+            return binding.requestContexts(0, Infinity).then((contexts) => {
+                const data = contexts.map((ctx) => ctx.getObject());
+                const ranked = data.map((item, index) => ({
+                    ...item,
+                    rank: index + 1
+                }));
+                const model = this.getView().getModel("leaderboard");
+                model.setProperty("/performances", ranked || []);
+            }).catch(() => {
+                const model = this.getView().getModel("leaderboard");
+                model.setProperty("/performances", []);
+                model.setProperty("/filteredPerformances", []);
             });
         },
 
@@ -118,7 +166,9 @@ sap.ui.define([
         _applyGenreFilter() {
             const model = this.getView().getModel("leaderboard");
             const selected = model.getProperty("/selectedGenres") || [];
+            const selectedArtist = model.getProperty("/selectedArtist") || "";
             const all = model.getProperty("/items") || [];
+            const perfAll = model.getProperty("/performances") || [];
             const filtered = (!selected.length ? all : all.filter((item) => {
                 const genres = normalizeGenres(item.genres);
                 return genres.some((g) => selected.includes(g));
@@ -126,7 +176,20 @@ sap.ui.define([
                 ...item,
                 rank: index + 1
             }));
+            const useArtistFilter = !!selectedArtist;
+            const useGenreFilter = !useArtistFilter && selected.length > 0;
+            const filteredPerformances = (!useArtistFilter && !useGenreFilter ? perfAll : perfAll.filter((item) => {
+                if (useArtistFilter) {
+                    return item.artistId === selectedArtist;
+                }
+                const genres = normalizeGenres(item.genres);
+                return genres.some((g) => selected.includes(g));
+            })).map((item, index) => ({
+                ...item,
+                rank: index + 1
+            }));
             model.setProperty("/filteredItems", filtered);
+            model.setProperty("/filteredPerformances", filteredPerformances);
         },
 
         _buildGenreOptions(items) {
@@ -145,7 +208,17 @@ sap.ui.define([
 
         onGenreSelectionChange(event) {
             const keys = event.getSource().getSelectedKeys();
-            this.getView().getModel("leaderboard").setProperty("/selectedGenres", keys || []);
+            const model = this.getView().getModel("leaderboard");
+            model.setProperty("/selectedGenres", keys || []);
+            model.setProperty("/selectedArtist", "");
+            this._applyGenreFilter();
+        },
+
+        onArtistSelectionChange(event) {
+            const key = event.getSource().getSelectedKey();
+            const model = this.getView().getModel("leaderboard");
+            model.setProperty("/selectedArtist", key || "");
+            model.setProperty("/selectedGenres", []);
             this._applyGenreFilter();
         },
 
@@ -171,6 +244,31 @@ sap.ui.define([
 
         formatGenre(value) {
             return formatter.formatGenre(value);
+        },
+
+        formatPerformanceSlot(dayNumber, dayDate, startTime, endTime, stageName) {
+            const dayPart = dayNumber ? `Day ${dayNumber}${dayDate ? ` (${dayDate})` : ""}` : (dayDate || "");
+            const timePart = [startTime, endTime].filter(Boolean).map((t) => (t && t.length >= 5 ? t.substring(0, 5) : t)).join(" - ");
+            return [dayPart, timePart].filter(Boolean).join(" | ");
+        },
+
+        onModeChange(event) {
+            const key = event.getSource().getSelectedKey();
+            this.getView().getModel("leaderboard").setProperty("/mode", key || "artists");
+        },
+
+        _buildArtistOptions(items) {
+            const byKey = new Map();
+            (items || []).forEach((item) => {
+                const id = item.ID || item.id;
+                const name = item.name || "";
+                if (id && name && !byKey.has(id)) {
+                    byKey.set(id, name);
+                }
+            });
+            return Array.from(byKey.entries())
+                .map(([key, text]) => ({ key, text }))
+                .sort((a, b) => a.text.localeCompare(b.text));
         }
     });
 });

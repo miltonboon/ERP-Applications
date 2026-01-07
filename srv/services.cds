@@ -52,4 +52,20 @@ service FestivalService {
     coalesce(cast(round(avg(r.rating) * 10, 0) / 10 as Decimal(4,1)), 0) as averageRating : Decimal(4,1),
     coalesce(count(r.ID), 0) as reviewCount : Integer
   } group by a.ID, a.name, a.genres, a.country.name, a.avatar, a.avatarMimeType;
+
+  @readonly
+  entity PerformanceLeaderboard as select from db.Performances as p
+    left join db.Reviews as r on r.performance.ID = p.ID {
+    key p.ID,
+    p.artist.ID as artistId,
+    p.artist.name as artistName,
+    p.artist.genres as genres,
+    p.stage.name as stageName,
+    p.day.dayNumber as dayNumber,
+    p.day.date as dayDate,
+    p.startTime,
+    p.endTime,
+    coalesce(cast(round(avg(r.rating) * 10, 0) / 10 as Decimal(4,1)), 0) as averageRating : Decimal(4,1),
+    coalesce(count(r.ID), 0) as reviewCount : Integer
+  } group by p.ID, p.artist.ID, p.artist.name, p.artist.genres, p.stage.name, p.day.dayNumber, p.day.date, p.startTime, p.endTime;
 }
