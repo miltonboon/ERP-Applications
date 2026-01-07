@@ -447,7 +447,8 @@ sap.ui.define([
                             type: "{calendar>type}"
                         })
                     },
-                    title: "Performances"
+                    title: "Performances",
+                    appointmentItemsHeader: "Performances"
                 });
                 oLegend.setModel(this.getView().getModel("calendar"), "calendar");
 
