@@ -119,14 +119,13 @@ sap.ui.define([
             const model = this.getView().getModel("leaderboard");
             const selected = model.getProperty("/selectedGenres") || [];
             const all = model.getProperty("/items") || [];
-            if (!selected.length) {
-                model.setProperty("/filteredItems", all);
-                return;
-            }
-            const filtered = all.filter((item) => {
+            const filtered = (!selected.length ? all : all.filter((item) => {
                 const genres = normalizeGenres(item.genres);
                 return genres.some((g) => selected.includes(g));
-            });
+            })).map((item, index) => ({
+                ...item,
+                rank: index + 1
+            }));
             model.setProperty("/filteredItems", filtered);
         },
 
