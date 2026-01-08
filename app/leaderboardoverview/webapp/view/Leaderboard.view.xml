@@ -56,7 +56,7 @@
                             <Label text="Genres"/>
                         </Column>
                         <Column hAlign="Center" width="12rem" demandPopin="true" minScreenWidth="Tablet">
-                            <Label text="Rating trend (by day)"/>
+                            <Label text="Rating trend (by review date)"/>
                         </Column>
                         <Column hAlign="Center" width="12rem" demandPopin="true" popinDisplay="Inline">
                             <Label text="Average rating"/>
@@ -81,7 +81,7 @@
                                     </VBox>
                                 </HBox>
                                 <Text text="{path: 'leaderboard>genres', formatter: '.formatGenresList'}" wrapping="true"/>
-                                <mc:LineMicroChart width="100%" showPoints="true" points="{
+                                <mc:LineMicroChart width="100%" showPoints="true" maxYValue="5" minYValue="1" points="{
                                     path: 'leaderboard>trendPoints',
                                     templateShareable: false
                                 }">
