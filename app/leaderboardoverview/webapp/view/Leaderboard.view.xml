@@ -1,7 +1,8 @@
 <mvc:View controllerName="leaderboardoverview.leaderboardoverview.controller.Leaderboard"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
-    xmlns:core="sap.ui.core">
+    xmlns:core="sap.ui.core"
+    xmlns:mc="sap.suite.ui.microchart">
     <Page id="page" title="{i18n>title}" showHeader="false" class="sapUiNoContentPadding" busyIndicatorDelay="0" busy="{leaderboard>/busy}">
         <content>
             <VBox width="100%" class="sapUiNoMargin sapUiNoPadding">
@@ -54,6 +55,9 @@
                         <Column hAlign="Left" width="16rem" demandPopin="true" minScreenWidth="Tablet">
                             <Label text="Genres"/>
                         </Column>
+                        <Column hAlign="Center" width="12rem" demandPopin="true" minScreenWidth="Tablet">
+                            <Label text="Rating trend (by day)"/>
+                        </Column>
                         <Column hAlign="Center" width="12rem" demandPopin="true" popinDisplay="Inline">
                             <Label text="Average rating"/>
                         </Column>
@@ -77,6 +81,14 @@
                                     </VBox>
                                 </HBox>
                                 <Text text="{path: 'leaderboard>genres', formatter: '.formatGenresList'}" wrapping="true"/>
+                                <mc:LineMicroChart width="100%" showPoints="true" points="{
+                                    path: 'leaderboard>trendPoints',
+                                    templateShareable: false
+                                }">
+                                    <mc:points>
+                                        <mc:LineMicroChartPoint x="{leaderboard>x}" y="{leaderboard>y}"/>
+                                    </mc:points>
+                                </mc:LineMicroChart>
                                 <HBox alignItems="Center" justifyContent="End" width="100%">
                                     <RatingIndicator maxValue="5" value="{leaderboard>averageRating}" displayOnly="true"/>
                                     <ObjectNumber class="sapUiSmallMarginBegin"

@@ -55,14 +55,16 @@ sap.ui.define([
 
         _loadLeaderboard() {
             this.getView().getModel("leaderboard").setProperty("/busy", true);
-            Promise.all([
-                this._loadArtists(),
-                this._loadPerformances()
-            ]).then(() => {
-                this._applyGenreFilter();
-            }).finally(() => {
-                this.getView().getModel("leaderboard").setProperty("/busy", false);
-            });
+            this._loadPerformances()
+                .then(() => this._loadReviews())
+                .then(() => this._loadArtists())
+                .then(() => {
+                    this._attachTrends();
+                    this._applyGenreFilter();
+                })
+                .finally(() => {
+                    this.getView().getModel("leaderboard").setProperty("/busy", false);
+                });
         },
 
         _loadArtists() {
@@ -136,9 +138,88 @@ sap.ui.define([
             });
         },
 
+        _loadReviews() {
+            const oDataModel = this.getOwnerComponent().getModel();
+            if (!oDataModel) {
+                return Promise.resolve();
+            }
+            const binding = oDataModel.bindList("/Reviews", undefined, undefined, undefined, {
+                $select: "rating,date,performance_ID"
+            });
+            return binding.requestContexts(0, Infinity).then((contexts) => {
+                const reviewsByArtist = {};
+                const performances = this.getView().getModel("leaderboard").getProperty("/performances") || [];
+                contexts.forEach((ctx) => {
+                    const obj = ctx.getObject();
+                    const perfId = obj.performance_ID;
+                    const perf = performances.find((p) => p.ID === perfId);
+                    const artistId = perf ? perf.artistId : "";
+                    if (!artistId) {
+                        return;
+                    }
+                    if (!reviewsByArtist[artistId]) {
+                        reviewsByArtist[artistId] = [];
+                    }
+                    reviewsByArtist[artistId].push({
+                        rating: Number(obj.rating) || 0,
+                        date: obj.date || ""
+                    });
+                });
+                this.getView().getModel("leaderboard").setProperty("/reviewsByArtist", reviewsByArtist);
+            }).catch(() => {
+                this.getView().getModel("leaderboard").setProperty("/reviewsByArtist", {});
+            });
+        },
+
         _hydrateAvatars(items) {
             const tasks = (items || []).map((item) => this._fetchAvatar(item));
             return Promise.all(tasks);
+        },
+
+        _attachTrends() {
+            const model = this.getView().getModel("leaderboard");
+            const items = model.getProperty("/items") || [];
+            const reviewsMap = model.getProperty("/reviewsByArtist") || {};
+            const enriched = items.map((item) => {
+                const id = item.ID || item.id;
+                const list = id ? (reviewsMap[id] || []) : [];
+                const sorted = list.slice().sort((a, b) => {
+                    const da = a.date ? new Date(a.date).getTime() : 0;
+                    const db = b.date ? new Date(b.date).getTime() : 0;
+                    return da - db;
+                });
+                const byDate = new Map();
+                sorted.forEach((review) => {
+                    const key = review.date || "";
+                    if (!key) {
+                        return;
+                    }
+                    if (!byDate.has(key)) {
+                        byDate.set(key, { sum: 0, count: 0 });
+                    }
+                    const entry = byDate.get(key);
+                    entry.sum += Number(review.rating) || 0;
+                    entry.count += 1;
+                });
+                const averagedByDate = Array.from(byDate.entries()).map(([date, agg]) => ({
+                    date,
+                    value: agg.count ? agg.sum / agg.count : 0
+                })).sort((a, b) => {
+                    const da = a.date ? new Date(a.date).getTime() : 0;
+                    const db = b.date ? new Date(b.date).getTime() : 0;
+                    return da - db;
+                });
+                const lastTen = averagedByDate.slice(-10);
+                const points = lastTen.map((entry, idx) => ({
+                    x: idx + 1,
+                    y: Number(entry.value) || 0
+                }));
+                return {
+                    ...item,
+                    trendPoints: points
+                };
+            });
+            model.setProperty("/items", enriched);
         },
 
         _fetchAvatar(item) {
