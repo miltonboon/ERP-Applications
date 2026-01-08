@@ -1,12 +1,192 @@
 ID;code;name
-00000000-0000-0000-0000-000000000001;USA;United States
-00000000-0000-0000-0000-000000000002;CAN;Canada
-00000000-0000-0000-0000-000000000003;DEU;Germany
-00000000-0000-0000-0000-000000000004;PRT;Portugal
+d43c19c6-4bbe-4261-893e-4c22920a3eb5;AFG;Afghanistan
+e9f6b691-442e-43b7-b207-37d713e229ad;AGO;Angola
+ac5936ee-cd9e-4b50-a93a-7af54f080522;ALB;Albania
+829e1cbb-adc6-40c5-85a0-163cd9daa5f0;AND;Andorra
+7bc9bf39-52cf-4f79-a92d-18af0e934fc2;ARE;United Arab Emirates
+22df47ef-7e5d-4756-bf19-a74b1e83086b;ARG;Argentina
+5071f2c3-4a14-4a66-84fd-c802b07c6829;ARM;Armenia
+ea5f6427-9325-49bf-a52f-bfb5d79da56d;ATG;Antigua and Barbuda
+976d65cb-5616-46eb-b436-e59d59bfa9f8;AUS;Australia
+9e2b4af6-1396-48e6-a586-aef507d35d18;AUT;Austria
+f77b1d3b-6617-4af8-bc30-f266d091c51d;AZE;Azerbaijan
+fb7ecc6a-9535-48bb-83ae-051bd19aaa3d;BDI;Burundi
 00000000-0000-0000-0000-000000000005;BEL;Belgium
-00000000-0000-0000-0000-000000000006;FRA;France
-00000000-0000-0000-0000-000000000007;GBR;United Kingdom
+20a4f90a-eb10-4a8c-ae8d-4dbbf297051f;BEN;Benin
+3374abe3-20ab-421e-83f9-5cc62d1a5339;BFA;Burkina Faso
+7cf459bb-0ed5-4d52-b8c0-31f1cda5e56e;BGD;Bangladesh
+9943e14e-ddc9-487b-8d8d-7a6149bd22b9;BGR;Bulgaria
+71fd7d61-adb9-432f-808d-3a929135d5d7;BHR;Bahrain
+42802755-43fc-4fe1-9835-a751c4efe973;BHS;Bahamas
+7b5d9a44-762b-41b3-8968-338e42b70986;BIH;Bosnia and Herzegovina
+57649f97-247e-4aae-a051-5f7b478264d2;BLR;Belarus
+e0ae7bca-b8a9-49af-9a14-517a6411ad51;BLZ;Belize
+20ed1053-06e0-4c2a-ad21-7e14e4ec77f0;BOL;Bolivia
 00000000-0000-0000-0000-000000000008;BRA;Brazil
-00000000-0000-0000-0000-000000000009;SWE;Sweden
-00000000-0000-0000-0000-000000000010;NLD;Netherlands
+39f6a88f-010e-49ef-a320-7a351f60a279;BRB;Barbados
+d9c14de2-5ffe-406f-9b51-4ccceaf8e1d1;BRN;Brunei
+db5ab263-095e-4917-9bec-59d1a4ac3bc9;BTN;Bhutan
+90f49937-385f-4d85-9ba1-0b567d3a286a;BWA;Botswana
+bdd27a46-e36a-446f-840a-37373940dbe1;CAF;Central African Republic
+00000000-0000-0000-0000-000000000002;CAN;Canada
+5ba9a191-c74a-4efd-b98b-8fdfe7b79a50;CHE;Switzerland
+fb8729e4-232b-4d10-8ba6-7c40af5c5343;CHL;Chile
+9ba7aafa-6288-4ceb-ba9a-49483a28c872;CHN;China
+ae4437e8-ad7c-405a-a4b3-634f3b9684e8;CIV;Ivory Coast
+d6b1a250-9243-407a-9eb5-cd31d6b1bbcf;CMR;Cameroon
+38597fb0-12f9-4bc0-ac49-5b8c97cb7b42;COD;DR Congo
+c2e7c5a3-0373-4d7d-b2fe-ca1ae28144e0;COG;Republic of the Congo
+78a4d99e-44cf-418e-8ce1-01b8dc38e0ec;COL;Colombia
+d269f3f7-0870-4dfb-9492-536b795e400a;COM;Comoros
+6846b16c-7ad5-4d1f-a2ea-e5d66f775309;CPV;Cape Verde
+38e4ed9f-8c64-4126-b51a-e6d61a770d14;CRI;Costa Rica
+0d7001a8-f685-47d1-9f3d-0001a35b9eea;CUB;Cuba
+3d2e2acc-4080-419f-a450-acd2d35a7ae6;CYP;Cyprus
+6cc057ea-dba6-4e16-a476-1a0c3d50e811;CZE;Czechia
+00000000-0000-0000-0000-000000000003;DEU;Germany
+0ce9b711-ccec-4fab-99bf-223d670d69ac;DJI;Djibouti
+0eb6e0d7-a751-4745-889a-128be946e908;DMA;Dominica
+efdae1b1-0ea8-405a-aab8-7f36025aa79c;DNK;Denmark
+886d55b5-7a12-45d0-aa73-3cab9476d1cd;DOM;Dominican Republic
+3a110856-6b4c-49da-980b-17170add40b2;DZA;Algeria
+bf7cb3e2-affd-4934-a5a4-2b52ae340d05;ECU;Ecuador
+8bd084d8-2ebd-4f99-bc34-a686cb2c069f;EGY;Egypt
+e7d11dee-b62b-44c1-9503-49adf5785d0f;ERI;Eritrea
+fc845496-da01-41ba-a205-ae6026e951b1;ESP;Spain
+e1eb4be8-f60d-4918-91cc-b00f70c98ff6;EST;Estonia
+4670fa12-24a5-4a57-acd2-df6a0d471a20;ETH;Ethiopia
+4e6a1ec1-1003-4299-a2c0-974f200c1a31;FIN;Finland
+0b813e3c-9545-4139-acf4-b26f212b3a6d;FJI;Fiji
+00000000-0000-0000-0000-000000000006;FRA;France
+76d707e3-e9a5-4173-b3f6-f1a1c879e4e5;FSM;Micronesia
+db1913c7-55ac-4e9f-bbe5-038914bf2ab7;GAB;Gabon
+00000000-0000-0000-0000-000000000007;GBR;United Kingdom
+f9f352a3-49aa-4354-983f-929cb77932bf;GEO;Georgia
+4bddf0d9-9cf5-4dec-8830-6420ae556d4b;GHA;Ghana
+6fe9191b-ece1-40ca-8584-3afe932e47cc;GIN;Guinea
+99b5ee48-d5b4-4f22-99d9-8581f14bde4b;GMB;Gambia
+34021a7e-c63a-4141-b63a-390ceb0ec6dc;GNQ;Equatorial Guinea
+ad9c076d-f109-42d7-ad41-393436ea23b3;GRC;Greece
+c4703f2b-bb06-44df-b8e0-e9ac9183cf04;GRD;Grenada
+78fe922d-f08a-4db2-8a33-b92ddf366951;GTM;Guatemala
+2449a3e1-56d5-4740-aaa9-088c2906f201;GUY;Guyana
+cc37fa2d-bd9e-4946-a96c-01d5b5bdbe2d;HND;Honduras
+55b77048-aa98-4ca6-8230-17877da81f85;HRV;Croatia
+0177a654-a5dd-4510-aff5-530b64a1f592;HTI;Haiti
+e9bcc7fd-a896-4fe9-ac86-43c227280b27;HUN;Hungary
+87de62c8-875f-42fd-8e00-aaf8b97581f4;IDN;Indonesia
+0413a4aa-73c0-4a54-ad49-f3fa7606e4dd;IND;India
+f9043c53-c49f-4ea8-b714-f83c69f7cda9;IRL;Ireland
+870b114d-d9fe-4d1b-9080-02ecc83f0dd2;IRN;Iran
+ae8c75d4-592b-43d7-b700-8e72f7ab1eb6;IRQ;Iraq
+13beea08-d9ac-41b6-abc2-d356a936427d;ISL;Iceland
+86903682-ec38-4553-bec2-65492f681f53;ITA;Italy
+00000000-0000-0000-0000-000000000012;JAM;Jamaica
+990a6de4-9c63-4f2b-8762-d1046312100c;JOR;Jordan
+4dd229a4-fb98-4ed8-8357-159808c65c33;JPN;Japan
+4f6a04ea-6a4b-4769-901b-263c46b27196;KAZ;Kazakhstan
+a03ba4cb-37ef-4e4d-b885-c9c177646786;KEN;Kenya
+b03efe44-e4fe-4289-b934-5e2e7a2087f3;KGZ;Kyrgyzstan
+538dca34-fd04-4bc6-b558-a6bf6166e38b;KHM;Cambodia
+4143078d-a5d3-4605-aa1a-6dbfaadd35b8;KIR;Kiribati
+0708b234-8776-40cc-a90b-8756797e96bd;KNA;Saint Kitts and Nevis
+da121bc1-7281-41d0-b59d-8bb30a8b111f;KOR;South Korea
+55c53a46-4c57-45da-8f31-8404fe1b8260;KWT;Kuwait
+3a493743-39e4-4c62-8d5f-c91388baee41;LAO;Laos
+51cf1617-783c-4813-83e0-908d0d6838d1;LBN;Lebanon
+0d773668-dcea-499a-a8b9-350045a0150f;LBR;Liberia
+15c4f790-7b8e-4f02-b7e7-20a701346462;LBY;Libya
+96197efa-ca9d-445a-b8f0-84fc35c291fb;LCA;Saint Lucia
+ce33db9c-baea-40da-bb17-88ecba4601da;LIE;Liechtenstein
+d6842a66-e42c-4e60-a98c-669c50532867;LKA;Sri Lanka
+28ddaac8-63a6-4574-9086-2dca43572757;LSO;Lesotho
+95510f5e-4421-4c95-8966-c84d7b0a6948;LTU;Lithuania
 00000000-0000-0000-0000-000000000011;LUX;Luxembourg
+f7674744-68d7-4a80-8799-506c52978499;LVA;Latvia
+390bdf4f-4821-42b8-9c56-e7fdce6ba4e9;MAR;Morocco
+ab3c45e8-ad77-4ad5-a6bd-fa6e7151904b;MCO;Monaco
+928c9f3b-2adf-4052-bd9a-b1c4754a2baf;MDA;Moldova
+231bbca2-869f-43ed-95f0-7bd05b06d865;MDG;Madagascar
+89ac0dbb-e754-4dd5-9838-1da33d303373;MDV;Maldives
+ffaeda77-d9b5-4fb3-8ec3-d96703ae8220;MEX;Mexico
+28a38503-ca6f-492f-baa2-70bda6363c10;MHL;Marshall Islands
+057cabb4-978b-48a9-8ae4-4df82bcf1a18;MKD;North Macedonia
+e8588110-0674-4bc5-8bfe-0b6952f75d7b;MLI;Mali
+abaf8f36-600a-468d-8876-c1466c956000;MLT;Malta
+73d020a7-7cfa-4b68-b81c-007ed309d1b2;MMR;Myanmar
+a28ebe68-b9ac-4e35-8957-318efd63c183;MNE;Montenegro
+215771ed-3809-481e-84ed-ebd9c9475586;MNG;Mongolia
+452548fb-9125-459b-85ca-9633dda805b3;MOZ;Mozambique
+4d2f10c8-ca99-41c4-b870-c73a862b8786;MRT;Mauritania
+f7ba3c09-884b-4137-a63f-ff61ebbca009;MUS;Mauritius
+1f0e5084-f270-437d-90e9-fa4471ba3ce1;MWI;Malawi
+33d9d6d9-b8e1-4c90-99e5-ae4ec668bcfc;MYS;Malaysia
+8ebf5c2b-911e-453e-923a-07097a3120e7;NAM;Namibia
+d779cba7-7650-4be7-8008-5a2dec5fe2f8;NER;Niger
+2a7ed5e0-9446-48f3-8dae-a19ac66fb56a;NGA;Nigeria
+6967dfaf-cc4b-4cea-8d84-3be97c153b0d;NIC;Nicaragua
+00000000-0000-0000-0000-000000000010;NLD;Netherlands
+ac8220a8-324b-4ded-8a22-f6bef71e5d5b;NOR;Norway
+ebc6489b-fc3c-48b8-b3a2-01f011fbba86;NPL;Nepal
+ed9f4c17-4339-41b7-bc3b-2d668fc8da4e;NRU;Nauru
+23e71a0e-8a17-4c5c-b989-2650c55c0d95;NZL;New Zealand
+77dd0a0d-fb97-4c25-b74b-8d80e19c7891;OMN;Oman
+d1371a22-58d2-45fc-888d-fa7dedbf9288;PAK;Pakistan
+fe4cf37d-7757-430f-875c-b3b5f8eeae13;PAN;Panama
+3d8e25b2-b72a-4262-af61-3a46da001471;PER;Peru
+85d96566-cd73-4198-a662-4c6fe19bd32d;PHL;Philippines
+2890a051-f6e7-41a4-9df0-d522dd044f43;PLW;Palau
+bf7e7f64-c466-45a7-93fe-336e84b86c9a;PNG;Papua New Guinea
+794f09cf-d9c0-4557-a7e7-a5eadba5e607;POL;Poland
+5b6890d7-f2f2-4a4c-b690-da1a294a2d01;PRK;North Korea
+00000000-0000-0000-0000-000000000004;PRT;Portugal
+a539e6b2-458b-406e-9648-57944e14e70b;PRY;Paraguay
+78a99ea7-5d00-4c9c-bb90-5f8f72546f7b;QAT;Qatar
+073640de-b756-4ed4-af2f-bc9d6dd7d122;ROU;Romania
+c751077a-cd9a-40d5-a9f4-4a39cc76b52e;RUS;Russia
+a0dade92-c84a-4a65-938d-1ebc0a84119d;RWA;Rwanda
+d454b806-c6a4-4c5f-90d1-79e0b8134384;SAU;Saudi Arabia
+60672ddb-64a7-4c45-9860-7458d4cb42d5;SDN;Sudan
+8cb0d62b-3428-4e70-85b2-68dab7369843;SEN;Senegal
+79c2f9ad-56b3-4a53-95a3-6391c2c3790e;SGP;Singapore
+9ac6f943-7640-46c6-beca-81f49de03072;SLB;Solomon Islands
+97e5f1cd-712f-4e8a-8aaf-8afc2c49e31e;SLE;Sierra Leone
+6f881112-fba6-4fc4-962d-c21c2b0f94b6;SLV;El Salvador
+15eff386-a215-4025-ae0e-ee6da3bbf3cb;SMR;San Marino
+c0621aac-4852-408c-b28d-01b735e9bd12;SOM;Somalia
+9e860bdf-fa24-4be8-a7d8-39b069c69d5e;SRB;Serbia
+79f5d3e0-5cbc-4e95-860e-cf43d252db1d;SSD;South Sudan
+b780264a-eecd-43bd-ae3d-2ad214cf02b6;STP;Sao Tome and Principe
+635834b4-6816-4923-ba5f-dd16aa306b3f;SUR;Suriname
+5f7ccd57-5f7f-474c-9f03-e8ad361d4f95;SVK;Slovakia
+08a3e2a4-5757-47b0-9518-5facee56467a;SVN;Slovenia
+00000000-0000-0000-0000-000000000009;SWE;Sweden
+cb50d6bf-db8d-4a20-9707-081a31ec3f29;SWZ;Eswatini
+82fc9ed9-ddaa-457d-89ad-e6e8d2d50843;SYC;Seychelles
+c650619a-6a4a-41e6-aef8-1be3abe97565;SYR;Syria
+0ef45c4f-6671-4ab2-9687-12a083b9b50c;TCD;Chad
+896f6367-270e-40b1-b240-fabe39b129ce;TGO;Togo
+2ff61973-9585-4758-a9ea-16f7c9b9561f;THA;Thailand
+36a176c4-337f-4daf-9dba-69d9329b2aa8;TJK;Tajikistan
+c8a9a11e-d647-4566-b35d-ab726e5b76af;TKM;Turkmenistan
+2fb2ed1b-9fe9-48ac-987d-82a8fc477ef6;TLS;Timor-Leste
+ca4bdcd3-8674-4933-9318-577ea99cb83f;TON;Tonga
+ea725bbd-e3eb-4c93-9357-d6555d004a3c;TTO;Trinidad and Tobago
+556d10b3-edf5-451b-8845-4be40d43695d;TUN;Tunisia
+86a9822d-43ff-401a-bf92-c2be1f2d1455;TUR;Turkey
+482388f8-ced0-46c1-9c1a-67ce738b62dd;TUV;Tuvalu
+c0069366-2096-4850-a832-14ffa3087645;TZA;Tanzania
+12fcb44f-f7cb-4e32-b384-11ef35c77efb;UGA;Uganda
+f33c6917-8410-46ed-9330-7ab1daa192eb;UKR;Ukraine
+fd3b3b87-2637-4f7a-a5d6-171297ea5af0;URY;Uruguay
+00000000-0000-0000-0000-000000000001;USA;United States
+51cfda66-f362-430e-b491-96ef2eefaa95;UZB;Uzbekistan
+2b67f8db-06f9-441f-bfb6-7f74aa478a44;VCT;Saint Vincent and the Grenadines
+a81fb472-c15b-4a7d-9bba-652cabb8371e;VEN;Venezuela
+52686d97-195f-4304-82a6-ce6453d2861f;VNM;Vietnam
+a8e7b086-793e-46da-87df-16077009c3be;VUT;Vanuatu
+7ca045be-1351-4f7d-8644-51685d51369b;WSM;Samoa
+2924f287-7fd0-4bbd-8d9d-879891cc9a83;YEM;Yemen
+326f5cea-d029-45a2-9847-eef0f81fbf4d;ZAF;South Africa
+a8de771a-5f42-4392-8503-501f7179c0cd;ZMB;Zambia
+45c37645-275b-46ff-b8e3-ac8edc4a358f;ZWE;Zimbabwe
