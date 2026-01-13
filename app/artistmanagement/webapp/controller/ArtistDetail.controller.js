@@ -57,10 +57,6 @@ sap.ui.define([
             return formatter.formatDate(value);
         },
 
-        formatDateTime(value) {
-            return formatter.formatDateTime(value);
-        },
-
         formatPerformanceSlot(dayLabel, startTime, endTime, date) {
             return formatter.formatPerformanceSlot(dayLabel, startTime, endTime, date);
         },
